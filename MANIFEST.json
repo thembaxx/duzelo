@@ -1,6 +1,6 @@
 {
   "created_utc": "2026-10-31",
-  "purpose": "PRD and untested SQL design blueprints",
+  "purpose": "PRD, untested SQL blueprints, motion/appearance design specification",
   "files": [
     {
       "path": ".env.example",
@@ -9,13 +9,13 @@
     },
     {
       "path": "00_START_HERE_CODEX_PROMPT.md",
-      "bytes": 2182,
-      "sha256": "b1d68d8ac276c98eb5af84d2b9342c23988fa971cb990393795669dbe54e75ae"
+      "bytes": 2408,
+      "sha256": "de7315b150aefe187fbaa040bad71335e1baa0e715e7f0e1852f4cd4bae7a8a8"
     },
     {
       "path": "01_PRODUCT_REQUIREMENTS.md",
-      "bytes": 72718,
-      "sha256": "400103cd63f9dc1e02aa46c7de6e2651f40907f54bc00b911d494f0e7f7bbcb9"
+      "bytes": 74322,
+      "sha256": "3aca1123c3ae14ff643b67ed9177b847fd73927c3c1ae520a6781ef9af5005bd"
     },
     {
       "path": "02_SCHEMA_BLUEPRINT.sql",
@@ -29,8 +29,8 @@
     },
     {
       "path": "04_CODEX_MILESTONES.md",
-      "bytes": 19453,
-      "sha256": "f57c79010e69149ffca97b142eb5a20a57342079f621bd995fe614bc1744eac4"
+      "bytes": 20735,
+      "sha256": "5f0eb910e40af7679fd873029acab8c0a60791d20c7dd8256407a3097af11235"
     },
     {
       "path": "05_VALIDATION_AND_REFERENCES.md",
@@ -39,19 +39,26 @@
     },
     {
       "path": "AGENTS.md",
-      "bytes": 2010,
-      "sha256": "fa4eb09378a4554200da50ce0adeed905964745ab574978f2cfe4a2fe223e606"
+      "bytes": 2495,
+      "sha256": "77cc98c51d06c131653bcc2ecb2d82df2688ab062ea881094a14e1fca92af1c0"
     },
     {
       "path": "README.md",
-      "bytes": 2674,
-      "sha256": "6f0bed0558b6c89f181afbae1a5e8e7f895310f1ebf029250a196f7d06aeb167"
+      "bytes": 3011,
+      "sha256": "477cbefc019004a83e0eed3649a6fbc0970cdbc7982c036227c194d7353e8c4e"
+    },
+    {
+      "path": "docs/design/MOTION_AND_THEMES.md",
+      "bytes": 13696,
+      "sha256": "5dbb356f5b1cdb79ba51899d8950e1496406428bfad66de05683b034488fed5d"
     }
   ],
   "validation": {
     "foreign_key_targets_exist": true,
     "rls_target_tables_exist": true,
-    "markdown_fences_balanced": true,
-    "postgresql_runtime_executed": false
-  }
+    "markdown_fences_balanced": "original pack only; updated documents require review",
+    "postgresql_runtime_executed": false,
+    "theme_and_motion_implemented": false
+  },
+  "updated_utc": "2026-10-31"
 }
