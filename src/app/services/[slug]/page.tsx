@@ -10,7 +10,11 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const category = findServiceCategory(slug);
-  return { title: category?.name ?? 'Service not found' };
+  return category ? {
+    title: category.name + ' services — Mkhondo',
+    description: category.summary + ' Browse Duzelo service-category previews; real bookings are not open.',
+    alternates: { canonical: '/services/' + category.slug },
+  } : { title: 'Service not found', robots: { index: false, follow: false } };
 }
 
 export default async function ServiceDetailPage({ params }: { params: Promise<{ slug: string }> }) {

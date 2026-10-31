@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-export const metadata: Metadata = { title: 'Sign-in coming soon' };
+export const metadata: Metadata = { title: 'Sign-in coming soon', robots: { index: false, follow: false } };
 export default function SignInPage() {
   return <section className="shell inner-page narrow-page">
     <p className="eyebrow">ACCOUNT ACCESS</p><h1 className="inner-heading">We're not quite <em>ready.</em></h1>

@@ -493,3 +493,59 @@ body { background: var(--background); accent-color: var(--primary); }
   .spotlight-card:hover,.hero-quick-links a:hover { transform: none !important; }
   .spotlight-card::before { display: none; }
 }
+
+
+/* Browser/PWA chrome continuity: theme canvas extends under safe-area and
+   status regions, without double padding on ordinary browsers. */
+html { min-height: 100%; background: var(--background); }
+body { min-height: 100svh; background: var(--background); }
+@supports (padding: env(safe-area-inset-bottom)) {
+  .pwa-status-stack { padding-bottom: env(safe-area-inset-bottom); }
+  @media (display-mode: standalone) {
+    .site-header-inner { padding-top: env(safe-area-inset-top); height: calc(78px + env(safe-area-inset-top)); }
+    .site-footer { padding-bottom: env(safe-area-inset-bottom); }
+  }
+}
+@media (prefers-color-scheme: dark) {
+  :root:not(.light):not(.dark) { color-scheme: dark; background: #101c17; }
+}
+.pwa-status-stack { position: fixed; bottom: 0; left: 0; right: 0; z-index: 105; display: grid; justify-items: center; gap: 7px; padding-inline: 12px; pointer-events: none; }
+.pwa-notice { pointer-events: auto; display: flex; align-items: center; flex-wrap: wrap; justify-content: center; gap: 12px; background: var(--foreground); color: var(--background); box-shadow: 0 12px 45px rgba(0,0,0,.26); border-radius: 14px 14px 0 0; padding: 14px 17px; font-size: 12px; font-weight: 630; max-width: min(100%,640px); }
+.pwa-notice span { line-height: 1.5; }
+.pwa-notice button { background: var(--background); color: var(--foreground); border-radius: 8px; border: 0; padding: 8px 13px; min-height: 38px; font-size: 12px; font-weight: 750; }
+.pwa-notice .notice-dismiss { padding: 8px; display: grid; place-items: center; min-width: 38px; }
+.offline-symbol { height: 80px; width: 80px; border-radius: 24px; background: var(--surface-elevated); color: var(--primary); margin-bottom: 35px; display: grid; place-items: center; }
+.offline-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.button-outline { border: 1px solid var(--border); background: var(--surface); color: var(--foreground); }
+.loading-shell { min-height: 58vh; }
+.skeleton-line,.skeleton-box { background: var(--surface-elevated); position: relative; overflow: hidden; border-radius: 11px; }
+.skeleton-line::after,.skeleton-box::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg,transparent,rgba(255,255,255,.20),transparent); transform: translateX(-100%); animation: duzelo-skeleton 1.6s ease-in-out infinite; }
+.skeleton-eyebrow { width: 160px; height: 12px; margin-bottom: 34px; }
+.skeleton-heading { width: min(92%,730px); height: 64px; margin-bottom: 16px; }
+.skeleton-heading.shorter { width: min(75%,540px); }
+.skeleton-description { width: min(80%,440px); height: 21px; margin-top: 30px; }
+.skeleton-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 15px; margin-top: 54px; }
+.skeleton-box { height: 185px; border-radius: 20px; }
+@keyframes duzelo-skeleton { to { transform: translateX(100%); } }
+@media (max-width: 700px) {
+  .skeleton-grid { grid-template-columns: 1fr; }
+  .skeleton-box { height: 120px; }
+  .skeleton-heading { height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-line::after,.skeleton-box::after { display: none; animation: none; }
+}
+
+
+/* Native sharing and install guidance, with no invented installation prompt. */
+.settings-native-divider { border-top: 1px solid var(--border); margin-block: 34px; }
+.native-actions { display: grid; gap: 17px; }
+.native-install-panel { display: flex; align-items: flex-start; gap: 18px; padding: 30px; border: 1px solid var(--border); border-radius: 22px; background: var(--surface-raised); }
+.native-install-panel > div { flex: 1; }
+.native-actions-icon { flex: none; width: 49px; height: 49px; display: grid; place-items: center; border-radius: 15px; color: var(--primary); background: var(--surface-elevated); }
+.native-install-panel h2 { font-size: 20px; letter-spacing: -.04em; margin-bottom: 10px; }
+.native-install-panel p { font-size: 13px; line-height: 1.75; color: var(--muted-foreground); margin-bottom: 7px; max-width: 500px; }
+.native-installed { color: var(--primary); flex: none; }
+.native-share { width: fit-content; border: 1px solid var(--border); background: var(--surface); color: var(--foreground); font-weight: 750; }
+.native-feedback { font-size: 13px; color: var(--muted-foreground); min-height: 21px; }
+@media (max-width: 480px) { .native-install-panel { padding: 20px; flex-wrap: wrap; } }
