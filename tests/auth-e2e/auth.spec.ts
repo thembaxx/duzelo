@@ -221,7 +221,7 @@ test("real local OTP, both modes, persistent settings, MFA and revoked sessions"
   ).toBe(200);
   await page.goto("/admin");
   await expect(
-    page.locator(".page-heading").getByText("Administrator · MFA verified", { exact: true }),
+    page.locator("#main-content").getByText("Administrator · MFA verified", { exact: true }),
   ).toBeVisible();
   await sql`delete from private.admin_members where user_id=${id}::uuid`;
   await sql`update public.user_profiles set is_suspended=true where user_id=${id}::uuid`;
