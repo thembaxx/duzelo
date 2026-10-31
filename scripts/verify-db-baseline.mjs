@@ -1,0 +1,34 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+
+const read = (file) => readFileSync(file,'utf8');
+const schema = read('supabase/migrations/20261031114309_foundation.sql');
+const config = read('supabase/config.toml');
+const seed = read('supabase/seed.sql');
+const tests = ['01_authorization.test.sql','02_integrity.test.sql','03_geospatial_and_expiry.test.sql']
+  .map(file=>read('supabase/tests/'+file)).join('\n');
+const tables = [...schema.matchAll(/create table (public|private)\.([a-z_]+)/gi)];
+assert.ok(tables.length >= 30, 'Unexpected partial schema');
+assert.ok(tables.some(match=>match[1]==='private' && match[2]==='client_addresses'));
+assert.ok(tables.some(match=>match[1]==='private' && match[2]==='worker_coverage'));
+assert.ok(tables.some(match=>match[1]==='private' && match[2]==='payment_intents'));
+assert.match(schema,/create extension if not exists postgis with schema extensions/i);
+assert.match(schema,/alter table %I\.%I enable row level security/i);
+assert.match(schema,/revoke all on schema private from public, anon, authenticated/i);
+assert.match(schema,/revoke all on table %I\.%I from public, anon, authenticated/i);
+assert.match(schema,/create policy job_requests_participants_read/i);
+assert.match(schema,/create policy worker_cards_public_read/i);
+assert.match(schema,/create function private\.publish_worker_card/i);
+assert.match(schema,/create function private\.invalidate_worker_cards/i);
+assert.match(schema,/create trigger worker_profile_invalidate/i);
+assert.match(schema,/create trigger verification_invalidate/i);
+assert.doesNotMatch(schema,/security definer/i);
+assert.match(config,/schemas = \["public"\]/);
+assert.doesNotMatch(config,/schemas\s*=\s*\[[^\]]*private/i);
+assert.match(config,/auto_expose_new_tables = false/);
+assert.match(tests,/set local role anon/i);
+assert.match(tests,/set local role authenticated/i);
+assert.match(tests,/self.publi|self.approv|cannot self/i);
+assert.match(tests,/st_dwithin/i);
+assert.doesNotMatch(seed,/insert into auth\.users.*password/is);
+console.log('Static migration contract checks passed. These do NOT replace Supabase PostgreSQL/pgTAP tests.');

@@ -13,7 +13,15 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "node --test tests/e2e/*.test.mjs",
-    "check": "npm run lint && npm run typecheck && npm test && npm run build"
+    "check": "npm run lint && npm run typecheck && npm test && npm run test:db:static && npm run build",
+    "test:db:static": "node scripts/verify-db-baseline.mjs",
+    "db:start": "node scripts/db-local.mjs start",
+    "db:reset": "node scripts/db-local.mjs reset",
+    "db:test": "node scripts/db-local.mjs test",
+    "db:concurrency": "python3 scripts/db-concurrency.py",
+    "db:advisors": "node scripts/db-local.mjs advisors",
+    "db:lint": "node scripts/db-local.mjs lint",
+    "db:explain": "node scripts/db-local.mjs explain"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

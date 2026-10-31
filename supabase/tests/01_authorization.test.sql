@@ -1,0 +1,80 @@
+begin;
+create extension if not exists pgtap with schema extensions;
+set search_path = public, extensions;
+select no_plan();
+select is((select count(*)::integer from pg_tables where schemaname in ('public','private') and not rowsecurity),0,'every application table has RLS');
+select is((select count(*)::integer from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname in ('public','private') and p.prosecdef),0,'no definer or privileged RPC shortcuts');
+select is((select n.nspname from pg_extension e join pg_namespace n on n.oid=e.extnamespace where e.extname='postgis'),'extensions','PostGIS is not exposed');
+select ok(not has_schema_privilege('anon','private','usage'),'guest lacks private schema usage');
+select ok(not has_schema_privilege('authenticated','private','usage'),'authenticated user lacks private schema usage');
+select ok(not has_table_privilege('authenticated','public.worker_profiles','update'),'browser cannot self-approve worker');
+select ok(not has_table_privilege('anon','public.worker_cards','insert'),'guest cannot publish cards');
+select is((select count(*)::integer from information_schema.role_table_grants where grantee in ('anon','authenticated') and table_schema in ('public','private') and privilege_type in ('INSERT','UPDATE','DELETE','TRUNCATE')),0,'no browser write privileges');
+select is((select count(*)::integer from information_schema.columns where table_schema='public' and column_name in ('street_address','exact_point','base_point','storage_path_private','encrypted_token','registration_number')),0,'precise/private fields are not public columns');
+
+set local role anon;
+select is((select count(*)::integer from public.service_categories),2,'guest sees active categories');
+select is((select count(*)::integer from public.worker_cards),1,'guest sees reviewed sanitized fixture card');
+select throws_ok('select * from public.job_requests','42501',null,'guest cannot read jobs');
+select throws_ok('select * from private.client_addresses','42501',null,'guest cannot read exact addresses');
+select throws_ok('select * from private.worker_verifications','42501',null,'guest cannot read verification evidence');
+select ok(not exists(select 1 from information_schema.role_table_grants where table_schema='storage' and grantee in ('anon','authenticated') and privilege_type in ('SELECT','INSERT','UPDATE','DELETE')), 'disabled storage has no browser data grants');
+reset role;
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000001',true);
+select is((select count(*)::integer from public.user_profiles),1,'client sees only own profile');
+select is((select count(*)::integer from public.job_requests),3,'client sees own jobs including draft');
+select is((select count(*)::integer from public.bookings),1,'client sees own booking');
+select is((select count(*)::integer from public.quotes),1,'client sees own submitted/accepted quotes');
+select is((select count(*)::integer from public.messages),1,'client sees job-bound messages');
+select throws_ok('select * from private.job_locations','42501',null,'client exact location requires authorized server DTO');
+select throws_ok('update public.worker_profiles set status=''approved''','42501',null,'client cannot set worker approval');
+select throws_ok('insert into public.job_requests default values','42501',null,'client direct API job writes denied');
+reset role;
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000002',true);
+select is((select count(*)::integer from public.worker_profiles),1,'worker owner reads own profile');
+select is((select count(*)::integer from public.job_matches),3,'matched worker reads own match rows');
+select is((select count(*)::integer from public.job_requests),2,'matched worker cannot see a client draft even with match');
+select is((select count(*)::integer from public.quotes),1,'worker reads own quote');
+select is((select count(*)::integer from public.messages),1,'worker reads member-only message');
+select throws_ok('select * from private.job_locations','42501',null,'matched worker cannot read exact address');
+select throws_ok('select * from private.verification_documents','42501',null,'worker cannot read another private evidence table');
+select throws_ok('select private.publish_worker_card(null,null,null,null)','42501',null,'worker cannot call publication function');
+select throws_ok('update public.worker_profiles set status=''approved''','42501',null,'worker cannot self-verify');
+reset role;
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000003',true);
+select is((select count(*)::integer from public.job_requests),0,'unrelated worker sees no jobs');
+select is((select count(*)::integer from public.quotes),0,'unrelated worker sees no quotes');
+select is((select count(*)::integer from public.bookings),0,'unrelated worker sees no bookings');
+select is((select count(*)::integer from public.messages),0,'unrelated worker sees no messages');
+select is((select count(*)::integer from public.conversations),0,'unrelated worker sees no conversations');
+reset role;
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000005',true);
+select is((select count(*)::integer from public.worker_profiles),0,'suspended worker cannot use worker identity policies');
+select is((select count(*)::integer from public.job_matches),0,'suspended worker gets no invitations');
+select is((select count(*)::integer from public.job_requests),0,'suspended worker gets no jobs');
+select is((select count(*)::integer from public.quotes),0,'suspended worker gets no quotes');
+reset role;
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000006',true);
+select is((select count(*)::integer from public.job_requests),0,'pending worker gets no jobs');
+select throws_ok('insert into public.quotes default values','42501',null,'unapproved worker cannot quote by direct write');
+reset role;
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000004',true);
+select is((select count(*)::integer from public.job_requests),0,'admin browser does not acquire blanket reads');
+select throws_ok('select * from private.admin_members','42501',null,'admin membership lookup stays server-only');
+select throws_ok('select * from private.worker_verifications','42501',null,'admin evidence requires MFA-authorized server command');
+select throws_ok('select * from private.payment_intents','42501',null,'financial data is not accessible to admin browser');
+reset role;
+select * from finish();
+rollback;
