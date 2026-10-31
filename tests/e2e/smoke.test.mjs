@@ -48,7 +48,9 @@ test('mobile menu, system preference and protected-route fallback', async () => 
     await page.getByRole('button', { name: 'Open menu' }).click();
     await page.getByRole('navigation', { name: 'Mobile navigation' }).getByRole('link', { name: 'Services' }).click();
     await page.waitForURL(/\/services$/);
-    assert.ok(await page.getByRole('heading', { level: 1 }).isVisible());
+    const servicesHeading = page.getByRole('heading', { level: 1 });
+    await servicesHeading.waitFor({ state: 'visible', timeout: 10000 });
+    assert.match(await servicesHeading.innerText(), /Your home|Our starting point/i);
     await page.goto(baseURL + '/admin');
     await page.waitForURL(/\/auth\/sign-in$/);
     await page.screenshot({ path: 'test-results/duzelo-mobile-dark.png', fullPage: true });
