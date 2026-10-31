@@ -96,15 +96,19 @@ export async function fillProfile(page: Page, name: string) {
   for (let i = 0; i < 3; i++) {
     if (i) await page.getByRole("button", { name: "Add another service" }).click();
     const row = page.getByRole("group", { name: "Service " + (i + 1), exact: true });
-    await row.getByLabel("Category", { exact: true }).selectOption(i === 0 ? plumbing : cleaning);
+    await row
+      .getByRole("combobox", { name: "Category", exact: true })
+      .selectOption(i === 0 ? plumbing : cleaning);
     await row
       .getByLabel("Service title")
       .fill(["Fictional repair", "Fictional starting clean", "Fictional custom clean"][i]!);
     await row.getByLabel("What is included?").fill("A bounded fictional service scope for review.");
-    await row.getByLabel("Pricing", { exact: true }).selectOption(["fixed", "from", "quote"][i]!);
+    await row
+      .getByRole("combobox", { name: "Pricing", exact: true })
+      .selectOption(["fixed", "from", "quote"][i]!);
     if (i < 2) await row.getByLabel("Price in rand").fill(i === 0 ? "250.00" : "180.00");
   }
-  await page.getByLabel("Public town", { exact: true }).selectOption(area);
+  await page.getByRole("combobox", { name: "Public town", exact: true }).selectOption(area);
   await page.getByLabel("Private latitude").fill("-27.123456");
   await page.getByLabel("Private longitude").fill("30.654321");
   await page.context().grantPermissions([], { origin });

@@ -4,10 +4,24 @@ select no_plan();
 select is((select public from storage.buckets where id='worker-evidence'),false,'evidence bucket is private');
 select is((select file_size_limit from storage.buckets where id='worker-evidence'),3145728::bigint,'native bucket limits sanitized bytes');
 select is((select allowed_mime_types from storage.buckets where id='worker-evidence'),array['image/jpeg'],'only re-encoded JPEG objects are stored');
-select ok(not has_table_privilege('anon','storage.objects','select'),'guest cannot read raw objects');
-select ok(not has_table_privilege('authenticated','storage.objects','select'),'owner browser cannot bypass signed-access command');
-select ok(not has_table_privilege('authenticated','storage.objects','insert'),'browser cannot bypass sanitizer by direct upload');
-select ok(not has_table_privilege('authenticated','storage.objects','update'),'browser cannot replace a reviewed file');
+-- Deliberately simulate platform-restored grants plus future broad policies.
+-- Everything, including synthetic metadata (no provider object), rolls back.
+grant select,insert,update on storage.objects,storage.buckets to anon,authenticated;
+create policy pgtap_future_object_allow on storage.objects for all to anon,authenticated using(true) with check(true);
+create policy pgtap_future_bucket_allow on storage.buckets for all to anon,authenticated using(true) with check(true);
+insert into storage.objects(id,bucket_id,name) values ('c0000000-0000-0000-0000-000000000001','worker-evidence','pgtap/private.jpg');
+set local role anon;
+select is((select count(*)::int from storage.objects where bucket_id='worker-evidence'),0,'guest cannot read raw objects despite broad permissive policy');
+select is((select count(*)::int from storage.buckets where id='worker-evidence'),0,'guest cannot list the private bucket');
+reset role;
+set local role authenticated;
+select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000002',true);
+select is((select count(*)::int from storage.objects where bucket_id='worker-evidence'),0,'owner browser cannot bypass signed-access command');
+select is((select count(*)::int from storage.buckets where id='worker-evidence'),0,'owner browser cannot list the private bucket');
+select throws_ok($$insert into storage.objects(bucket_id,name) values ('worker-evidence','pgtap/bypass.jpg')$$,'42501',null,'browser cannot bypass sanitizer by direct upload');
+update storage.objects set name='pgtap/replaced.jpg' where id='c0000000-0000-0000-0000-000000000001';
+reset role;
+select is((select name from storage.objects where id='c0000000-0000-0000-0000-000000000001'),'pgtap/private.jpg','browser cannot replace a reviewed file');
 select ok(not has_table_privilege('authenticated','private.worker_assets','select'),'assets metadata stays private');
 select ok(not has_table_privilege('authenticated','private.worker_applications','update'),'owner cannot mutate review state via Data API');
 select is((select count(*)::int from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='private' and p.prosecdef),0,'no definer shortcut');

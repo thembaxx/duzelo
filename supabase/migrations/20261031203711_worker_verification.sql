@@ -46,7 +46,14 @@ grant select,insert,update,delete on private.worker_applications,private.worker_
 insert into storage.buckets(id,name,public,file_size_limit,allowed_mime_types)
  values ('worker-evidence','worker-evidence',false,3145728,array['image/jpeg'])
  on conflict(id) do update set public=false,file_size_limit=excluded.file_size_limit,allowed_mime_types=excluded.allowed_mime_types;
-revoke all on all tables in schema storage from anon,authenticated;
+-- Storage owns and may restore its table grants at startup. RLS is the
+-- durable boundary: restrictive policies defeat even a future broad allow.
+create policy worker_evidence_objects_deny on storage.objects
+ as restrictive for all to anon,authenticated
+ using (bucket_id <> 'worker-evidence') with check (bucket_id <> 'worker-evidence');
+create policy worker_evidence_bucket_deny on storage.buckets
+ as restrictive for all to anon,authenticated
+ using (id <> 'worker-evidence') with check (id <> 'worker-evidence');
 -- Retention expiry is an authorization boundary, not only a cleanup schedule.
 create function private.bound_worker_evidence_expiry() returns trigger
 language plpgsql security invoker set search_path='' as $$
