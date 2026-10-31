@@ -18,7 +18,7 @@ select is((select count(*)::integer from public.worker_cards),1,'guest sees revi
 select throws_ok('select * from public.job_requests','42501',null,'guest cannot read jobs');
 select throws_ok('select * from private.client_addresses','42501',null,'guest cannot read exact addresses');
 select throws_ok('select * from private.worker_verifications','42501',null,'guest cannot read verification evidence');
-select ok(not exists(select 1 from information_schema.role_table_grants where table_schema='storage' and grantee in ('anon','authenticated') and privilege_type in ('SELECT','INSERT','UPDATE','DELETE')), 'disabled storage has no browser data grants');
+select ok(not exists(select 1 from information_schema.role_table_grants where table_schema='storage' and grantee in ('anon','authenticated') and privilege_type in ('SELECT','INSERT','UPDATE','DELETE')), 'server-managed storage has no browser data grants');
 reset role;
 
 set local role authenticated;

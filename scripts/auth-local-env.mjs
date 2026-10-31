@@ -29,7 +29,7 @@ if (existsSync(".env.auth-test"))
     readFileSync(".env.auth-test", "utf8").match(/^AUTH_RATE_LIMIT_SECRET=(.+)$/m)?.[1] ?? pepper;
 writeFileSync(
   ".env.auth-test",
-  `AUTH_ENABLED=true\nAUTH_MODE=local\nSUPABASE_URL=${endpoint}\nSUPABASE_PUBLISHABLE_KEY=${key}\nDATABASE_URL=${database}\nNEXT_PUBLIC_SITE_URL=${origin}\nAUTH_RATE_LIMIT_SECRET=${pepper}\nWORKER_APPROVAL_ENABLED=true\nSUPABASE_SECRET_KEY=${storageSecret}\n`,
+  `AUTH_ENABLED=true\nAUTH_MODE=local\nSUPABASE_URL=${endpoint}\nSUPABASE_PUBLISHABLE_KEY=${key}\nDATABASE_URL=${database}\nNEXT_PUBLIC_SITE_URL=${origin}\nAUTH_RATE_LIMIT_SECRET=${pepper}\nWORKER_APPROVAL_ENABLED=true\nSUPABASE_SECRET_KEY=${storageSecret}\nCLAMAV_HOST=127.0.0.1\nCLAMAV_PORT=3310\nCLAMAV_TLS=false\n`,
   { mode: 0o600 },
 );
 chmodSync(".env.auth-test",0o600);

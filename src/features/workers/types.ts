@@ -19,6 +19,7 @@ export interface Verification {
 }
 export interface OwnerApplication extends Catalog {
   workerId: string;
+  publicSlug: string | null;
   status: string;
   revision: number | null;
   state: string | null;
@@ -35,6 +36,7 @@ export interface PublicWorker {
   town: string;
   identityReviewed: boolean;
   businessReviewed: boolean;
+  travelFeeCents: number;
   categories: { id: string; label: string; tradeReviewed: boolean }[];
   services: {
     id: string;

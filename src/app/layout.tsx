@@ -11,6 +11,7 @@ import { RevealDirector } from "@/components/reveal-director";
 import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/site";
 import "./globals.css";
 import "@/features/auth/auth.css";
+import { workerConfig } from "@/features/workers/config";
 import { readAuthConfig } from "@/config/auth";
 
 export const metadata: Metadata = {
@@ -55,6 +56,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   readAuthConfig();
+  workerConfig();
   return (
     <html
       lang="en"

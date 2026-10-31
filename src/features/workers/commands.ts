@@ -86,6 +86,7 @@ export async function workerCommand(action: string, input: unknown, key: string 
         if (unopened.length) throw new Error("REVIEW_REQUIRED");
       }
       await sql`update private.worker_verifications set status=${data.decision},reviewed_by=${actor.id}::uuid,reviewed_at=now(),expiry_date=${data.expiryDate}::date,worker_reason=${data.reason} where id=${data.verificationId}::uuid`;
+      await sql`insert into private.worker_review_events(verification_id,worker_id,application_revision,reviewer_id,decision,reason,expiry_date) values (${data.verificationId}::uuid,${w.id}::uuid,${w.revision},${actor.id}::uuid,${data.decision},${data.reason},${data.expiryDate}::date)`;
       if (data.decision !== "approved") {
         if (v.kind !== "trade")
           await sql`update public.worker_profiles set status=${data.decision === "needs_changes" ? "needs_changes" : "rejected"}::public.worker_status where id=${w.id}::uuid`;
@@ -118,8 +119,8 @@ export async function workerCommand(action: string, input: unknown, key: string 
         await sql`select a.id from private.worker_assets a where a.worker_id=${w.id}::uuid and a.application_revision=${w.revision} and a.kind in ('avatar','portfolio') and a.state='stored' and a.retain_until>now() and not exists(select 1 from private.audit_events e where e.actor_id=${actor.id}::uuid and e.action='worker.document-access' and e.resource_id=a.id and e.created_at>now()-interval '1 hour')`;
       if (unopened.length) throw new Error("REVIEW_REQUIRED");
       await sql`update private.worker_assets set public_approved=true where worker_id=${w.id}::uuid and application_revision=${w.revision} and kind in ('avatar','portfolio') and state='stored' and retain_until>now()`;
-      await sql`select private.publish_worker_card(${w.id}::uuid,${w.area_id}::uuid,w.display_name,w.bio) from public.worker_profiles w where w.id=${w.id}::uuid`;
       await sql`update private.worker_applications set state='reviewed',updated_at=now() where worker_id=${w.id}::uuid`;
+      await sql`select private.publish_worker_card(${w.id}::uuid,${w.area_id}::uuid,w.display_name,w.bio) from public.worker_profiles w where w.id=${w.id}::uuid`;
       return { message: "Reviewed profile published for eligible categories." };
     });
   }

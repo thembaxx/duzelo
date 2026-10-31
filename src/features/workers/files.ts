@@ -5,6 +5,7 @@ import { database } from "@/lib/db/server";
 import { getVerifiedIdentity } from "@/features/auth/service";
 import { workerActor, lockWorker, command } from "./command-boundary";
 import { assetSchema } from "./schema";
+import { scanWorkerImage } from "./antivirus";
 import { sanitizeImage } from "./images";
 import { workerConfig, WORKER_BUCKET } from "./config";
 import { workerStorage } from "./storage";
@@ -15,7 +16,9 @@ export async function uploadWorkerImage(input: unknown, file: File, key: string 
   if (!config) throw new Error("UNAVAILABLE");
   const actor = await workerActor();
   const meta = assetSchema.parse(input);
-  const image = await sanitizeImage(Buffer.from(await file.arrayBuffer()), file.type);
+  const raw = Buffer.from(await file.arrayBuffer());
+  await scanWorkerImage(raw);
+  const image = await sanitizeImage(raw, file.type);
   const hash = createHash("sha256")
     .update(JSON.stringify({ action: "worker.upload", meta, sha: image.sha256 }))
     .digest("hex");
@@ -29,7 +32,7 @@ export async function uploadWorkerImage(input: unknown, file: File, key: string 
       if (prior[0]!.request_hash !== hash) throw new Error("CONFLICT");
       const id = String(prior[0]!.response_json.assetId);
       const found =
-        await sql`select * from private.worker_assets where id=${id}::uuid and worker_id=${worker.id}::uuid and application_revision=${worker.revision} and state in ('pending','stored')`;
+        await sql`select * from private.worker_assets where id=${id}::uuid and worker_id=${worker.id}::uuid and application_revision=${worker.revision} and state in ('pending','stored') and retain_until>now()`;
       if (!found.length) throw new Error("CONFLICT");
       return found[0]!;
     }
@@ -43,7 +46,10 @@ export async function uploadWorkerImage(input: unknown, file: File, key: string 
       await sql`select count(*)::int as count from private.worker_assets where worker_id=${worker.id}::uuid and application_revision=${worker.revision} and state in ('pending','stored')`;
     const same =
       await sql`select count(*)::int as count from private.worker_assets where worker_id=${worker.id}::uuid and application_revision=${worker.revision} and kind=${meta.kind} and category_id is not distinct from ${meta.categoryId}::uuid and state in ('pending','stored')`;
+    const total =
+      await sql`select count(*)::int as count from private.worker_assets where worker_id=${worker.id}::uuid and state<>'purged'`;
     if (
+      total[0]!.count >= 60 ||
       count[0]!.count >= 24 ||
       same[0]!.count >= (meta.kind === "avatar" ? 1 : meta.kind === "portfolio" ? 6 : 3)
     )
@@ -51,7 +57,7 @@ export async function uploadWorkerImage(input: unknown, file: File, key: string 
     const id = randomUUID(),
       path = worker.id + "/" + id + ".jpg";
     const added =
-      await sql`insert into private.worker_assets(id,worker_id,application_revision,kind,category_id,storage_path,sha256,byte_size,caption,retain_until) values (${id}::uuid,${worker.id}::uuid,${worker.revision},${meta.kind},${meta.categoryId}::uuid,${path},${image.sha256},${image.bytes.length},${meta.caption},now()+${config.retentionDays}::integer*interval '1 day') returning *`;
+      await sql`insert into private.worker_assets(id,worker_id,application_revision,kind,category_id,storage_path,sha256,byte_size,caption,scan_status,scanned_at,retain_until) values (${id}::uuid,${worker.id}::uuid,${worker.revision},${meta.kind},${meta.categoryId}::uuid,${path},${image.sha256},${image.bytes.length},${meta.caption},'clean',now(),now()+${config.retentionDays}::integer*interval '1 day') returning *`;
     await sql`insert into private.command_idempotency(actor_id,idempotency_key,request_hash,status,response_json,expires_at) values (${actor.id}::uuid,${key!},${hash},'in_progress',${sql.json({ assetId: id })},now()+interval '1 day')`;
     await sql`insert into private.audit_events(actor_id,actor_type,action,resource_kind,resource_id) values (${actor.id}::uuid,'user','worker.upload-reserved','worker_asset',${id}::uuid)`;
     return added[0]!;
@@ -82,9 +88,9 @@ export async function uploadWorkerImage(input: unknown, file: File, key: string 
     if (worker.revision !== asset.application_revision || worker.state !== "draft")
       throw new Error("CONFLICT");
     const rows =
-      await sql`select state from private.worker_assets where id=${asset.id}::uuid for update`;
+      await sql`select state,retain_until>now() as retained from private.worker_assets where id=${asset.id}::uuid for update`;
     if (rows[0]?.state === "stored") return;
-    if (rows[0]?.state !== "pending") throw new Error("CONFLICT");
+    if (!rows[0]?.retained || rows[0]?.state !== "pending") throw new Error("CONFLICT");
     await sql`update private.worker_assets set state='stored' where id=${asset.id}::uuid`;
     if (["identity", "business", "trade"].includes(meta.kind)) {
       const verified =
@@ -138,7 +144,10 @@ export async function documentAccess(input: unknown, key: string | null) {
 }
 export async function purgeExpired(input: unknown, key: string | null) {
   key = keySchema.parse(key);
-  const { workerId } = z.object({ workerId: z.guid() }).strict().parse(input);
+  const { workerId } = z
+    .object({ workerId: z.guid(), confirmed: z.literal(true) })
+    .strict()
+    .parse(input);
   const stageKey = createHash("sha256")
     .update("purge-stage:" + key)
     .digest("hex");
@@ -165,7 +174,19 @@ export async function purgeExpired(input: unknown, key: string | null) {
     const removed = await workerStorage()
       .from(WORKER_BUCKET)
       .remove(rows.map((r) => String(r.storage_path)));
-    if (removed.error) throw new Error("UNAVAILABLE");
+    if (removed.error) {
+      // A retry after provider deletion but before DB completion is safe only
+      // when every object is confirmed absent, rather than on arbitrary errors.
+      for (const row of rows) {
+        const check = await workerStorage().from(WORKER_BUCKET).download(String(row.storage_path));
+        if (
+          !check.error ||
+          !("statusCode" in check.error) ||
+          String(check.error.statusCode) !== "404"
+        )
+          throw new Error("UNAVAILABLE");
+      }
+    }
   }
   const doneKey = createHash("sha256")
     .update("purge-finish:" + key)

@@ -31,5 +31,16 @@ export function workerConfig() {
     throw new Error(
       "Worker storage requires a private key and approved retention policy; values redacted.",
     );
-  return { ...auth, secret, retentionDays };
+  const host = process.env.CLAMAV_HOST ?? "",
+    port = Number(process.env.CLAMAV_PORT ?? "3310"),
+    tls = process.env.CLAMAV_TLS === "true";
+  if (
+    !/^[a-zA-Z0-9.-]+$/.test(host) ||
+    !Number.isInteger(port) ||
+    port < 1 ||
+    port > 65535 ||
+    (auth.mode === "local" ? !["127.0.0.1", "localhost"].includes(host) : !tls)
+  )
+    throw new Error("A trusted malware scanner is required; values redacted.");
+  return { ...auth, secret, retentionDays, scanner: { host, port, tls } };
 }

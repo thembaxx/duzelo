@@ -1,10 +1,10 @@
 /* Duzelo public-only offline shell: no auth, API, or private caching. */
-const REV = 'duzelo-shell-v3';
+const REV = 'duzelo-shell-v4';
 const PAGES = REV + '-pages';
 const ASSETS = REV + '-assets';
 const OFFLINE = '/offline';
 const PREPARE = ['/', '/services', '/explore', '/how-it-works', '/trust', OFFLINE];
-const PRIVATE = /^\/(?:app(?:\/|$)|admin(?:\/|$)|onboarding(?:\/|$)|auth(?:\/|$)|api(?:\/|$))/;
+const PRIVATE = /^\/(?:app(?:\/|$)|admin(?:\/|$)|onboarding(?:\/|$)|workers(?:\/|$)|auth(?:\/|$)|api(?:\/|$))/;
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(PAGES).then(async cache => {

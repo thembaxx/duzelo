@@ -1,3 +1,4 @@
+import { workerConfig } from "@/features/workers/config";
 import Link from "next/link";
 import { requireWorkspace } from "./guard";
 import { PageHeading } from "@/features/auth/page-heading";
@@ -50,7 +51,9 @@ export async function WorkspacePage({ mode }: { mode: "client" | "worker" }) {
         <p>
           {mode === "client"
             ? "Explore the planned services while the local pilot takes shape."
-            : "Verification, services and opportunities will open in later releases. Account setup does not verify identity or trade credentials."}
+            : workerConfig()
+              ? "Complete your profile and evidence for manual review. Account setup does not verify identity or trade credentials."
+              : "Worker profile setup is awaiting release configuration. Account setup does not verify identity or trade credentials."}
         </p>
         <nav aria-label="Account navigation" className="inline-actions">
           <Link href="/app/settings" className={buttonVariants()}>
@@ -60,6 +63,22 @@ export async function WorkspacePage({ mode }: { mode: "client" | "worker" }) {
             <Link href="/onboarding" className={buttonVariants({ variant: "outline" })}>
               Add {mode === "client" ? "worker" : "client"} mode
             </Link>
+          )}
+          {mode === "worker" && workerConfig() && (
+            <>
+              <Link
+                href="/app/worker/onboarding"
+                className={buttonVariants({ variant: "outline" })}
+              >
+                Set up worker profile
+              </Link>
+              <Link
+                href="/app/worker/verification"
+                className={buttonVariants({ variant: "outline" })}
+              >
+                Verification status
+              </Link>
+            </>
           )}
           <Link href="/services" className={buttonVariants({ variant: "outline" })}>
             Explore services

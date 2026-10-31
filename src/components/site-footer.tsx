@@ -14,12 +14,14 @@ export function SiteFooter() {
           </Link>
           <p>A little help. A lot closer.</p>
           <p className="footer-note">
-            A local-services marketplace in development. No workers or bookings are live yet.
+            A local-services marketplace in development. Worker profiles require manual review.
+            Bookings are not open yet.
           </p>
         </div>
         <nav aria-label="Footer navigation">
           <Link href="/services">Services</Link>
           <Link href="/explore">Explore</Link>
+          <Link href="/workers">Worker profiles</Link>
           <Link href="/how-it-works">How it works</Link>
           <Link href="/trust">Trust & safety</Link>
           <Link href="/settings">Appearance</Link>

@@ -21,7 +21,7 @@ export async function ownerApplication(): Promise<OwnerApplication> {
   const actor = await workerActor();
   const sql = database();
   const rows =
-    await sql`select w.id,w.status,a.revision,a.state,a.draft_json from public.worker_profiles w left join private.worker_applications a on a.worker_id=w.id where w.user_id=${actor.id}::uuid`;
+    await sql`select w.id,w.status,a.revision,a.state,a.draft_json,(select c.slug from public.worker_cards c where c.worker_id=w.id and c.safe_until>now()) as public_slug from public.worker_profiles w left join private.worker_applications a on a.worker_id=w.id where w.user_id=${actor.id}::uuid`;
   const w = rows[0];
   if (!w) throw new Error("FORBIDDEN");
   const [options, assets, verifications] = await Promise.all([
@@ -33,6 +33,7 @@ export async function ownerApplication(): Promise<OwnerApplication> {
   return {
     ...options,
     workerId: String(w.id),
+    publicSlug: w.public_slug ? String(w.public_slug) : null,
     status: String(w.status),
     revision: w.revision ?? null,
     state: w.state ?? null,
@@ -84,7 +85,7 @@ export async function publicWorkers(slug?: string): Promise<PublicWorker[]> {
   if (slug && !/^provider-[a-f0-9-]{36}$/.test(slug)) return [];
   const sql = database();
   const rows =
-    await sql`select c.worker_id,c.slug,c.public_name,c.short_bio,c.town_label,c.verified_identity,c.verified_trade_category_ids,w.business_id,a.revision,private.eligible_worker_categories(c.worker_id) as eligible from public.worker_cards c join public.worker_profiles w on w.id=c.worker_id join private.worker_applications a on a.worker_id=w.id and a.state='reviewed' where c.safe_until>now() and (${slug ?? null}::text is null or c.slug=${slug ?? null}) and cardinality(private.eligible_worker_categories(c.worker_id))>0 order by c.public_name limit 60`;
+    await sql`select c.worker_id,c.slug,c.public_name,c.short_bio,c.town_label,c.verified_identity,c.verified_trade_category_ids,w.business_id,a.revision,(select travel_fee_cents from private.worker_coverage where worker_id=w.id) as travel_fee_cents,private.eligible_worker_categories(c.worker_id) as eligible from public.worker_cards c join public.worker_profiles w on w.id=c.worker_id join private.worker_applications a on a.worker_id=w.id and a.state='reviewed' where c.safe_until>now() and (${slug ?? null}::text is null or c.slug=${slug ?? null}) and cardinality(private.eligible_worker_categories(c.worker_id))>0 order by c.public_name limit 60`;
   const result: PublicWorker[] = [];
   for (const row of rows) {
     const ids = row.eligible as string[];
@@ -100,6 +101,7 @@ export async function publicWorkers(slug?: string): Promise<PublicWorker[]> {
       town: String(row.town_label),
       identityReviewed: Boolean(row.verified_identity),
       businessReviewed: Boolean(row.business_id),
+      travelFeeCents: Number(row.travel_fee_cents ?? 0),
       categories: categories.map((c) => ({
         id: String(c.id),
         label: String(c.label),

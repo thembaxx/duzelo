@@ -19,6 +19,8 @@ export function workerError(error: unknown) {
       422,
       "Use a valid JPEG or PNG photo, at least 32 pixels across and no larger than 3 MB.",
     ],
+    UNSAFE: [422, "This image could not pass the file safety check. Use a clean image."],
+    SCANNER: [503, "Image safety checking is unavailable. No image was accepted; try again later."],
     FILE_LIMIT: [422, "This application has reached its image limit."],
     LIMITED: [429, "Please wait before uploading another image."],
     INCOMPLETE: [409, "Required evidence or review is incomplete."],
@@ -30,6 +32,18 @@ export function workerError(error: unknown) {
     NOT_FOUND: [404, "This item is not available."],
     UNAVAILABLE: [503, "Worker profiles are not available. Please try again later."],
   };
+  if (
+    process.env.AUTH_MODE === "local" &&
+    process.env.AUTH_DIAGNOSTICS === "true" &&
+    error &&
+    typeof error === "object" &&
+    "code" in error &&
+    /^[0-9A-Z]{5}$/.test(String(error.code))
+  )
+    console.info("Local worker database rejection", {
+      code: String(error.code),
+      constraint: "constraint_name" in error ? String(error.constraint_name) : undefined,
+    });
   const [status, message] = errors[code] ?? errors.UNAVAILABLE!;
   const response = json({ error: { message } }, status);
   if (status === 429) response.headers.set("Retry-After", "60");
