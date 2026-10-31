@@ -34,6 +34,7 @@ test('desktop navigation, category search and colour preference persistence', as
     await page.getByRole('button', { name: /Find a service/ }).click();
     await page.waitForURL(/explore\?q=plumbing/);
     assert.ok(await page.getByRole('link', { name: /Plumbing/ }).count());
+    assert.equal(await page.getByRole('heading', { name: /1 category matching/ }).count(), 1, 'search count should contain a space');
     await page.screenshot({ path: 'test-results/duzelo-desktop-dark.png', fullPage: true });
   } finally { await browser.close(); }
 });
