@@ -1,30 +1,25 @@
-# Duzelo Milestone 01 — schema and access-control decisions
+# Duzelo Milestone 01 — reviewed isolated database baseline
 
-**State: unverified database candidate, NOT applied to any hosted Supabase project. Do not merge until the migration-reset, pgTAP and advisor gates pass.**
+**State: open PR. No Duzelo-hosted Supabase instance created or modified.**
 
-## Model
+The database portion of this PR uses the source migration and deterministic fictional tests from [PR #2](https://github.com/thembaxx/duzelo/pull/2). The source branch passed GitHub Actions run [41199771269](https://github.com/thembaxx/duzelo/actions/runs/41199771269), including PostgreSQL 17 reset, 80 pgTAP assertions, two concurrent publication races, security advisors, SQL lint and GiST EXPLAIN. That evidence applies to the SOURCE branch, not automatically to this integration branch.
 
-- `public` holds account profiles, manually published worker cards, service taxonomy and job workflow records.
-- `private` holds exact client addresses, job locations, worker home/coverage, verification evidence paths, administrator membership, inspection grants, bank/provider/payment records, outbox, command idempotency and audit logs.
-- `extensions.postgis` provides geography points and GiST spatial indexes.
-- No customer or worker can directly INSERT/UPDATE/DELETE domain rows. The authenticated server command layer planned for Milestones 02–08 must recheck session, ownership, role, status, quotas and payment invariants; a `service_role` key bypasses RLS, so never put one in browser code or a public endpoint.
-- No `SECURITY DEFINER` helpers and no private Data API schema. RLS is enabled on every app table. Public SELECTs require explicit grants and scoped policies; separate sanitized review API is required to publish reviews.
-- Administrative membership is provisioned by an approved operator. Membership does not automatically grant Data API access. Verification requires a separate active owner/verification admin; workers cannot approve their own credentials.
-- Worker cards cannot be published unless worker status is approved, the account unsuspended, identity evidence reviewed and current, service offerings active, and category-specific trade evidence reviewed where required. Any verification change deletes the card; suspension or status changes delete it too. Expired credentials hide it via RLS until cleanup.
-- **Milestone 01 deliberately publishes no location coordinates at all.** `worker_cards.approx_marker` is forcibly NULL. Later MapLibre discovery must migrate to a reviewed, coarse **town-centroid** lookup model; it must not copy `private.worker_coverage.base_point` into public cards.
-- Matching preview is restricted to workers who own active approved cards and have unexpired, active invitations for the requested category. Unknown workers cannot use `requested_worker_id` alone to bypass a match.
-- Audit and booking event history are append-only by a trigger even if a privileged app command attempts UPDATE/DELETE.
+This PR deliberately retains Duzelo's existing main-branch React/Next.js UI, including Geist Serif, theme and animation. It does NOT merge the unrelated, alternate Milestone 00 foundation from PR #1.
 
-## Decisions held for later milestones
+## Security contract
 
-- Server-side command API, OTP, SMS provider, signed Storage URLs, private document buckets, and MFA are NOT implemented.
-- Payment integration is NOT enabled and no escrow semantics are claimed.
-- Business teams are phased; current business links require the owner to be the same worker identity.
-- No runtime Supabase credentials or project URL are added to Duzelo or Vercel.
-- The reference `02_SCHEMA_BLUEPRINT.sql` and `03_RLS_BLUEPRINT.sql` are source material only, not deployable migrations.
+- Exact addresses, worker home bases/coverage, verification files, financial records and administrative membership remain in the non-exposed private schema.
+- PostGIS resides in extensions. Public worker location is a curated coarse town marker, never the private base. No browser DML grants.
+- Worker cards require a transactionally serialized, admin-controlled publication command and reviewed credentials. Workers may not self-verify.
+- Public job reads are restricted by actual participation and conservative RLS. Audit, ledger and booking evidence cannot be retroactively rewritten.
+- Stage paid/sensitive functions OFF. No phone OTP, worker bookings, checkout or production auth/storage credentials.
+- No fictional real-world worker data is published. Local fixtures are synthetic and local-only.
 
-## Local verification workflow
+## Verification needed before merge
 
-Run `node scripts/verify-db-baseline.mjs` as an inexpensive review aid, then use a **new isolated local database** with Supabase CLI `supabase db reset` twice and `supabase test db`. Verify pgTAP case outcomes, RLS policies and suspicious privilege grants under real role impersonation. Run security and performance advisors on the dedicated project, not an unrelated application. Inspect `supabase/tests/manual/geo_explain.sql` against a representative (fictional) dataset. The open PR must remain unmerged until the real database and deny tests are green.
+1. New branch-specific GitHub Actions database job: `npm run db:start`, `db:reset`, `db:test`, `db:concurrency`, `db:advisors`, `db:lint`, `db:explain`.
+2. The app's normal Vercel `npm run check` (includes static migration contract, lint, type, unit and build).
+3. Rerun local migration reset independently if the source/schema changes. Do not assume passing PR #2 means this port passes until branch checks report success.
+4. No remote Duzelo database or organisation will be created without the user selecting the organisation and confirming nonzero quoted cost.
 
-The repo's developer has not selected which Supabase organization should own the new project. Project creation may add billing; no project can be created or charged without the required organization/cost confirmation.
+Only merge when both database and application checks pass. Do not apply migration to tally-sync, subzero or any other existing user's Supabase project.

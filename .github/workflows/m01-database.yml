@@ -1,0 +1,44 @@
+name: Duzelo M01 database integration
+on:
+  pull_request:
+    paths:
+      - "supabase/**"
+      - "scripts/db-*.mjs"
+      - "scripts/db-concurrency.py"
+      - "scripts/verify-db-baseline.mjs"
+      - "package.json"
+      - ".github/workflows/m01-database.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - name: Install pinned Supabase CLI (without changing application lockfile)
+        run: npm install --no-save --no-package-lock supabase@2.122.0
+      - run: npm run test:db:static
+      - run: npm run db:start
+      - name: Fresh schema reset #1
+        run: npm run db:reset
+      - name: Fresh schema reset #2
+        run: npm run db:reset
+      - name: pgTAP role, data-isolation and integrity tests
+        run: npm run db:test
+      - name: Concurrent publication and invalidation races
+        run: npm run db:concurrency
+      - run: npm run db:advisors
+      - run: npm run db:lint
+      - run: npm run db:explain
+      - name: Stop local test database
+        if: always()
+        run: node_modules/.bin/supabase stop --no-backup || true

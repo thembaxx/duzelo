@@ -1,21 +1,25 @@
-# Milestone 01 — test fixtures and verification
+# Duzelo Milestone 01 — reviewed isolated database baseline
 
-All accounts, job requests and address examples in `supabase/tests/database/01_rls_guards.test.sql` are fictional. The test runs in an explicit transaction and always rolls back. No account is created by the production seed migration.
+**State: open PR. No Duzelo-hosted Supabase instance created or modified.**
 
-## Prerequisites
+The database portion of this PR uses the source migration and deterministic fictional tests from [PR #2](https://github.com/thembaxx/duzelo/pull/2). The source branch passed GitHub Actions run [41199771269](https://github.com/thembaxx/duzelo/actions/runs/41199771269), including PostgreSQL 17 reset, 80 pgTAP assertions, two concurrent publication races, security advisors, SQL lint and GiST EXPLAIN. That evidence applies to the SOURCE branch, not automatically to this integration branch.
 
-- New isolated, empty Supabase project, with owner-selected organization and approved cost.
-- **Pinned CLI: Supabase v2.122.0** (stable release 23 October 2026). Use `npx --yes supabase@2.122.0 --version` and then the same version for `start`, `db reset`, `test db` and `db advisors`; inspect `--help` on the installed version. Docker and local Postgres 17 support required. Do not point test commands at production.
-- `supabase start`, `supabase db reset`, `supabase test db`, `supabase db advisors` (or connected Supabase security/performance advisors).
+This PR deliberately retains Duzelo's existing main-branch React/Next.js UI, including Geist Serif, theme and animation. It does NOT merge the unrelated, alternate Milestone 00 foundation from PR #1.
 
-## Acceptance gates
+## Security contract
 
-- Cold `supabase db reset` twice, with matching results; both migrations and seed apply repeatably only to an isolated test DB.
-- `supabase test db` must report **all pgTAP assertions passing**, across anonymous, client, matched worker, unrelated worker, suspended worker and a nominal admin who is *not* automatically privileged.
-- Inspect `supabase/tests/manual/geo_explain.sql` on a representative data set: GIST index exists, acceptable ST_DWithin plan; no exact point is in public payload.
-- Security advisors clean or findings independently resolved; also run performance advisors.
-- Negative checks: no client write grant, no cross-tenant job/quote/message/document access, self-verification or business-owner linking, SQL cross-reference constraints and append-only audit updates.
-- Browser 390×844/1440×900 QA: existing interface, theme persistence, search, reduced-motion and protected-route fallback.
-- No credential or private data emitted in a public schema, SQL seed or Next.js bundle.
+- Exact addresses, worker home bases/coverage, verification files, financial records and administrative membership remain in the non-exposed private schema.
+- PostGIS resides in extensions. Public worker location is a curated coarse town marker, never the private base. No browser DML grants.
+- Worker cards require a transactionally serialized, admin-controlled publication command and reviewed credentials. Workers may not self-verify.
+- Public job reads are restricted by actual participation and conservative RLS. Audit, ledger and booking evidence cannot be retroactively rewritten.
+- Stage paid/sensitive functions OFF. No phone OTP, worker bookings, checkout or production auth/storage credentials.
+- No fictional real-world worker data is published. Local fixtures are synthetic and local-only.
 
-**Until these gates are observed on an actual dedicated database, the migration remains UNVERIFIED and the PR MUST remain open.** SQL parser/static checks or an unrelated Supabase project cannot substitute for a genuine migration reset and authorization tests.
+## Verification needed before merge
+
+1. New branch-specific GitHub Actions database job: `npm run db:start`, `db:reset`, `db:test`, `db:concurrency`, `db:advisors`, `db:lint`, `db:explain`.
+2. The app's normal Vercel `npm run check` (includes static migration contract, lint, type, unit and build).
+3. Rerun local migration reset independently if the source/schema changes. Do not assume passing PR #2 means this port passes until branch checks report success.
+4. No remote Duzelo database or organisation will be created without the user selecting the organisation and confirming nonzero quoted cost.
+
+Only merge when both database and application checks pass. Do not apply migration to tally-sync, subzero or any other existing user's Supabase project.
