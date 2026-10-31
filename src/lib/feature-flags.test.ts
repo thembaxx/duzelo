@@ -5,4 +5,4 @@ describe('foundation feature flags', () => {
   it('does not claim unfinished privileged workflows are enabled', () => {
     expect(Object.values(featureFlags).every((value) => value === false)).toBe(true);
   });
-}
+});
