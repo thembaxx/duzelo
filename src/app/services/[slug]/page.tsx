@@ -1,21 +1,29 @@
-import Link from 'next/link';
-import { ArrowLeft, ArrowUpRight } from '@phosphor-icons/react/dist/ssr';
-import { notFound } from 'next/navigation';
-import type { Metadata } from 'next';
-import { findServiceCategory, serviceCategories } from '@/lib/services';
+import Link from "next/link";
+import { ArrowLeft, ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { findServiceCategory, serviceCategories } from "@/lib/services";
 
 export function generateStaticParams() {
   return serviceCategories.map(({ slug }) => ({ slug }));
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
   const { slug } = await params;
   const category = findServiceCategory(slug);
-  return category ? {
-    title: category.name + ' services — Mkhondo',
-    description: category.summary + ' Browse Duzelo service-category previews; real bookings are not open.',
-    alternates: { canonical: '/services/' + category.slug },
-  } : { title: 'Service not found', robots: { index: false, follow: false } };
+  return category
+    ? {
+        title: category.name + " services — Mkhondo",
+        description:
+          category.summary +
+          " Browse Duzelo service-category previews; real bookings are not open.",
+        alternates: { canonical: "/services/" + category.slug },
+      }
+    : { title: "Service not found", robots: { index: false, follow: false } };
 }
 
 export default async function ServiceDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -25,20 +33,37 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
 
   return (
     <section className="shell inner-page detail-page">
-      <Link href="/services" className="breadcrumb"><ArrowLeft size={17} aria-hidden="true"/> All services</Link>
+      <Link href="/services" className="breadcrumb">
+        <ArrowLeft size={17} aria-hidden="true" /> All services
+      </Link>
       <p className="eyebrow">SERVICE CATEGORY / {category.number}</p>
-      <h1 className="inner-heading">{category.name}<span className="highlight-period">.</span></h1>
+      <h1 className="inner-heading">
+        {category.name}
+        <span className="highlight-period">.</span>
+      </h1>
       <p className="inner-lede">{category.summary}</p>
       <div className="detail-grid">
         <div className="detail-panel">
           <h2>Common requests</h2>
-          <ul className="example-list">{category.examples.map((example) => <li key={example}><ArrowUpRight size={17} aria-hidden="true"/>{example}</li>)}</ul>
+          <ul className="example-list">
+            {category.examples.map((example) => (
+              <li key={example}>
+                <ArrowUpRight size={17} aria-hidden="true" />
+                {example}
+              </li>
+            ))}
+          </ul>
         </div>
         <div className="detail-panel tinted-panel">
           <p className="eyebrow">LAUNCH STATUS</p>
           <h2>We're getting ready.</h2>
-          <p>No workers are available to book through Duzelo yet. We won’t show invented profiles, ratings or prices while the marketplace is being built.</p>
-          <Link href="/explore" className="text-link">Explore more categories <ArrowUpRight size={17} aria-hidden="true"/></Link>
+          <p>
+            No workers are available to book through Duzelo yet. We won’t show invented profiles,
+            ratings or prices while the marketplace is being built.
+          </p>
+          <Link href="/explore" className="text-link">
+            Explore more categories <ArrowUpRight size={17} aria-hidden="true" />
+          </Link>
         </div>
       </div>
     </section>

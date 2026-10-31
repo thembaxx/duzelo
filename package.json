@@ -21,7 +21,12 @@
     "db:concurrency": "python3 scripts/db-concurrency.py",
     "db:advisors": "node scripts/db-local.mjs advisors",
     "db:lint": "node scripts/db-local.mjs lint",
-    "db:explain": "node scripts/db-local.mjs explain"
+    "db:explain": "node scripts/db-local.mjs explain",
+    "auth:start": "supabase start --exclude realtime,storage-api,imgproxy,studio,postgres-meta,edge-runtime,logflare,vector,supavisor,mailpit",
+    "auth:env": "node scripts/auth-local-env.mjs",
+    "test:auth": "node scripts/auth-test-runner.mjs",
+    "security:check": "node scripts/check-secrets.mjs",
+    "test:public": "node scripts/test-public.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -31,7 +36,12 @@
     "next": "16.4.3",
     "next-themes": "^0.4.6",
     "react": "19.3.1",
-    "react-dom": "19.3.1"
+    "react-dom": "19.3.1",
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.118.0",
+    "postgres": "4.0.0",
+    "server-only": "0.0.1",
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -43,7 +53,10 @@
     "tailwindcss": "^4",
     "typescript": "7.0.2",
     "vitest": "^5.0.5",
-    "playwright": "1.64.1"
+    "playwright": "1.64.1",
+    "@axe-core/playwright": "4.14.0",
+    "@playwright/test": "1.64.1",
+    "supabase": "2.122.0"
   },
   "engines": {
     "node": "24.x"
