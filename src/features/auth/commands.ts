@@ -147,6 +147,7 @@ export async function authCommand(
   }
   if (action === "mfa-enroll" || action === "mfa-verify") {
     if (!identity.admin) throw new Error("FORBIDDEN");
+    if (!identity.hasVerifiedEmail) throw new Error("MFA_SETUP");
     if (!(await allowAuthAttempt("mfa", identity.id, 5, 900))) throw new Error("LIMITED");
     const client = await createAuthClient(true);
     if (action === "mfa-enroll") {

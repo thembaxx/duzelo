@@ -7,6 +7,7 @@ export interface Identity {
   sessionId: string;
   aal2: boolean;
   admin: boolean;
+  hasVerifiedEmail: boolean;
   profile: {
     display_name: string;
     client_enabled: boolean;
@@ -46,6 +47,7 @@ export async function getVerifiedIdentity(): Promise<Identity | null> {
     sessionId: claims.claims.session_id,
     aal2: claims.claims.aal === "aal2" && factors.length > 0,
     admin: staff.length > 0,
+    hasVerifiedEmail: Boolean(data.user.email && data.user.email_confirmed_at),
     profile: (profiles[0] ?? null) as Identity["profile"],
     workerStatus: workers[0]?.status ?? null,
   };

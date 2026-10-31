@@ -7,6 +7,7 @@ export const flagNames = [
   "SMS_CRITICAL_ENABLED",
   "WEB_PUSH_ENABLED",
   "GOOGLE_OAUTH_ENABLED",
+  "EMAIL_AUTH_ENABLED",
   "TEAM_DISPATCH_ENABLED",
   "AI_ASSIST_ENABLED",
   "RECURRING_JOBS_ENABLED",
@@ -15,7 +16,9 @@ export const flagNames = [
 export function validateDisabledFlags(input: Record<string, string | undefined>) {
   for (const name of flagNames) {
     if (!z.literal("false").optional().safeParse(input[name]).success) {
-      throw new Error(`Unfinished capability ${name} must remain false in milestone 00.`);
+      throw new Error(
+        `Unfinished capability ${name} must remain false until its milestone is implemented.`,
+      );
     }
   }
   return Object.freeze({

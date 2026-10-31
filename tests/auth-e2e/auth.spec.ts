@@ -102,6 +102,37 @@ test("real local OTP, both modes, persistent settings, MFA and revoked sessions"
   await expect(page.getByText("Preferences saved.")).toBeVisible();
   await page.reload();
   await expect(page.getByLabel("Your display name")).toHaveValue("Fictional updated neighbour");
+  const key = crypto.randomUUID();
+  const preferences = {
+    displayName: "Fictional updated neighbour",
+    emailNotifications: false,
+    inAppNotifications: true,
+  };
+  const auditBefore = (
+    await sql`select count(*)::int as count from private.audit_events where actor_id=${id}::uuid and action='profile.updated'`
+  )[0]!.count;
+  for (let n = 0; n < 2; n++)
+    expect(
+      (
+        await page.request.post("/api/v1/auth/preferences", {
+          data: preferences,
+          headers: { origin, "Idempotency-Key": key },
+        })
+      ).status(),
+    ).toBe(200);
+  expect(
+    (
+      await sql`select count(*)::int as count from private.audit_events where actor_id=${id}::uuid and action='profile.updated'`
+    )[0]!.count,
+  ).toBe(auditBefore + 1);
+  expect(
+    (
+      await page.request.post("/api/v1/auth/preferences", {
+        data: { ...preferences, displayName: "A different command" },
+        headers: { origin, "Idempotency-Key": key },
+      })
+    ).status(),
+  ).toBe(409);
   const authCookies = (await context.cookies()).filter((cookie) =>
     cookie.name.startsWith("duzelo-auth"),
   );
@@ -113,7 +144,7 @@ test("real local OTP, both modes, persistent settings, MFA and revoked sessions"
     .map((cookie) => cookie.value)
     .join("");
   const cached = JSON.parse(Buffer.from(joined.replace(/^base64-/, ""), "base64url").toString());
-  cached.expires_at = 0;
+  cached.expires_at = 1;
   const expiredHint = "base64-" + Buffer.from(JSON.stringify(cached)).toString("base64url");
   const chunked = authCookies.some((cookie) => cookie.name.endsWith(".0"));
   const chunkSize = authCookies[0]!.value.length;
@@ -146,6 +177,12 @@ test("real local OTP, both modes, persistent settings, MFA and revoked sessions"
   await sql`insert into private.admin_members(user_id,admin_role) values (${id}::uuid,'owner') on conflict(user_id) do update set active=true`;
   await page.goto("/admin");
   await expect(page).toHaveURL(/admin-mfa/);
+  // Phone-only users cannot enroll native TOTP (upstream requires email).
+  // Never manufacture a production email or let signup grant admin membership.
+  await sql`update auth.users set email=null,email_confirmed_at=null where id=${id}::uuid`;
+  expect((await post(page, "mfa-enroll", {})).status()).toBe(409);
+  // An isolated operator-owned email fixture, not a public email-linking flow.
+  await sql`update auth.users set email='fictional-admin@example.invalid',email_confirmed_at=now() where id=${id}::uuid`;
   const factors = await sql`select id from auth.mfa_factors where user_id=${id}::uuid`;
   for (const factor of factors) await sql`delete from auth.mfa_factors where id=${factor.id}::uuid`;
   const enroll = await post(page, "mfa-enroll", {});

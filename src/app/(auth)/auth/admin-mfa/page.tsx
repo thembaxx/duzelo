@@ -19,7 +19,14 @@ export default async function AdminMfa() {
           continue.
         </p>
       </PageHeading>
-      <MfaForm {...(factor ? { factorId: factor.id } : {})} />
+      {actor.hasVerifiedEmail ? (
+        <MfaForm {...(factor ? { factorId: factor.id } : {})} />
+      ) : (
+        <p>
+          An approved operator must arrange a verified administrator email before authenticator
+          setup. Administrator access stays locked.
+        </p>
+      )}
     </>
   );
 }

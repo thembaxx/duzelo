@@ -24,6 +24,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ act
       LIMITED_VERIFY: [429, "Too many attempts. Please wait 15 minutes before trying again."],
       LIMITED: [429, "Please wait before trying again."],
       CODE: [400, "The code could not be verified. Check it or try again later."],
+      MFA_SETUP: [
+        409,
+        "An approved operator must verify your administrator email before authenticator setup.",
+      ],
       CAPTCHA: [422, "Complete the security check before requesting a code."],
       CONFLICT: [409, "This request key was already used for a different action."],
       NOT_FOUND: [404, "This action is not available."],
