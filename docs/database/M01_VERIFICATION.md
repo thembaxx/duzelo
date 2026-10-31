@@ -5,7 +5,7 @@ All accounts, job requests and address examples in `supabase/tests/database/01_r
 ## Prerequisites
 
 - New isolated, empty Supabase project, with owner-selected organization and approved cost.
-- A compatible Supabase CLI, Docker and local Postgres 17+ available. Do not point test commands at production.
+- **Pinned CLI: Supabase v2.122.0** (stable release 23 October 2026). Use `npx --yes supabase@2.122.0 --version` and then the same version for `start`, `db reset`, `test db` and `db advisors`; inspect `--help` on the installed version. Docker and local Postgres 17 support required. Do not point test commands at production.
 - `supabase start`, `supabase db reset`, `supabase test db`, `supabase db advisors` (or connected Supabase security/performance advisors).
 
 ## Acceptance gates
