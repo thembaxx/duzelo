@@ -267,7 +267,7 @@ create table private.verification_documents (
 
 -- Approved verifications require a real active reviewer, not a worker self-approval.
 create function private.guard_verification_review() returns trigger
-language plpgsql security invoker set search_path = '' as $
+language plpgsql security invoker set search_path = '' as $$
 begin
   if new.kind = 'trade' and new.category_id is null then
     raise exception 'Trade verification requires a category';
@@ -291,7 +291,7 @@ begin
     end if;
   end if;
   return new;
-end; $;
+end; $$;
 revoke execute on function private.guard_verification_review() from public, anon, authenticated;
 create trigger enforce_manual_verification before insert or update
   on private.worker_verifications for each row
@@ -300,7 +300,7 @@ create trigger enforce_manual_verification before insert or update
 -- Any verification change invalidates the previously published card.
 -- Admin must re-publish after reviewing the full set of current evidence.
 create function private.unpublish_on_verification_change() returns trigger
-language plpgsql security invoker set search_path = '' as $
+language plpgsql security invoker set search_path = '' as $$
 begin
   if tg_op = 'DELETE' then
     delete from public.worker_cards where worker_id = old.worker_id;
@@ -308,7 +308,7 @@ begin
   end if;
   delete from public.worker_cards where worker_id = new.worker_id;
   return new;
-end; $;
+end; $$;
 revoke execute on function private.unpublish_on_verification_change() from public, anon, authenticated;
 create trigger worker_verification_invalidate_card
   after insert or update or delete on private.worker_verifications
@@ -316,7 +316,7 @@ create trigger worker_verification_invalidate_card
 
 -- Team management is out of scope. A linked business must belong to the worker.
 create function private.enforce_worker_business_owner() returns trigger
-language plpgsql security invoker set search_path = '' as $
+language plpgsql security invoker set search_path = '' as $$
 begin
   if new.business_id is not null and not exists (
     select 1 from public.business_profiles b
@@ -325,7 +325,7 @@ begin
     raise exception 'Cross-owner worker/business links require a future audited team model';
   end if;
   return new;
-end; $;
+end; $$;
 revoke execute on function private.enforce_worker_business_owner() from public, anon, authenticated;
 create trigger worker_business_owner_guard before insert or update of business_id,user_id
   on public.worker_profiles for each row execute function private.enforce_worker_business_owner();
@@ -365,7 +365,7 @@ create table private.job_locations (
 create index job_locations_point_gist_idx on private.job_locations using gist(exact_point);
 -- An address selected for a job must belong to that job's actual client.
 create function private.guard_job_address_owner() returns trigger
-language plpgsql security invoker set search_path = '' as $
+language plpgsql security invoker set search_path = '' as $$
 begin
   if new.address_id is not null and not exists (
     select 1 from private.client_addresses a
@@ -375,7 +375,7 @@ begin
     raise exception 'Job address must belong to the requesting client';
   end if;
   return new;
-end; $;
+end; $$;
 revoke execute on function private.guard_job_address_owner() from public, anon, authenticated;
 create trigger job_address_ownership before insert or update
   on private.job_locations for each row execute function private.guard_job_address_owner();
@@ -395,7 +395,7 @@ create table private.inspection_access_grants (
 create index inspection_access_grants_lookup_idx on private.inspection_access_grants(job_id,worker_id,expires_at);
 -- A time-limited inspection grant is valid only for the job owner and its matched worker.
 create function private.guard_inspection_grant() returns trigger
-language plpgsql security invoker set search_path = '' as $
+language plpgsql security invoker set search_path = '' as $$
 begin
   if not exists (
     select 1 from public.job_requests j
@@ -408,7 +408,7 @@ begin
     raise exception 'Inspection grant requires job owner and eligible matched worker';
   end if;
   return new;
-end; $;
+end; $$;
 revoke execute on function private.guard_inspection_grant() from public, anon, authenticated;
 create trigger inspection_grant_ownership before insert or update
   on private.inspection_access_grants for each row execute function private.guard_inspection_grant();
@@ -652,10 +652,10 @@ create table private.audit_events (
 create index audit_events_resource_idx on private.audit_events(resource_kind,resource_id,occurred_at desc);
 -- Audit trails and booking status events are strictly append-only, including for service_role.
 create function private.prevent_event_mutation() returns trigger
-language plpgsql security invoker set search_path = '' as $
+language plpgsql security invoker set search_path = '' as $$
 begin
   raise exception 'Append-only event history cannot be updated or deleted';
-end; $;
+end; $$;
 revoke execute on function private.prevent_event_mutation() from public, anon, authenticated;
 create trigger booking_events_immutable before update or delete
   on public.booking_events for each row execute function private.prevent_event_mutation();
