@@ -302,8 +302,12 @@ create trigger enforce_manual_verification before insert or update
 create function private.unpublish_on_verification_change() returns trigger
 language plpgsql security invoker set search_path = '' as $
 begin
-  delete from public.worker_cards where worker_id = coalesce(new.worker_id,old.worker_id);
-  return coalesce(new,old);
+  if tg_op = 'DELETE' then
+    delete from public.worker_cards where worker_id = old.worker_id;
+    return old;
+  end if;
+  delete from public.worker_cards where worker_id = new.worker_id;
+  return new;
 end; $;
 revoke execute on function private.unpublish_on_verification_change() from public, anon, authenticated;
 create trigger worker_verification_invalidate_card
