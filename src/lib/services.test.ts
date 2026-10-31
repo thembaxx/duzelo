@@ -17,4 +17,4 @@ describe('service category catalogue', () => {
     expect(searchServiceCategories('')).toHaveLength(serviceCategories.length);
     expect(searchServiceCategories('unknown-service')).toEqual([]);
   });
-}
+});
