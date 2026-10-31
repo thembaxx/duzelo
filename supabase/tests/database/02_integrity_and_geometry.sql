@@ -15,6 +15,7 @@ insert into public.user_profiles(user_id,display_name) values
  ('a0000000-0000-4000-8000-000000000003','Fixture worker one'),
  ('a0000000-0000-4000-8000-000000000004','Fixture worker two'),
  ('a0000000-0000-4000-8000-000000000005','Fixture admin');
+insert into private.admin_members(user_id,admin_role) values ('a0000000-0000-4000-8000-000000000005','owner');
 insert into public.service_categories(id,slug,label_en,requires_trade_review) values
  ('a1000000-0000-4000-8000-000000000001','fixture-clean','Fixture cleaning',false),
  ('a1000000-0000-4000-8000-000000000002','fixture-trade','Fixture trade',true);
@@ -50,9 +51,9 @@ select throws_ok(
   'update public.worker_profiles set status=''approved'' where id=''a3000000-0000-4000-8000-000000000001''',
   'P0001',null,'identity verification required before promotion');
 
-insert into private.worker_verifications(worker_id,kind,status,reviewed_by)
+insert into private.worker_verifications(worker_id,kind,status,reviewed_by,reviewed_at)
 values ('a3000000-0000-4000-8000-000000000001','identity','approved',
-        'a0000000-0000-4000-8000-000000000005');
+        'a0000000-0000-4000-8000-000000000005',now());
 update public.worker_profiles set status='approved'
 where id='a3000000-0000-4000-8000-000000000001';
 select is((select status::text from public.worker_profiles where id='a3000000-0000-4000-8000-000000000001'),
@@ -81,10 +82,10 @@ select throws_ok(
   'update public.worker_cards set category_ids=array[''a1000000-0000-4000-8000-000000000001'',''a1000000-0000-4000-8000-000000000002'']::uuid[] where slug=''real-fixture''',
   'P0001',null,'regulated trade needs its own verification');
 
-insert into private.worker_verifications(worker_id,kind,category_id,status,reviewed_by)
+insert into private.worker_verifications(worker_id,kind,category_id,status,reviewed_by,reviewed_at)
 values ('a3000000-0000-4000-8000-000000000001','trade',
         'a1000000-0000-4000-8000-000000000002','approved',
-        'a0000000-0000-4000-8000-000000000005');
+        'a0000000-0000-4000-8000-000000000005',now());
 update public.worker_cards
 set category_ids=array['a1000000-0000-4000-8000-000000000001','a1000000-0000-4000-8000-000000000002']::uuid[],
     verified_trade_category_ids=array['a1000000-0000-4000-8000-000000000001']::uuid[]

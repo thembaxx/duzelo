@@ -30,10 +30,10 @@ insert into public.worker_profiles(id,user_id,display_name,status) values
  ('40000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000003','Fictional Worker A','draft'),
  ('40000000-0000-4000-8000-000000000002','10000000-0000-4000-8000-000000000004','Fictional Worker B','draft'),
  ('40000000-0000-4000-8000-000000000003','10000000-0000-4000-8000-000000000005','Fictional Suspended Worker','draft');
-insert into private.worker_verifications(worker_id,kind,status,reviewed_by)
+insert into private.worker_verifications(worker_id,kind,status,reviewed_by,reviewed_at)
 values
- ('40000000-0000-4000-8000-000000000001','identity','approved','10000000-0000-4000-8000-000000000006'),
- ('40000000-0000-4000-8000-000000000003','identity','approved','10000000-0000-4000-8000-000000000006');
+ ('40000000-0000-4000-8000-000000000001','identity','approved','10000000-0000-4000-8000-000000000006',now()),
+ ('40000000-0000-4000-8000-000000000003','identity','approved','10000000-0000-4000-8000-000000000006',now());
 update public.worker_profiles set status='approved'
 where id in ('40000000-0000-4000-8000-000000000001','40000000-0000-4000-8000-000000000003');
 insert into public.worker_services(id,worker_id,category_id,title,price_model) values

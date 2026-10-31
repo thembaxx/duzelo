@@ -247,7 +247,7 @@ create index worker_verifications_worker_idx on private.worker_verifications(wor
 create function private.validate_worker_approval() returns trigger
 language plpgsql security invoker set search_path = '' as $$
 begin
-  if new.status='approved' and old.status is distinct from new.status then
+  if new.status='approved' and (tg_op='INSERT' or old.status is distinct from new.status) then
     if not exists (
       select 1 from private.worker_verifications v
       where v.worker_id=new.id and v.kind='identity' and v.status='approved'
@@ -271,7 +271,7 @@ begin
 end; $$;
 revoke execute on function private.validate_worker_approval() from public, anon, authenticated;
 create trigger worker_approval_requires_manual_evidence
-  before update of status on public.worker_profiles
+  before insert or update of status on public.worker_profiles
   for each row execute function private.validate_worker_approval();
 
 -- A verification revocation immediately removes the previously published card.
@@ -300,6 +300,31 @@ create table private.admin_members (
   granted_by uuid references auth.users(id),
   granted_at timestamptz not null default now()
 );
+-- Approval of verification evidence requires a real active administrator.
+-- This protects future server commands from accidentally trusting a status field.
+create function private.enforce_manual_review() returns trigger
+language plpgsql security invoker set search_path = '' as $$
+begin
+  if new.status='approved' then
+    if new.reviewed_by is null or new.reviewed_at is null
+      or not exists (
+        select 1 from private.admin_members am
+        where am.user_id=new.reviewed_by and am.active
+          and am.admin_role in ('owner','verification')
+      ) then
+      raise exception 'Verification approval requires an active authorized reviewer';
+    end if;
+    if new.kind='trade' and new.category_id is null then
+      raise exception 'Trade verification requires a category';
+    end if;
+  end if;
+  return new;
+end; $$;
+revoke execute on function private.enforce_manual_review() from public, anon, authenticated;
+create trigger verification_manual_review_required
+  before insert or update of status on private.worker_verifications
+  for each row execute function private.enforce_manual_review();
+
 create table private.command_idempotency (
   actor_id uuid not null references auth.users(id),
   idempotency_key text not null,
