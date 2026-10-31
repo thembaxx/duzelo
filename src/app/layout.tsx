@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
+import { GeistSans } from 'geist/font/sans';
+import { GeistSerifRegular } from 'geist/font/serif/regular';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -22,7 +24,7 @@ export const viewport: Viewport = { width: 'device-width', initialScale: 1, them
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={`${GeistSans.variable} ${GeistSerifRegular.variable}`} suppressHydrationWarning>
       <body>
         <ThemeProvider>
           <a href="#main-content" className="skip-link">Skip to main content</a>
