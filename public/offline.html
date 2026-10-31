@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en-ZA">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>You’re offline</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 32px;
+        background: #121311;
+        color: #f4f5ee;
+        font:
+          16px Arial,
+          sans-serif;
+        display: grid;
+        min-height: 80vh;
+        place-content: center;
+      }
+      main {
+        max-width: 440px;
+      }
+      h1 {
+        font-size: 36px;
+        font-weight: 500;
+        letter-spacing: -1px;
+      }
+      p {
+        color: #afb4a6;
+        line-height: 1.7;
+      }
+      a {
+        display: inline-block;
+        background: #d5f478;
+        color: #1a2110;
+        padding: 16px 24px;
+        border-radius: 32px;
+        margin-top: 16px;
+        text-decoration: none;
+      }
+      a:focus-visible {
+        outline: 2px solid #d5f478;
+        outline-offset: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p>Connection unavailable</p>
+      <h1>A little pause.</h1>
+      <p>
+        You’re offline. Reconnect to continue. This is a generic offline page; no private
+        information or unsent actions are stored here.
+      </p>
+      <a href="/">Try home again</a>
+    </main>
+  </body>
+</html>

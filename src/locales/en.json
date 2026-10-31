@@ -1,0 +1,22 @@
+{
+  "navigation": {
+    "home": "Home",
+    "services": "Services",
+    "explore": "Explore",
+    "howItWorks": "How it works",
+    "trust": "Trust & safety",
+    "account": "Account",
+    "help": "Help & install"
+  },
+  "home": {
+    "eyebrow": "A little closer. A lot simpler.",
+    "greeting": "Hello, neighbour.",
+    "intro": "A place for the jobs on your list and the people who know how to do them.",
+    "browse": "Explore services",
+    "worker": "I offer a service",
+    "servicesTitle": "What needs doing?",
+    "servicesDescription": "From everyday upkeep to the unexpected.",
+    "pilot": "Preparing a local pilot",
+    "areaLabel": "Starting close to home"
+  }
+}
