@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useSyncExternalStore, type FormEvent } from "react";
 import Link from "next/link";
+import { House, Wrench, ArrowLeftRight } from "lucide-react";
 import Script from "next/script";
 import { Button } from "@/components/ui/button";
 
@@ -73,6 +74,10 @@ export function SignInForm({ local, captchaSiteKey }: { local: boolean; captchaS
   };
   return (
     <form method="post" className="auth-form" onSubmit={submit}>
+      <p className="auth-progress" aria-live="polite">
+        {sent ? "02 · Verify your number" : "01 · Your mobile number"}
+        <span>{sent ? "Step 2 of 2" : "Step 1 of 2"}</span>
+      </p>
       {local && (
         <p className="test-notice">
           Local testing only. Use a configured test number; no SMS is sent.
@@ -244,17 +249,35 @@ export function ProfileForm({
         <>
           <fieldset>
             <legend>How would you like to use your account?</legend>
-            <label className="choice">
-              <input type="radio" name="mode" value="client" defaultChecked />
-              Find help
+            <label className="choice mode-choice">
+              <input
+                type="radio"
+                name="mode"
+                value="client"
+                defaultChecked
+                aria-label="Find help"
+              />
+              <House size={20} aria-hidden="true" />
+              <span>
+                <strong>Find help</strong>
+                <small>For your home and everyday to-do list.</small>
+              </span>
             </label>
-            <label className="choice">
-              <input type="radio" name="mode" value="worker" />
-              Offer a service
+            <label className="choice mode-choice">
+              <input type="radio" name="mode" value="worker" aria-label="Offer a service" />
+              <Wrench size={20} aria-hidden="true" />
+              <span>
+                <strong>Offer a service</strong>
+                <small>A starting point for your skills or business.</small>
+              </span>
             </label>
-            <label className="choice">
-              <input type="radio" name="mode" value="both" />
-              Both
+            <label className="choice mode-choice">
+              <input type="radio" name="mode" value="both" aria-label="Both" />
+              <ArrowLeftRight size={20} aria-hidden="true" />
+              <span>
+                <strong>Both</strong>
+                <small>One account. Switch views when you need to.</small>
+              </span>
             </label>
           </fieldset>
           <p>

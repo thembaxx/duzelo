@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
 import { createHmac } from "node:crypto";
 import postgres from "postgres";
 const origin = "http://127.0.0.1:3000";
@@ -57,6 +58,10 @@ test("real local OTP, both modes, persistent settings, MFA and revoked sessions"
   await page.screenshot({
     path: `docs/evidence/screenshots/auth-sign-in-${info.project.name}.png`,
   });
+  expect(
+    (await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze())
+      .violations,
+  ).toEqual([]);
   await page.getByLabel("South African mobile number").fill("0820000001");
   await page.getByRole("button", { name: "Send verification code" }).click();
   await page.getByLabel("Six-digit verification code").fill("000000");
@@ -70,6 +75,13 @@ test("real local OTP, both modes, persistent settings, MFA and revoked sessions"
   {
     await page.getByLabel("Your display name").fill("Fictional neighbour");
     await page.getByLabel("Both", { exact: true }).check();
+    expect(
+      (await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze())
+        .violations,
+    ).toEqual([]);
+    await page.screenshot({
+      path: `docs/evidence/screenshots/auth-onboarding-${info.project.name}.png`,
+    });
     await page.getByLabel("I am 18 or older.").check();
     await page.getByLabel(/I have read the preview terms/).check();
     const [saved] = await Promise.all([
@@ -79,6 +91,12 @@ test("real local OTP, both modes, persistent settings, MFA and revoked sessions"
     expect(saved.status(), "Onboarding command must persist before navigation").toBe(200);
   }
   await expect(page).toHaveURL(/app\/client/);
+  if (info.project.name === "mobile")
+    await expect(
+      page
+        .getByRole("navigation", { name: "Mobile navigation" })
+        .getByRole("link", { name: "Account" }),
+    ).toHaveAttribute("aria-current", "page");
   const id = await userId();
   expect(
     (await sql`select status from public.worker_profiles where user_id=${id}::uuid`)[0]!.status,

@@ -76,5 +76,5 @@ jobs:
         if: always()
         with:
           name: auth-ui-screenshots
-          path: docs/evidence/screenshots/auth-sign-in-*.png
+          path: docs/evidence/screenshots/auth-*.png
           retention-days: 14

@@ -15,6 +15,11 @@ if (
   throw new Error("Auth tests require the local stack.");
 const build = spawnSync("node_modules/.bin/next", ["build"], { env, stdio: "inherit" });
 if (build.status) process.exit(build.status);
+const scan = spawnSync("node", ["scripts/check-secrets.mjs"], {
+  env: { ...env, SECURITY_SCAN_CANARY: env.AUTH_RATE_LIMIT_SECRET },
+  stdio: "inherit",
+});
+if (scan.status) process.exit(scan.status);
 const result = spawnSync(
   "node_modules/.bin/playwright",
   ["test", "--config", "playwright.auth.config.ts"],

@@ -27,13 +27,17 @@ const mainLinks = [
 ];
 const accountLink = { href: "/auth/sign-in", label: t.account, icon: UserRound };
 function isCurrent(pathname: string, href: string) {
+  if (href === "/auth/sign-in")
+    return ["/auth/", "/app/", "/onboarding", "/admin"].some((prefix) =>
+      pathname.startsWith(prefix),
+    );
   return href === "/" ? pathname === href : pathname.startsWith(href);
 }
 export function Wordmark() {
   return (
     <Link href="/" className="wordmark" aria-label={`${brand.name} home`}>
+      <span className="brand-symbol" aria-hidden="true" />
       {brand.name.toLowerCase()}
-      <span aria-hidden="true">.</span>
     </Link>
   );
 }
@@ -63,7 +67,11 @@ export function Sidebar() {
           <CircleHelp size={18} aria-hidden="true" />
           {t.help}
         </Link>
-        <Link href="/auth/sign-in" className="nav-link">
+        <Link
+          href="/auth/sign-in"
+          className="nav-link"
+          aria-current={isCurrent(pathname, accountLink.href) ? "page" : undefined}
+        >
           <UserRound size={18} aria-hidden="true" />
           {t.account}
           <ArrowUpRight size={14} aria-hidden="true" />
@@ -99,7 +107,7 @@ export function Topbar() {
           href="/auth/sign-in"
           className="desktop-action rounded-full border border-border px-4 py-3"
         >
-          Sign in
+          {isCurrent(pathname, accountLink.href) ? "My account" : "Sign in"}
         </Link>
         <details className="mobile-menu" key={pathname}>
           <summary aria-label="Open navigation menu">

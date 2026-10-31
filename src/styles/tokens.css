@@ -125,7 +125,9 @@ p {
   gap: 44px;
 }
 .wordmark {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
   font-size: 34px;
   font-weight: 750;
   letter-spacing: -0.075em;
@@ -868,4 +870,72 @@ main {
   padding: 16px;
   background: var(--background);
   margin-bottom: 24px;
+}
+
+/* Original provisional mark: neighbouring doorways, independent of the name. */
+.brand-symbol {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  background: var(--primary);
+  mask: url("/brand/neighbourhood.svg") center / contain no-repeat;
+}
+.mode-switch {
+  display: inline-flex;
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  background: var(--card);
+  margin-bottom: 24px;
+}
+.mode-switch a {
+  padding: 13px 20px;
+  min-height: 48px;
+  border-radius: 99px;
+  font-size: 14px;
+  color: var(--muted-foreground);
+}
+.mode-switch a[aria-current="page"] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+.auth-form .auth-progress {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--foreground);
+  font-size: 12px;
+}
+.auth-progress span {
+  color: var(--muted-foreground);
+}
+.auth-form .mode-choice {
+  border: 1px solid var(--input);
+  border-radius: 16px;
+  padding: 16px 12px;
+  cursor: pointer;
+}
+.mode-choice:has(input:checked) {
+  background: var(--accent);
+  border-color: var(--primary);
+}
+.mode-choice:focus-within {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+.mode-choice strong {
+  display: block;
+  font-weight: 500;
+}
+.mode-choice small {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.mode-choice svg {
+  flex-shrink: 0;
+  color: var(--primary);
 }

@@ -7,6 +7,30 @@ export async function WorkspacePage({ mode }: { mode: "client" | "worker" }) {
   const actor = await requireWorkspace(mode);
   return (
     <>
+      <nav aria-label="Account mode" className="mode-switch">
+        {actor.profile?.client_enabled && (
+          <Link
+            href="/app/client"
+            aria-label={mode === "worker" ? "Switch to client" : "Client mode"}
+            aria-current={mode === "client" ? "page" : undefined}
+          >
+            Find help
+          </Link>
+        )}
+        {actor.profile?.worker_enabled && actor.profile.client_enabled ? (
+          <Link
+            href="/app/worker"
+            aria-label={mode === "client" ? "Switch to worker" : "Worker mode"}
+            aria-current={mode === "worker" ? "page" : undefined}
+          >
+            Offer services
+          </Link>
+        ) : mode === "worker" ? (
+          <Link href="/app/worker" aria-current="page">
+            Offer services
+          </Link>
+        ) : null}
+      </nav>
       <PageHeading
         eyebrow={`${mode === "client" ? "Client" : "Worker"} mode`}
         title={`Welcome, ${actor.profile?.display_name ?? "neighbour"}.`}
@@ -32,14 +56,7 @@ export async function WorkspacePage({ mode }: { mode: "client" | "worker" }) {
           <Link href="/app/settings" className={buttonVariants()}>
             Account settings
           </Link>
-          {(mode === "client" ? actor.profile?.worker_enabled : actor.profile?.client_enabled) ? (
-            <Link
-              href={mode === "client" ? "/app/worker" : "/app/client"}
-              className={buttonVariants({ variant: "outline" })}
-            >
-              Switch to {mode === "client" ? "worker" : "client"}
-            </Link>
-          ) : (
+          {!(mode === "client" ? actor.profile?.worker_enabled : actor.profile?.client_enabled) && (
             <Link href="/onboarding" className={buttonVariants({ variant: "outline" })}>
               Add {mode === "client" ? "worker" : "client"} mode
             </Link>
