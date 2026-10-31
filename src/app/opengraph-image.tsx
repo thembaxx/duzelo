@@ -10,7 +10,7 @@ export default function OpenGraphImage() {
         <div style={{display:'flex',alignItems:'center',justifyContent:'center',width:54,height:54,borderRadius:17,background:'#f6bc5c',color:'#173f35',marginRight:16,fontSize:35}}>D</div>Duzelo.
       </div>
       <div style={{display:'flex',flexDirection:'column'}}>
-        <div style={{fontSize:83,fontWeight:750,lineHeight:1.05,letterSpacing:'-4px'}}>A little help.<br/>A lot closer.</div>
+        <div style={{display:'flex',flexDirection:'column',fontSize:83,fontWeight:750,lineHeight:1.05,letterSpacing:'-4px'}}><span>A little help.</span><span>A lot closer.</span></div>
         <div style={{fontSize:22,color:'#c9dfd0',marginTop:25}}>A better kind of local, starting in Mkhondo.</div>
       </div>
       <div style={{display:'flex',justifyContent:'space-between',fontSize:16,color:'#c9dfd0'}}>
