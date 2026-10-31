@@ -96,6 +96,41 @@ create table public.worker_cards (
 );
 create index worker_cards_category_gin_idx on public.worker_cards using gin(category_ids);
 create index worker_cards_approx_gist_idx on public.worker_cards using gist(approx_marker);
+
+-- Category trade requirements and active service offerings are publication invariants.
+-- A later admin/service change must revoke an existing card until it is re-reviewed.
+create function private.invalidate_cards_on_service_change() returns trigger
+language plpgsql security invoker set search_path = '' as $$
+begin
+  if tg_op = 'DELETE' then
+    delete from public.worker_cards where worker_id = old.worker_id;
+    return old;
+  end if;
+  delete from public.worker_cards where worker_id = new.worker_id;
+  if old.worker_id is distinct from new.worker_id then
+    delete from public.worker_cards where worker_id = old.worker_id;
+  end if;
+  return new;
+end; $$;
+revoke execute on function private.invalidate_cards_on_service_change() from public, anon, authenticated;
+create trigger service_change_revalidate_worker_card
+  after update or delete on public.worker_services for each row
+  execute function private.invalidate_cards_on_service_change();
+
+create function private.invalidate_cards_on_category_change() returns trigger
+language plpgsql security invoker set search_path = '' as $$
+begin
+  if old.requires_trade_review is distinct from new.requires_trade_review
+    or old.active is distinct from new.active then
+    delete from public.worker_cards where old.id = any(category_ids);
+  end if;
+  return new;
+end; $$;
+revoke execute on function private.invalidate_cards_on_category_change() from public, anon, authenticated;
+create trigger category_change_revalidate_worker_cards
+  after update of requires_trade_review,active on public.service_categories for each row
+  execute function private.invalidate_cards_on_category_change();
+
 -- Fail closed if a privileged publisher attempts to expose an unapproved worker.
 -- This does not replace category-specific verification checks in server commands.
 create function private.enforce_approved_worker_card() returns trigger language plpgsql
