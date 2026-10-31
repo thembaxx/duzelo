@@ -33,6 +33,7 @@ export async function lockWorker(
   actor: Identity,
   workerId: string | null,
   staff = false,
+  targetPolicy: "active" | "retention" = "active",
 ) {
   // This is the same serialization point used by M01 publication/revocation.
   // Do not lock user_profiles here: M02 updates that row before its invalidator.
@@ -64,7 +65,10 @@ export async function lockWorker(
   if (staff) {
     const owner =
       await sql`select is_suspended from public.user_profiles where user_id=${worker.user_id}::uuid`;
-    if (worker.status === "suspended" || !owner.length || owner[0]!.is_suspended)
+    if (
+      !owner.length ||
+      (targetPolicy === "active" && (worker.status === "suspended" || owner[0]!.is_suspended))
+    )
       throw new Error("FORBIDDEN");
   }
   return worker;
@@ -76,13 +80,14 @@ export async function command<T extends Result>(
   staff: boolean,
   target: string | null,
   run: (sql: TransactionSql, worker: LockedWorker, actor: Identity) => Promise<T>,
+  targetPolicy: "active" | "retention" = "active",
 ) {
   if (!key || !/^[-a-zA-Z0-9_]{16,128}$/.test(key)) throw new Error("INVALID");
   const actor = await workerActor(staff);
   const hash = createHash("sha256").update(JSON.stringify({ action, input })).digest("hex");
   return database().begin(async (sql) => {
     await sql`select pg_advisory_xact_lock(hashtextextended(${actor.id + ":" + key},2))`;
-    const worker = await lockWorker(sql, actor, target, staff);
+    const worker = await lockWorker(sql, actor, target, staff, targetPolicy);
     const prior =
       await sql`select request_hash,status,response_json from private.command_idempotency where actor_id=${actor.id}::uuid and idempotency_key=${key}`;
     if (prior.length) {

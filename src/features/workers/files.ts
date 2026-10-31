@@ -158,12 +158,13 @@ export async function purgeExpired(input: unknown, key: string | null) {
     workerId,
     async (sql, w) => {
       const files =
-        await sql`update private.worker_assets set state='purge_pending',public_approved=false where worker_id=${w.id}::uuid and (retain_until<=now() or (state='pending' and created_at<now()-interval '1 hour')) and state in ('stored','pending','purge_pending') returning id`;
+        await sql`update private.worker_assets set state='purge_pending',public_approved=false where worker_id=${w.id}::uuid and (state='purge_pending' or retain_until<=now() or (state='pending' and created_at<now()-interval '1 hour')) and state in ('stored','pending','purge_pending') returning id`;
       const ids = files.map((f) => String(f.id));
       if (ids.length)
         await sql`update private.worker_verifications v set status='expired' where exists(select 1 from private.verification_documents d where d.verification_id=v.id and d.asset_id=any(${ids}::uuid[]))`;
       return { ids: JSON.stringify(ids) };
     },
+    "retention",
   );
   const ids = JSON.parse(intent.ids) as string[];
   if (!ids.length) return { message: "No expired files need removal." };
@@ -190,9 +191,17 @@ export async function purgeExpired(input: unknown, key: string | null) {
   const doneKey = createHash("sha256")
     .update("purge-finish:" + key)
     .digest("hex");
-  return command("purge-complete", { workerId, ids }, doneKey, true, workerId, async (sql, w) => {
-    await sql`update private.worker_assets set state='purged' where worker_id=${w.id}::uuid and id=any(${ids}::uuid[]) and state='purge_pending'`;
-    await sql`update private.verification_documents set deleted_at=now() where asset_id=any(${ids}::uuid[]) and deleted_at is null`;
-    return { message: "Expired private files removed." };
-  });
+  return command(
+    "purge-complete",
+    { workerId, ids },
+    doneKey,
+    true,
+    workerId,
+    async (sql, w) => {
+      await sql`update private.worker_assets set state='purged' where worker_id=${w.id}::uuid and id=any(${ids}::uuid[]) and state='purge_pending'`;
+      await sql`update private.verification_documents set deleted_at=now() where asset_id=any(${ids}::uuid[]) and deleted_at is null`;
+      return { message: "Expired private files removed." };
+    },
+    "retention",
+  );
 }

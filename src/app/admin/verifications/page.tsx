@@ -3,14 +3,15 @@ import { redirect } from "next/navigation";
 import { requireWorkspace } from "@/features/auth/guard";
 import { PageHeading } from "@/features/auth/page-heading";
 import { workerConfig } from "@/features/workers/config";
-import { reviewQueue } from "@/features/workers/queries";
+import { PurgeForm } from "@/features/workers/review-forms.client";
+import { reviewQueue, retentionQueue } from "@/features/workers/queries";
 export const dynamic = "force-dynamic";
 export default async function VerificationQueue() {
   const actor = await requireWorkspace("admin");
   if (!["owner", "verification"].includes(actor.adminRole ?? "")) redirect("/auth/forbidden");
   if (!workerConfig())
     return <PageHeading eyebrow="Manual review" title="Verification is not open yet." />;
-  const applications = await reviewQueue();
+  const [applications, expired] = await Promise.all([reviewQueue(), retentionQueue()]);
   return (
     <>
       <PageHeading eyebrow="Administrator · MFA required" title="Review with care.">
@@ -34,6 +35,21 @@ export default async function VerificationQueue() {
         </ul>
       ) : (
         <p>No applications are available for your review.</p>
+      )}
+      <h2>Files awaiting removal</h2>
+      <p>
+        Expired evidence and abandoned uploads remain removable when a worker account is paused.
+      </p>
+      {expired.length ? (
+        expired.map((item) => (
+          <section key={String(item.id)} className="worker-review-claim retention-case">
+            <h3>{String(item.display_name)}</h3>
+            <p>{Number(item.files)} files awaiting removal</p>
+            <PurgeForm workerId={String(item.id)} />
+          </section>
+        ))
+      ) : (
+        <p>No expired files are awaiting removal.</p>
       )}
     </>
   );

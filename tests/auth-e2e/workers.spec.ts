@@ -85,6 +85,13 @@ test("worker evidence, MFA review, publication, category denials and retention a
   await worker.screenshot({
     path: `docs/evidence/screenshots/worker-onboarding-${info.project.name}.png`,
   });
+  expect(await worker.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(
+    true,
+  );
+  await worker.getByRole("heading", { name: "Evidence and photos" }).scrollIntoViewIfNeeded();
+  await worker.screenshot({
+    path: `docs/evidence/screenshots/worker-evidence-${info.project.name}.png`,
+  });
   expect(
     (await new AxeBuilder({ page: worker }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze())
       .violations,
@@ -204,9 +211,15 @@ test("worker evidence, MFA review, publication, category denials and retention a
       )
     ).status(),
   ).toBe(409);
+  if (info.project.name === "mobile") {
+    await admin.setViewportSize({ width: 390, height: 844 });
+    await expect(admin.locator(".admin-mobile-notice")).toBeVisible();
+    await expect(admin.getByRole("button", { name: "Record decision" }).first()).toBeHidden();
+  }
   await admin.screenshot({
     path: `docs/evidence/screenshots/worker-review-${info.project.name}.png`,
   });
+  await admin.setViewportSize({ width: 1440, height: 900 });
   const [accessed] = await Promise.all([
     admin.waitForResponse((r) => r.url().endsWith("/api/v1/workers/document-access")),
     admin.getByRole("button", { name: "Request identity image", exact: true }).click(),
@@ -260,6 +273,9 @@ test("worker evidence, MFA review, publication, category denials and retention a
   const publicImage = await guest.request.get("/api/v1/workers/media/" + avatar.id);
   expect(publicImage.status()).toBe(200);
   expect((await sharp(await publicImage.body()).metadata()).exif).toBeUndefined();
+  expect(await guest.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(
+    true,
+  );
   await guest.screenshot({
     path: `docs/evidence/screenshots/worker-public-${info.project.name}.png`,
   });
@@ -302,6 +318,22 @@ test("worker evidence, MFA review, publication, category denials and retention a
   await sql`update public.user_profiles set is_suspended=true where user_id=${ownerId}::uuid`;
   await expectUnpublished();
   expect((await post(worker, "submit", { revision, consent: true })).status()).toBe(403);
+  const portfolio = assets.find((a) => a.kind === "portfolio")!;
+  await sql`update private.worker_assets set retain_until=now()-interval '1 second' where id=${portfolio.id}::uuid`;
+  await admin.goto("/admin/verifications");
+  const retentionCase = admin
+    .locator(".retention-case")
+    .filter({ has: admin.getByRole("heading", { name: company, exact: true }) });
+  await expect(retentionCase).toBeVisible();
+  await retentionCase.getByRole("checkbox").check();
+  const [removedPaused] = await Promise.all([
+    admin.waitForResponse((r) => r.url().endsWith("/api/v1/workers/purge-expired")),
+    retentionCase.getByRole("button", { name: "Remove expired private files" }).click(),
+  ]);
+  expect(removedPaused.status()).toBe(200);
+  expect(
+    (await sql`select state from private.worker_assets where id=${portfolio.id}::uuid`)[0]!.state,
+  ).toBe("purged");
   await sql`update public.user_profiles set is_suspended=false where user_id=${ownerId}::uuid`;
   expect(
     (

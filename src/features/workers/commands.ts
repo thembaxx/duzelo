@@ -82,7 +82,7 @@ export async function workerCommand(action: string, input: unknown, key: string 
       if (!files.length) throw new Error("INCOMPLETE");
       if (data.decision === "approved") {
         const unopened =
-          await sql`select a.id from private.verification_documents d join private.worker_assets a on a.id=d.asset_id where d.verification_id=${data.verificationId}::uuid and a.state='stored' and not exists(select 1 from private.audit_events e where e.actor_id=${actor.id}::uuid and e.action='worker.document-access' and e.resource_id=a.id and e.created_at>now()-interval '1 hour')`;
+          await sql`select a.id from private.verification_documents d join private.worker_assets a on a.id=d.asset_id where d.verification_id=${data.verificationId}::uuid and a.state='stored' and not exists(select 1 from private.audit_events e where e.actor_id=${actor.id}::uuid and e.action='worker.document-access' and e.resource_id=a.id and e.occurred_at>now()-interval '1 hour')`;
         if (unopened.length) throw new Error("REVIEW_REQUIRED");
       }
       await sql`update private.worker_verifications set status=${data.decision},reviewed_by=${actor.id}::uuid,reviewed_at=now(),expiry_date=${data.expiryDate}::date,worker_reason=${data.reason} where id=${data.verificationId}::uuid`;
@@ -116,7 +116,7 @@ export async function workerCommand(action: string, input: unknown, key: string 
       const eligible = await sql`select private.eligible_worker_categories(${w.id}::uuid) as ids`;
       if (!eligible[0]!.ids.length) throw new Error("INCOMPLETE");
       const unopened =
-        await sql`select a.id from private.worker_assets a where a.worker_id=${w.id}::uuid and a.application_revision=${w.revision} and a.kind in ('avatar','portfolio') and a.state='stored' and a.retain_until>now() and not exists(select 1 from private.audit_events e where e.actor_id=${actor.id}::uuid and e.action='worker.document-access' and e.resource_id=a.id and e.created_at>now()-interval '1 hour')`;
+        await sql`select a.id from private.worker_assets a where a.worker_id=${w.id}::uuid and a.application_revision=${w.revision} and a.kind in ('avatar','portfolio') and a.state='stored' and a.retain_until>now() and not exists(select 1 from private.audit_events e where e.actor_id=${actor.id}::uuid and e.action='worker.document-access' and e.resource_id=a.id and e.occurred_at>now()-interval '1 hour')`;
       if (unopened.length) throw new Error("REVIEW_REQUIRED");
       await sql`update private.worker_assets set public_approved=true where worker_id=${w.id}::uuid and application_revision=${w.revision} and kind in ('avatar','portfolio') and state='stored' and retain_until>now()`;
       await sql`update private.worker_applications set state='reviewed',updated_at=now() where worker_id=${w.id}::uuid`;

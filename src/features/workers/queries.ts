@@ -48,6 +48,10 @@ export async function reviewQueue() {
   const actor = await workerActor(true);
   return database()`select w.id,w.display_name,a.revision,a.state,a.submitted_at from private.worker_applications a join public.worker_profiles w on w.id=a.worker_id join public.user_profiles u on u.user_id=w.user_id where a.state in ('pending_review','needs_changes','reviewed') and not u.is_suspended and w.status<>'suspended' and w.user_id<>${actor.id}::uuid order by (a.state='pending_review') desc,a.submitted_at nulls last limit 100`;
 }
+export async function retentionQueue() {
+  const actor = await workerActor(true);
+  return database()`select w.id,w.display_name,count(*)::int as files from private.worker_assets a join public.worker_profiles w on w.id=a.worker_id where w.user_id<>${actor.id}::uuid and a.state in ('stored','pending','purge_pending') and (a.state='purge_pending' or a.retain_until<=now() or (a.state='pending' and a.created_at<now()-interval '1 hour')) group by w.id,w.display_name order by min(a.retain_until) limit 100`;
+}
 export async function reviewApplication(workerId: string) {
   z.guid().parse(workerId);
   const actor = await workerActor(true);
