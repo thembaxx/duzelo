@@ -97,7 +97,7 @@ export async function uploadWorkerImage(input: unknown, file: File, key: string 
   return { message: "Image checked and stored privately.", assetId: String(asset.id) };
 }
 export async function documentAccess(input: unknown, key: string | null) {
-  const { assetId } = z.object({ assetId: z.uuid() }).strict().parse(input);
+  const { assetId } = z.object({ assetId: z.guid() }).strict().parse(input);
   const config = workerConfig();
   if (!config) throw new Error("UNAVAILABLE");
   const actor = await getVerifiedIdentity();
@@ -138,7 +138,7 @@ export async function documentAccess(input: unknown, key: string | null) {
 }
 export async function purgeExpired(input: unknown, key: string | null) {
   key = keySchema.parse(key);
-  const { workerId } = z.object({ workerId: z.uuid() }).strict().parse(input);
+  const { workerId } = z.object({ workerId: z.guid() }).strict().parse(input);
   const stageKey = createHash("sha256")
     .update("purge-stage:" + key)
     .digest("hex");

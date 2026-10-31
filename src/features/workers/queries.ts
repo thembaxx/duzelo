@@ -48,7 +48,7 @@ export async function reviewQueue() {
   return database()`select w.id,w.display_name,a.revision,a.state,a.submitted_at from private.worker_applications a join public.worker_profiles w on w.id=a.worker_id join public.user_profiles u on u.user_id=w.user_id where a.state in ('pending_review','needs_changes','reviewed') and not u.is_suspended and w.status<>'suspended' and w.user_id<>${actor.id}::uuid order by a.submitted_at nulls last limit 100`;
 }
 export async function reviewApplication(workerId: string) {
-  z.uuid().parse(workerId);
+  z.guid().parse(workerId);
   const actor = await workerActor(true);
   const sql = database();
   const rows =
@@ -125,7 +125,7 @@ export async function publicWorkers(slug?: string): Promise<PublicWorker[]> {
   return result;
 }
 export async function publicAsset(id: string) {
-  if (!workerConfig() || !z.uuid().safeParse(id).success) return null;
+  if (!workerConfig() || !z.guid().safeParse(id).success) return null;
   const rows =
     await database()`select a.storage_path from private.worker_assets a join private.worker_applications p on p.worker_id=a.worker_id and p.revision=a.application_revision and p.state='reviewed' join public.worker_cards c on c.worker_id=a.worker_id where a.id=${id}::uuid and a.state='stored' and a.public_approved and a.kind in ('avatar','portfolio') and a.retain_until>now() and c.safe_until>now() and cardinality(private.eligible_worker_categories(c.worker_id))>0`;
   return rows[0] ? String(rows[0].storage_path) : null;

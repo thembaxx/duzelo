@@ -29,7 +29,7 @@ const money = z.string().transform((v, ctx) => {
 });
 const service = z
   .object({
-    categoryId: z.uuid(),
+    categoryId: z.guid(),
     title: publicText(3, 80),
     description: publicText(5, 350),
     pricing: z.enum(["fixed", "from", "quote"]),
@@ -55,11 +55,11 @@ export const workerDraftSchema = z
     kind: z.enum(["individual", "business"]),
     businessName: publicText(0, 80),
     registrationNumber: z.string().trim().max(60),
-    areaId: z.uuid(),
+    areaId: z.guid(),
     latitude: z.number().min(-35).max(-22),
     longitude: z.number().min(16).max(33),
     radiusKm: z.number().int().min(1).max(150),
-    townIds: z.array(z.uuid()).min(1).max(20),
+    townIds: z.array(z.guid()).min(1).max(20),
     travelFee: money,
     services: z.array(service).min(1).max(8),
   })
@@ -74,7 +74,7 @@ export type WorkerDraft = z.input<typeof workerDraftSchema>;
 export const assetSchema = z
   .object({
     kind: z.enum(["identity", "business", "trade", "avatar", "portfolio"]),
-    categoryId: z.uuid().nullable(),
+    categoryId: z.guid().nullable(),
     caption: publicText(0, 120),
     consent: z.literal(true),
   })
@@ -88,8 +88,8 @@ export const submitSchema = z
   .strict();
 export const decisionSchema = z
   .object({
-    workerId: z.uuid(),
-    verificationId: z.uuid(),
+    workerId: z.guid(),
+    verificationId: z.guid(),
     revision: z.number().int().positive(),
     decision: z.enum(["approved", "rejected", "needs_changes"]),
     reason: z.string().trim().min(10).max(500),
@@ -99,7 +99,7 @@ export const decisionSchema = z
   .strict();
 export const publishSchema = z
   .object({
-    workerId: z.uuid(),
+    workerId: z.guid(),
     revision: z.number().int().positive(),
     publicContentReviewed: z.literal(true),
     confirmed: z.literal(true),
