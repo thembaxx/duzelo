@@ -246,14 +246,14 @@ create index worker_verifications_worker_idx on private.worker_verifications(wor
 -- A verification revocation immediately removes the previously published card.
 -- Expiration as time passes requires a later scheduled revalidation job.
 create function private.unpublish_revoked_verification() returns trigger
-language plpgsql security invoker set search_path = '' as $
+language plpgsql security invoker set search_path = '' as $$
 begin
   if old.status='approved' and
     (new.status <> 'approved' or new.expiry_date is distinct from old.expiry_date) then
     delete from public.worker_cards where worker_id=new.worker_id;
   end if;
   return new;
-end; $;
+end; $$;
 revoke execute on function private.unpublish_revoked_verification() from public, anon, authenticated;
 create trigger approved_verification_changed
   after update of status, expiry_date on private.worker_verifications
@@ -347,7 +347,7 @@ create index job_media_job_idx on public.job_media(job_id);
 
 -- Prevent cross-account address reuse and forged site inspection grants.
 create function private.enforce_job_location_owner() returns trigger
-language plpgsql security invoker set search_path = '' as $
+language plpgsql security invoker set search_path = '' as $$
 begin
   if new.address_id is not null and not exists (
     select 1 from public.job_requests j join private.client_addresses a
@@ -356,14 +356,14 @@ begin
     raise exception 'Job address must belong to its client';
   end if;
   return new;
-end; $;
+end; $$;
 revoke execute on function private.enforce_job_location_owner() from public, anon, authenticated;
 create trigger job_location_address_owner
   before insert or update on private.job_locations
   for each row execute function private.enforce_job_location_owner();
 
 create function private.enforce_inspection_grant_actor() returns trigger
-language plpgsql security invoker set search_path = '' as $
+language plpgsql security invoker set search_path = '' as $$
 begin
   if not exists (
     select 1 from public.job_requests j
@@ -380,7 +380,7 @@ begin
     raise exception 'Inspection access must be approved by the job client for an eligible worker';
   end if;
   return new;
-end; $;
+end; $$;
 revoke execute on function private.enforce_inspection_grant_actor() from public, anon, authenticated;
 create trigger inspection_grant_auth
   before insert or update on private.inspection_access_grants
@@ -617,10 +617,10 @@ create index audit_events_resource_idx on private.audit_events(resource_kind,res
 -- Audit and booking timelines are immutable, including for privileged application roles.
 -- Database owner can still perform deliberate maintenance through a reviewed migration.
 create function private.reject_immutable_change() returns trigger
-language plpgsql security invoker set search_path = '' as $
+language plpgsql security invoker set search_path = '' as $$
 begin
   raise exception 'Append-only event cannot be updated or deleted';
-end; $;
+end; $$;
 revoke execute on function private.reject_immutable_change() from public, anon, authenticated;
 create trigger audit_events_immutable
   before update or delete on private.audit_events
