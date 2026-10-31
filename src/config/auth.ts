@@ -70,4 +70,11 @@ export function readAuthConfig() {
     secure: urls[2]?.protocol === "https:",
   };
 }
-export const localTestPhones = ["+27820000001", "+27820000002", "+27820000003"] as const;
+export const localTestPhones = [
+  "+27820000001",
+  "+27820000002",
+  "+27820000003",
+  "+27820000004",
+  "+27820000005",
+  "+27820000006",
+] as const;

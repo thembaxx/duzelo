@@ -20,6 +20,8 @@ const scan = spawnSync("node", ["scripts/check-secrets.mjs"], {
   stdio: "inherit",
 });
 if (scan.status) process.exit(scan.status);
+const storageScan=spawnSync('node',['scripts/check-secrets.mjs'],{env:{...env,SECURITY_SCAN_CANARY:env.SUPABASE_SECRET_KEY},stdio:'inherit'});
+if(storageScan.status)process.exit(storageScan.status);
 const result = spawnSync(
   "node_modules/.bin/playwright",
   ["test", "--config", "playwright.auth.config.ts"],

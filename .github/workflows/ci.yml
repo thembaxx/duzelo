@@ -2,7 +2,7 @@ name: Application checks
 on:
   pull_request:
   push:
-    branches: [main, feat/m02-integrated-accounts]
+    branches: [main, feat/milestone-03-workers]
 permissions:
   contents: read
 concurrency:
@@ -77,5 +77,7 @@ jobs:
         if: always()
         with:
           name: auth-ui-screenshots
-          path: docs/evidence/screenshots/auth-*.png
+          path: |
+            docs/evidence/screenshots/auth-*.png
+            docs/evidence/screenshots/worker-*.png
           retention-days: 14

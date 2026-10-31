@@ -7,6 +7,7 @@ export interface Identity {
   sessionId: string;
   aal2: boolean;
   admin: boolean;
+  adminRole: string | null;
   hasVerifiedEmail: boolean;
   profile: {
     display_name: string;
@@ -35,7 +36,7 @@ export async function getVerifiedIdentity(): Promise<Identity | null> {
   const profiles =
     await sql`select display_name,client_enabled,worker_enabled,is_suspended,onboarding_completed_at,email_notifications,in_app_notifications from public.user_profiles where user_id=${data.user.id}::uuid`;
   const staff =
-    await sql`select user_id from private.admin_members where user_id=${data.user.id}::uuid and active`;
+    await sql`select user_id,admin_role from private.admin_members where user_id=${data.user.id}::uuid and active`;
   const factors =
     claims.claims.aal === "aal2"
       ? await sql`select id from auth.mfa_factors where user_id=${data.user.id}::uuid and status='verified'`
@@ -47,6 +48,7 @@ export async function getVerifiedIdentity(): Promise<Identity | null> {
     sessionId: claims.claims.session_id,
     aal2: claims.claims.aal === "aal2" && factors.length > 0,
     admin: staff.length > 0,
+    adminRole: staff[0]?.admin_role ?? null,
     hasVerifiedEmail: Boolean(data.user.email && data.user.email_confirmed_at),
     profile: (profiles[0] ?? null) as Identity["profile"],
     workerStatus: workers[0]?.status ?? null,
