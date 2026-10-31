@@ -75,7 +75,7 @@ for (const match of [...schema.matchAll(/create function private\.([a-z_]+)\(\) 
     `Broken PL/pgSQL delimiter in ${match[1]}`);
 }
 const functions = [...schema.matchAll(/create function private\.([a-z_]+)\(\) returns trigger/gi)];
-assert.equal(functions.length, 9, 'Verify every trigger function, including copied blueprints');
+assert.equal(functions.length, 11, 'Verify every trigger function, including invalidation gates');
 
 console.log(`DB baseline static guards passed: ${tables.length} tables, ${functions.length} functions, policies and fixtures checked.`);
 console.log('NOTE: This is NOT a database migration, pgTAP or PostGIS execution test.');
