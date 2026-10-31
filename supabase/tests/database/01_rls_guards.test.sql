@@ -69,7 +69,7 @@ insert into private.client_addresses(id,owner_id,label,street_address,town,point
  'Test','Fictional Lane','Fictional Town',
  extensions.ST_SetSRID(extensions.ST_MakePoint(30.807,-27.005),4326)::extensions.geography);
 
-select plan(49);
+select plan(52);
 select has_table('public','worker_cards','Public sanitized read model exists');
 select has_table('private','client_addresses','Exact addresses are in private schema');
 select has_table('private','worker_coverage','Worker home locations are private');
@@ -129,6 +129,26 @@ select throws_ok('select count(*) from private.payment_intents','42501',null,'Un
 select set_config('request.jwt.claim.sub','44444444-4444-4444-8444-444444444444',true);
 select throws_ok('select count(*) from private.admin_members','42501',null,'Admin membership alone cannot bypass API grants');
 reset role;
+
+-- A status flag alone is insufficient: credentials and trade category review must exist.
+insert into public.worker_services(worker_id,category_id,title,price_model)
+select 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',id,'Fixture cleaning','quote'
+from public.service_categories where slug='cleaning';
+select throws_ok(
+ 'insert into public.worker_cards(worker_id,slug,public_name,town_label,category_ids) select ''cccccccc-cccc-4ccc-8ccc-cccccccccccc'',''unverified-worker'',''Unverified'',''Fictional Town'',array[id] from public.service_categories where slug=''cleaning''',
+ 'P0001',null,'Approved worker status without identity review cannot publish a card');
+insert into private.worker_verifications(worker_id,kind,status,reviewed_by,reviewed_at)
+values ('cccccccc-cccc-4ccc-8ccc-cccccccccccc','identity','approved',
+ '44444444-4444-4444-8444-444444444444',now());
+insert into public.worker_cards(worker_id,slug,public_name,town_label,category_ids)
+select 'cccccccc-cccc-4ccc-8ccc-cccccccccccc','fixture-unrelated','Fixture Unrelated','Fictional Town',array[id]
+from public.service_categories where slug='cleaning';
+select is((select count(*) from public.worker_cards),2::bigint,
+ 'Both independently approved identities can publish eligible cards');
+-- Tightening a trade category after publication must fail closed, not preserve the badge.
+update public.service_categories set requires_trade_review=true where slug='cleaning';
+select is((select count(*) from public.worker_cards),1::bigint,
+ 'New trade requirements automatically unpublish cards without review');
 
 -- Revoke verified worker status after fixture setup: no stale public cards or job preview.
 update public.user_profiles
