@@ -243,6 +243,37 @@ create table private.worker_verifications (
   created_at timestamptz not null default now()
 );
 create index worker_verifications_worker_idx on private.worker_verifications(worker_id);
+-- Promote to approved only after a real reviewed identity record.
+create function private.validate_worker_approval() returns trigger
+language plpgsql security invoker set search_path = '' as $$
+begin
+  if new.status='approved' and old.status is distinct from new.status then
+    if not exists (
+      select 1 from private.worker_verifications v
+      where v.worker_id=new.id and v.kind='identity' and v.status='approved'
+        and (v.expiry_date is null or v.expiry_date>=current_date)
+    ) then
+      raise exception 'Worker approval requires a current approved identity record';
+    end if;
+    if exists (
+      select 1 from public.worker_services svc
+      join public.service_categories cat on cat.id=svc.category_id and cat.requires_trade_review
+      where svc.worker_id=new.id and svc.active and not exists (
+        select 1 from private.worker_verifications v
+        where v.worker_id=new.id and v.kind='trade' and v.category_id=cat.id
+          and v.status='approved' and (v.expiry_date is null or v.expiry_date>=current_date)
+      )
+    ) then
+      raise exception 'Worker approval requires current category-specific trade evidence';
+    end if;
+  end if;
+  return new;
+end; $$;
+revoke execute on function private.validate_worker_approval() from public, anon, authenticated;
+create trigger worker_approval_requires_manual_evidence
+  before update of status on public.worker_profiles
+  for each row execute function private.validate_worker_approval();
+
 -- A verification revocation immediately removes the previously published card.
 -- Expiration as time passes requires a later scheduled revalidation job.
 create function private.unpublish_revoked_verification() returns trigger
@@ -250,6 +281,7 @@ language plpgsql security invoker set search_path = '' as $$
 begin
   if old.status='approved' and
     (new.status <> 'approved' or new.expiry_date is distinct from old.expiry_date) then
+    update public.worker_profiles set status='needs_changes' where id=new.worker_id and status='approved';
     delete from public.worker_cards where worker_id=new.worker_id;
   end if;
   return new;
