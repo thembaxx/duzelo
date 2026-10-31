@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 async function command(action: string, body: unknown) {
   const response = await fetch(`/api/v1/auth/${action}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() },
     body: JSON.stringify(body),
   });
   const result = await response.json();

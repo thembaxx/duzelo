@@ -3,7 +3,13 @@ import { authCommand } from "@/features/auth/commands";
 import { json, readMutation } from "@/lib/security/http";
 export async function POST(request: Request, { params }: { params: Promise<{ action: string }> }) {
   try {
-    return json(await authCommand((await params).action, await readMutation(request)));
+    return json(
+      await authCommand(
+        (await params).action,
+        await readMutation(request),
+        request.headers.get("idempotency-key"),
+      ),
+    );
   } catch (error) {
     const code =
       error instanceof ZodError
@@ -18,6 +24,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ act
       LIMITED: [429, "Please wait before trying again."],
       CODE: [400, "The code could not be verified. Check it or try again later."],
       CAPTCHA: [422, "Complete the security check before requesting a code."],
+      CONFLICT: [409, "This request key was already used for a different action."],
       NOT_FOUND: [404, "This action is not available."],
     };
     const [status, message] =

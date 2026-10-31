@@ -1,4 +1,5 @@
 import "server-only";
+import { createHash } from "node:crypto";
 import { z } from "zod";
 import { createAuthClient } from "@/lib/supabase/server";
 import { database } from "@/lib/db/server";
@@ -13,7 +14,11 @@ async function actor() {
   if (identity.profile?.is_suspended) throw new Error("FORBIDDEN");
   return identity;
 }
-export async function authCommand(action: string, input: unknown) {
+export async function authCommand(
+  action: string,
+  input: unknown,
+  idempotencyKey: string | null = null,
+) {
   const config = readAuthConfig();
   if (!config) throw new Error("UNAVAILABLE");
   if (action === "otp") {
@@ -55,11 +60,26 @@ export async function authCommand(action: string, input: unknown) {
     return { redirect: "/auth/sign-in" };
   }
   const identity = await actor();
+  const commandHash = createHash("sha256").update(JSON.stringify({ action, input })).digest("hex");
+  if (
+    ["onboard", "preferences"].includes(action) &&
+    (!idempotencyKey || !/^[-a-zA-Z0-9_]{16,128}$/.test(idempotencyKey))
+  )
+    throw new Error("INVALID");
+
   if (action === "onboard") {
     const data = profileSchema.parse(input);
     const clientEnabled = data.mode !== "worker",
       workerEnabled = data.mode !== "client";
     await database().begin(async (sql) => {
+      await sql`select pg_advisory_xact_lock(hashtextextended(${identity.id + ":" + idempotencyKey},2))`;
+      const previous =
+        await sql`select request_hash from private.command_idempotency where actor_id=${identity.id}::uuid and idempotency_key=${idempotencyKey!}`;
+      if (previous.length) {
+        if (previous[0]!.request_hash !== commandHash) throw new Error("CONFLICT");
+        return;
+      }
+      await sql`insert into private.command_idempotency(actor_id,idempotency_key,request_hash,status,expires_at) values (${identity.id}::uuid,${idempotencyKey!},${commandHash},'completed',now()+interval '1 day')`;
       const session =
         await sql`select id from auth.sessions where id=${identity.sessionId}::uuid and user_id=${identity.id}::uuid and (not_after is null or not_after>now()) for share`;
       if (!session.length) throw new Error("UNAUTHORIZED");
@@ -79,6 +99,14 @@ export async function authCommand(action: string, input: unknown) {
     const data = preferencesSchema.parse(input);
     if (!identity.profile?.onboarding_completed_at) throw new Error("FORBIDDEN");
     await database().begin(async (sql) => {
+      await sql`select pg_advisory_xact_lock(hashtextextended(${identity.id + ":" + idempotencyKey},2))`;
+      const previous =
+        await sql`select request_hash from private.command_idempotency where actor_id=${identity.id}::uuid and idempotency_key=${idempotencyKey!}`;
+      if (previous.length) {
+        if (previous[0]!.request_hash !== commandHash) throw new Error("CONFLICT");
+        return;
+      }
+      await sql`insert into private.command_idempotency(actor_id,idempotency_key,request_hash,status,expires_at) values (${identity.id}::uuid,${idempotencyKey!},${commandHash},'completed',now()+interval '1 day')`;
       const session =
         await sql`select id from auth.sessions where id=${identity.sessionId}::uuid and user_id=${identity.id}::uuid and (not_after is null or not_after>now()) for share`;
       if (!session.length) throw new Error("UNAUTHORIZED");

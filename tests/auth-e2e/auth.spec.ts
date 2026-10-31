@@ -11,7 +11,17 @@ async function signIn(page: Page, phone = "0820000001") {
   await page.getByLabel("South African mobile number").fill(phone);
   await page.getByRole("button", { name: "Send verification code" }).click();
   await page.getByLabel("Six-digit verification code").fill("123456");
-  await page.getByRole("button", { name: "Verify and continue" }).click();
+  const [verified] = await Promise.all([
+    page.waitForResponse(
+      (response) =>
+        response.url().endsWith("/api/v1/auth/verify") && response.request().method() === "POST",
+    ),
+    page.getByRole("button", { name: "Verify and continue" }).click(),
+  ]);
+  expect(
+    verified.status(),
+    "Native OTP verification must succeed before inspecting workspace",
+  ).toBe(200);
   await expect(page).toHaveURL(/onboarding|app\//);
 }
 async function userId(phone = "27820000001") {
@@ -48,7 +58,7 @@ test("real local OTP, both modes, persistent settings, MFA and revoked sessions"
   await page.getByRole("button", { name: "Send verification code" }).click();
   await page.getByLabel("Six-digit verification code").fill("000000");
   await page.getByRole("button", { name: "Verify and continue" }).click();
-  await expect(page.getByRole("alert")).toContainText("could not be verified");
+  await expect(page.locator(".form-error")).toContainText("could not be verified");
   expect((await post(page, "otp", { phone: "0820000001" })).status()).toBe(429);
   await page.getByLabel("Six-digit verification code").fill("123456");
   await page.getByRole("button", { name: "Verify and continue" }).click();
@@ -152,8 +162,8 @@ test("cross-origin requests, bounded verification, no signup authority escalatio
     );
   expect((await post(page, "verify", { phone: "0820000002", code: "123456" })).status()).toBe(429);
   await sql`delete from private.auth_rate_limits`;
-  await signIn(page, "0820000002");
-  const id = await userId("27820000002");
+  await signIn(page, "0820000003");
+  const id = await userId("27820000003");
   await sql`delete from auth.sessions where user_id=${id}::uuid`;
   expect(
     (
