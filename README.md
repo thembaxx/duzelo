@@ -49,6 +49,16 @@ To target an existing accessible deployment, set `E2E_BASE_URL` to its base URL.
 
 No Supabase, payments, identity documents, storage buckets, geocoding keys or private user data are used in this milestone. Site indexing is disabled until launch.
 
+## Implemented in Milestone 01 — isolated database foundation
+
+- **Reviewed Supabase PostgreSQL 17 / PostGIS migration**: [`supabase/migrations/20261031114309_foundation.sql`](supabase/migrations/20261031114309_foundation.sql), plus local-only seed, [pgTAP access/integrity/geospatial tests](supabase/tests), verified worker-card publication with a concurrency harness, SQL lint and query-plan checks.
+- Exact addresses, worker base points, verification documents, audit and payment records belong to a **non-exposed `private` schema**. The exposed read models use RLS and deny anonymous/authenticated direct writes.
+- **Integrated PR [#7](https://github.com/thembaxx/duzelo/pull/7) was merged 31 October 2026**; merge commit `03dc10c06bf6e28712043f71dac53b48e0fddd2e`. [GitHub Actions run 41220272585](https://github.com/thembaxx/duzelo/actions/runs/41220272585) independently passed two fresh local database resets, **80 pgTAP assertions**, two concurrency races, Supabase advisors, SQL lint, spatial EXPLAIN, application checks and **two desktop/mobile Playwright E2E smoke tests**.
+- This is a **local isolated database implementation**, not a deployed Supabase instance. As of this verification, no dedicated hosted Duzelo Supabase project has been created or linked. Do not use the separate `tally-sync` or `subzero` projects. Organization choice and any quoted project cost require confirmation before hosting.
+- Phone OTP, production auth, private storage, verified worker onboarding, booking and payments remain disabled and are later milestones. A local fixture passing verification is not a real approved worker.
+
+For local database verification, follow [`docs/database/M01_VERIFICATION.md`](docs/database/M01_VERIFICATION.md) and the isolated `npm run db:*` scripts. Do not run schema resets against any linked, existing or production project.
+
 ## Product specifications
 
 The files below remain authoritative for later milestones:
