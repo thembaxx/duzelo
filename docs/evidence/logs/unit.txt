@@ -1,0 +1,16 @@
+$ npm test
+
+> duzelo@0.0.0 test
+> vitest run
+
+
+ RUN  v5.0.5 /workspace/duzelo
+
+
+ Test Files  4 passed (4)
+      Tests  10 passed (10)
+   Start at  11:36:41
+   Duration  605ms (transform 44%, import 40%, tests 10%, worker 6%)
+
+    Isolate  4 workers spawned · ~88ms startup each (spawn + environment, per file)
+             at least ~264ms faster with isolate: false — reuses workers across files instead of one per file

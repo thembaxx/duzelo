@@ -1,0 +1,20 @@
+{
+  "semi": true,
+  "singleQuote": false,
+  "printWidth": 100,
+  "ignorePatterns": [
+    "00_START_HERE_CODEX_PROMPT.md",
+    "01_PRODUCT_REQUIREMENTS.md",
+    "04_CODEX_MILESTONES.md",
+    "05_VALIDATION_AND_REFERENCES.md",
+    "AGENTS.md",
+    "MANIFEST.json",
+    "docs/build-pack-readme.md",
+    "docs/evidence/screenshots/**",
+    "package-lock.json",
+    "node_modules/**",
+    ".next/**",
+    "test-results/**",
+    "playwright-report/**"
+  ]
+}

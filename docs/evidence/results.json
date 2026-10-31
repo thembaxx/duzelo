@@ -1,0 +1,56 @@
+[
+  {
+    "check": "install",
+    "command": "npm ci",
+    "exit": 0,
+    "seconds": 11.41
+  },
+  {
+    "check": "format",
+    "command": "npm run format:check",
+    "exit": 0,
+    "seconds": 0.29
+  },
+  {
+    "check": "lint",
+    "command": "npm run lint",
+    "exit": 0,
+    "seconds": 0.28
+  },
+  {
+    "check": "typecheck",
+    "command": "npm run typecheck",
+    "exit": 0,
+    "seconds": 0.98
+  },
+  {
+    "check": "unit",
+    "command": "npm test",
+    "exit": 0,
+    "seconds": 1.0
+  },
+  {
+    "check": "audit",
+    "command": "npm audit --audit-level=high",
+    "exit": 0,
+    "seconds": 0.45
+  },
+  {
+    "check": "build",
+    "command": "npm run build",
+    "exit": 0,
+    "seconds": 2.68
+  },
+  {
+    "check": "secret-scan",
+    "command": "npm run security:check",
+    "exit": 0,
+    "seconds": 0.16
+  },
+  {
+    "check": "desktop-mobile",
+    "command": "npm run test:e2e",
+    "exit": 0,
+    "seconds": 14.18
+  }
+]
