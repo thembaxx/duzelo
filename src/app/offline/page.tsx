@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import type { Metadata } from 'next';
 import { ArrowClockwise, WifiSlash, ArrowLeft } from '@phosphor-icons/react/dist/ssr';
 
@@ -12,8 +11,8 @@ export default function OfflinePage() {
       <h1 className="inner-heading">A little offline.<br/><em>Still close to home.</em></h1>
       <p className="inner-lede">There’s no connection right now. Public pages saved earlier may still be available. Private information, sign-in and bookings are never served from an offline cache.</p>
       <div className="offline-actions">
-        <Link href="/" className="button button-primary"><ArrowClockwise size={18} aria-hidden="true"/> Try again</Link>
-        <Link href="/services" className="button button-outline"><ArrowLeft size={18} aria-hidden="true"/> Saved categories</Link>
+        <a href="/" className="button button-primary"><ArrowClockwise size={18} aria-hidden="true"/> Try again</a>
+        <a href="/services" className="button button-outline"><ArrowLeft size={18} aria-hidden="true"/> Saved categories</Link>
       </div>
     </section>
   );
