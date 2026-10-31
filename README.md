@@ -1,32 +1,69 @@
-# Duzelo — Codex build pack
+# Duzelo
 
-Status: specification and implementation blueprint; **not a deployed application**, production-ready migration, or legal certification.
+**Good help, close to home.**
 
-**Design update (2026-10-31):** Light/Dark/System theme support and accessible motion are confirmed Milestone 00 build requirements. See [`docs/design/MOTION_AND_THEMES.md`](docs/design/MOTION_AND_THEMES.md) for the implementation contract, UX choreography and test gates. These changes are specifications, **not running UI features**.
+Duzelo is an early-stage, mobile-first local-services marketplace for South Africa, starting with a Piet Retief/Mkhondo pilot. This repository now includes a **runnable Next.js 16 / React 19 prelaunch foundation**, along with the full product and engineering specifications.
 
-**Duzelo** is a working name only. Complete CIPC trademark, domain, marketplace name and app-store clearance before making it permanent. The visual direction is provisional until the founder supplies reference photos.
+> **Not yet a live marketplace:** Accounts, worker verification, worker matching, quotes, bookings, real messaging, location sharing, admin actions and payments are disabled. No worker has been verified or bookable through this implementation. Duzelo is a provisional brand pending clearance.
 
-Read in this order:
+## Run locally
 
-1. `01_PRODUCT_REQUIREMENTS.md` — complete PRD, experience, architecture, domain flows, security, tests, operations, launch.
-2. `02_SCHEMA_BLUEPRINT.sql` — initial PostgreSQL/PostGIS schema **blueprint**. Must be reviewed, completed for production, applied to a local Supabase instance and migration-tested before deployment. Not a substitute for access-control tests.
-3. `03_RLS_BLUEPRINT.sql` — default-deny / read-only client RLS examples. Requires schema blueprint first. Execute only after privilege review; no client-side direct writes. All financial records remain in private schema, fetched through authorized server DTOs.
-4. `04_CODEX_MILESTONES.md` — ordered, copy-ready Codex tasks with acceptance gates.
-5. `.env.example` — environment contract; no real credentials.
+Prerequisites: Node.js 24 and npm 10 or later.
 
-## Foundational constraints
+```sh
+npm ci
+npm run dev
+```
 
-- Single Supabase auth identity may be client, worker, or both.
-- All privileged writes go through a server command layer; never trust a role or verification status from a browser. `service_role` must never be shipped to the client. The application is responsible for per-request authorization before using privileged SQL.
-- Personal addresses, exact worker base locations, identity documents, payout details and raw provider payloads must **not** be returned via public endpoints.
-- Online checkout uses an abstraction and is disabled until the South African merchant / settlement / refund workflow is independently validated. No escrow promises.
-- No fabricated reviews or qualifications; no auto-verified workers.
-- Every milestone must pass relevant lint, typecheck, tests, production build and negative authorization checks.
+Open `http://localhost:3000`.
 
-Generated 2026-10-31.
+### Quality commands
 
-6. `AGENTS.md` — drop-in permanent Codex guardrails for the repository.
-7. `00_START_HERE_CODEX_PROMPT.md` — single starter prompt for Codex.
+```sh
+npm run lint
+npm run typecheck
+npm test
+npm run build
+npm run check
+```
 
-**IMPORTANT:** The SQL files are migration design references, not tested migrations; PostgreSQL syntax parsing and migration execution could not be run in the current container. Codex must create a fresh Supabase CLI migration and test it against an isolated local database. The pack contains no deployed app or live service accounts.
-8. `05_VALIDATION_AND_REFERENCES.md` — what was checked, what remains unverified and external documentation.
+The optional browser smoke suite runs against a separate local or authorized deployment after installing Playwright's Chromium browser:
+
+```sh
+npx playwright install chromium
+npm run build && npm run start
+# In another terminal:
+npm run test:e2e
+```
+
+To target an existing accessible deployment, set `E2E_BASE_URL` to its base URL. Tests do not bypass Vercel deployment protection.
+
+## Implemented in Milestone 00
+
+- Responsive home, service categories and detail pages, working category search, How it works, Trust and safety, appearance settings, prelaunch sign-in information and 404.
+- Light, Dark and System themes; persisted choice, OS system following and semantic CSS tokens using `next-themes`.
+- Accessible header/mobile navigation, focus styles, reduced-motion support, subtle CSS state transitions and a scoped GSAP hero entrance.
+- Server-side redirects of `/app/client`, `/app/worker`, `/app/settings` and `/admin` until real Supabase session and role verification exists. **Redirects are not a replacement for secure backend authorization.**
+- npm lockfile, Tailwind/PostCSS, TypeScript, Oxlint/Oxfmt, Vitest unit tests, opt-in Playwright browser smoke and manually triggered GitHub workflow.
+- PWA manifest and provisional SVG icon. **Offline caching and PNG icon support are not complete**; do not call this an installable/offline-ready PWA.
+
+No Supabase, payments, identity documents, storage buckets, geocoding keys or private user data are used in this milestone. Site indexing is disabled until launch.
+
+## Product specifications
+
+The files below remain authoritative for later milestones:
+
+1. [01_PRODUCT_REQUIREMENTS.md](01_PRODUCT_REQUIREMENTS.md) — comprehensive PRD, workflows, architecture, access controls and acceptance gates.
+2. [02_SCHEMA_BLUEPRINT.sql](02_SCHEMA_BLUEPRINT.sql) — untested PostgreSQL/PostGIS design blueprint. Do **not** apply directly to production.
+3. [03_RLS_BLUEPRINT.sql](03_RLS_BLUEPRINT.sql) — untested restrictive RLS blueprint; server authorization required in addition.
+4. [04_CODEX_MILESTONES.md](04_CODEX_MILESTONES.md) — progressive implementation plan.
+5. [docs/design/MOTION_AND_THEMES.md](docs/design/MOTION_AND_THEMES.md) — motion, theme and accessibility contract.
+6. [AGENTS.md](AGENTS.md) — contributor/Codex security and validation requirements.
+7. [README-MILESTONE-00.md](README-MILESTONE-00.md) — foundation verification notes.
+8. [05_VALIDATION_AND_REFERENCES.md](05_VALIDATION_AND_REFERENCES.md) — earlier blueprint validation limitations.
+
+## Principles
+
+Keep sensitive features fail-closed and server-authorized. Never claim escrow, real verified workers, working checkout or live availability without evidence. Avoid exposing exact addresses, worker home bases, identity documents, bank data or secret keys. Maintain real keyboard access, mobile performance and text-based action feedback in both colour schemes.
+
+The app is prelaunch, and the founder will supply photography/design references when available.
