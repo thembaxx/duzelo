@@ -42,6 +42,20 @@ test("worker evidence, MFA review, publication, category denials and retention a
     ownerId = String(owner!.user_id),
     revision = Number(owner!.revision),
     slug = "provider-" + workerId;
+  async function expectUnpublished() {
+    const response = await guest.request.get("/workers/" + slug);
+    const html = await response.text();
+    // A streamed Next.js notFound() response may already have status 200.
+    expect([200, 404]).toContain(response.status());
+    expect(html).toContain("404 / PAGE NOT FOUND");
+    expect(html).not.toContain(company);
+    expect(
+      (
+        await sql`select count(*)::int as count from public.worker_cards where worker_id=${workerId}::uuid`
+      )[0]!.count,
+    ).toBe(0);
+  }
+
   expect((await post(worker, "submit", { revision, consent: true })).status()).toBe(409);
   expect(
     (
@@ -139,7 +153,7 @@ test("worker evidence, MFA review, publication, category denials and retention a
     .check();
   await worker.getByRole("button", { name: "Submit application for review" }).click();
   await expect(worker).toHaveURL(/worker\/verification/);
-  expect((await guest.request.get("/workers/" + slug)).status()).toBe(404);
+  await expectUnpublished();
   const adminContext = await browser.newContext({
       baseURL: origin,
       viewport: { width: 1440, height: 900 },
@@ -286,7 +300,7 @@ test("worker evidence, MFA review, publication, category denials and retention a
     ).status(),
   ).toBe(200);
   await sql`update public.user_profiles set is_suspended=true where user_id=${ownerId}::uuid`;
-  expect((await guest.request.get("/workers/" + slug)).status()).toBe(404);
+  await expectUnpublished();
   expect((await post(worker, "submit", { revision, consent: true })).status()).toBe(403);
   await sql`update public.user_profiles set is_suspended=false where user_id=${ownerId}::uuid`;
   expect(
@@ -304,7 +318,7 @@ test("worker evidence, MFA review, publication, category denials and retention a
   expect(finalLease.status()).toBe(200);
   expect((await finalLease.json()).expiresIn).toBeLessThanOrEqual(10);
   await sql`update private.worker_assets set retain_until=now()-interval '1 second' where id=${identity.id}::uuid`;
-  expect((await guest.request.get("/workers/" + slug)).status()).toBe(404);
+  await expectUnpublished();
   expect(
     (
       await post(admin, "publish", {
@@ -382,7 +396,7 @@ test("worker evidence, MFA review, publication, category denials and retention a
   );
   change.reason = "Provide a clearer fictional identity photo.";
   expect((await post(admin, "decision", change)).status()).toBe(200);
-  expect((await guest.request.get("/workers/" + slug)).status()).toBe(404);
+  await expectUnpublished();
   await worker.goto("/app/worker/verification");
   await expect(
     worker.getByText("Reviewer feedback: Provide a clearer fictional identity photo."),
