@@ -549,3 +549,33 @@ body { min-height: 100svh; background: var(--background); }
 .native-share { width: fit-content; border: 1px solid var(--border); background: var(--surface); color: var(--foreground); font-weight: 750; }
 .native-feedback { font-size: 13px; color: var(--muted-foreground); min-height: 21px; }
 @media (max-width: 480px) { .native-install-panel { padding: 20px; flex-wrap: wrap; } }
+
+
+/* Purposeful one-time editorial motion; no opacity changes without JS or observer. */
+.reveal-pending { opacity: 0; transform: translate3d(0,16px,0); }
+.reveal-in { animation: duzelo-reveal 440ms cubic-bezier(.22,1,.36,1) both; }
+@keyframes duzelo-reveal {
+  from { opacity: 0; transform: translate3d(0,16px,0); }
+  to { opacity: 1; transform: translate3d(0,0,0); }
+}
+.service-browser { margin-top: 35px; }
+.service-pill-tabs { display: inline-flex; max-width: 100%; gap: 4px; padding: 5px; background: var(--surface-raised); border: 1px solid var(--border); border-radius: 999px; overflow-x: auto; }
+.service-pill { position: relative; border: 0; background: transparent; padding: 11px 17px; min-height: 44px; white-space: nowrap; border-radius: 999px; font-size: 13px; font-weight: 700; color: var(--muted-foreground); transition: background 190ms var(--ease-enter),color 190ms; }
+.service-pill:hover { color: var(--foreground); }
+.service-pill.active { background: var(--primary); color: var(--primary-foreground); box-shadow: 0 4px 14px rgba(0,0,0,.09); }
+.service-result-count { margin: 24px 0 -35px; font-size: 12px; font-weight: 700; color: var(--muted-foreground); }
+.footer-brand { align-items: center; gap: 10px; }
+.footer-brand svg { color: var(--primary); }
+.breadcrumb { display: inline-flex; align-items: center; gap: 9px; }
+.example-list li { align-items: center; }
+.example-list li svg { color: var(--primary); flex: none; }
+@media (max-width: 600px) {
+  .service-pill-tabs { width: 100%; border-radius: 16px; }
+  .service-pill { flex: 1; padding-inline: 10px; font-size: 11px; }
+  .service-result-count { margin-bottom: -38px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-pending { opacity: 1 !important; transform: none !important; }
+  .reveal-in { animation: none !important; }
+  .service-pill { transition: none !important; }
+}

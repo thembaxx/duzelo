@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { ArrowUpRight } from '@phosphor-icons/react/dist/ssr';
 
 export const metadata: Metadata = { title: 'How it will work' };
 const steps = [
@@ -14,6 +15,6 @@ export default function HowItWorksPage() {
     <h1 className="inner-heading">A clearer path from<br /><em>to-do to done.</em></h1>
     <p className="inner-lede">Here's what we're building. These steps describe the planned service, not features you can book with today.</p>
     <ol className="walkthrough-list">{steps.map(([title,description],index)=><li key={title}><span>0{index+1}</span><div><h2>{title}</h2><p>{description}</p></div></li>)}</ol>
-    <div className="standout-panel"><h2>Good help should feel good to organise.</h2><p>We're starting with honest expectations, privacy and simple experiences for every phone.</p><Link href="/services" className="text-link">Explore services ↗</Link></div>
+    <div className="standout-panel"><h2>Good help should feel good to organise.</h2><p>We're starting with honest expectations, privacy and simple experiences for every phone.</p><Link href="/services" className="text-link">Explore services <ArrowUpRight size={17} aria-hidden="true"/></Link></div>
   </section>;
 }

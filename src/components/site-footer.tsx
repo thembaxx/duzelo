@@ -1,12 +1,13 @@
 import Link from 'next/link';
+import { BrandMark } from './brand-mark';
 
 export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="shell footer-inner">
         <div>
-          <Link href="/" className="footer-brand">Duzelo<span>.</span></Link>
-          <p>Good help, close to home.</p>
+          <Link href="/" className="footer-brand"><BrandMark size={38}/><span>Duzelo<span>.</span></span></Link>
+          <p>A little help. A lot closer.</p>
           <p className="footer-note">A local-services marketplace in development. No workers or bookings are live yet.</p>
         </div>
         <nav aria-label="Footer navigation">
