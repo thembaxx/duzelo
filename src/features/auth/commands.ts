@@ -26,7 +26,29 @@ export async function authCommand(
     if (!(await allowAuthAttempt("send", data.phone, 1, 60))) throw new Error("LIMITED");
     if (config.mode === "local" && !localTestPhones.some((phone) => phone === data.phone))
       return { message: "If this number can receive a code, check your messages.", retryAfter: 60 };
-    if (config.mode === "supabase" && !data.captchaToken) throw new Error("CAPTCHA");
+    if (config.mode === "supabase") {
+      if (!data.captchaToken) throw new Error("CAPTCHA");
+      let valid = false;
+      try {
+        const response = await fetch("https://api.hcaptcha.com/siteverify", {
+          method: "POST",
+          body: new URLSearchParams({
+            secret: config.captchaSecret!,
+            response: data.captchaToken,
+            sitekey: config.captchaSiteKey!,
+          }),
+          signal: AbortSignal.timeout(8000),
+        });
+        const proof = await response.json();
+        valid =
+          response.ok &&
+          proof.success === true &&
+          proof.hostname === new URL(config.origin).hostname;
+      } catch {
+        valid = false;
+      }
+      if (!valid) throw new Error("CAPTCHA");
+    }
     const client = await createAuthClient(true);
     // All sends, including provider failures, use an enumeration-safe response.
     const sent = await client.auth.signInWithOtp({
@@ -44,7 +66,7 @@ export async function authCommand(
     const data = otpVerifySchema.parse(input);
     if (config.mode === "local" && !localTestPhones.some((phone) => phone === data.phone))
       throw new Error("CODE");
-    if (!(await allowAuthAttempt("verify", data.phone, 5, 900))) throw new Error("LIMITED");
+    if (!(await allowAuthAttempt("verify", data.phone, 5, 900))) throw new Error("LIMITED_VERIFY");
     const client = await createAuthClient(true);
     const { error } = await client.auth.verifyOtp({
       phone: data.phone,

@@ -21,6 +21,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ act
       UNAVAILABLE: [503, "Account access is unavailable. Please try again later."],
       UNAUTHORIZED: [401, "Your session has ended. Please sign in again."],
       FORBIDDEN: [403, "This action is not available to this account."],
+      LIMITED_VERIFY: [429, "Too many attempts. Please wait 15 minutes before trying again."],
       LIMITED: [429, "Please wait before trying again."],
       CODE: [400, "The code could not be verified. Check it or try again later."],
       CAPTCHA: [422, "Complete the security check before requesting a code."],
@@ -33,7 +34,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ act
         ? [422, "Check the form and try again."]
         : [503, "Account access is unavailable. Please try again later."]);
     const response = json({ error: { message } }, status);
-    if (status === 429) response.headers.set("Retry-After", "60");
+    if (status === 429)
+      response.headers.set("Retry-After", code === "LIMITED_VERIFY" ? "900" : "60");
     return response;
   }
 }

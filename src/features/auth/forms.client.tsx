@@ -103,7 +103,7 @@ export function SignInForm({ local, captchaSiteKey }: { local: boolean; captchaS
         </p>
       )}
       {notice && <output aria-live="polite">{notice}</output>}
-      <Button disabled={busy || (!local && !captcha)} type="submit">
+      <Button disabled={busy || (!local && !captcha && !sent)} type="submit">
         {busy ? "Please wait…" : sent ? "Verify and continue" : "Send verification code"}
       </Button>
       {sent && (
@@ -111,7 +111,7 @@ export function SignInForm({ local, captchaSiteKey }: { local: boolean; captchaS
           <Button
             type="button"
             variant="outline"
-            disabled={busy || cooldown > 0}
+            disabled={busy || cooldown > 0 || (!local && !captcha)}
             onClick={() => void send()}
           >
             {cooldown ? `Resend in ${cooldown}s` : "Resend code"}
@@ -135,6 +135,7 @@ export function SignInForm({ local, captchaSiteKey }: { local: boolean; captchaS
 declare global {
   interface Window {
     hcaptcha?: {
+      reset: () => void;
       render: (
         element: string,
         options: {

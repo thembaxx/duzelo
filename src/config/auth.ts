@@ -16,6 +16,7 @@ export function readAuthConfig() {
       origin: z.url(),
       rateSecret: z.string().min(32),
       captchaSiteKey: z.string().optional(),
+      captchaSecret: z.string().optional(),
     })
     .safeParse({
       mode: process.env.AUTH_MODE,
@@ -25,6 +26,7 @@ export function readAuthConfig() {
       origin: process.env.NEXT_PUBLIC_SITE_URL,
       rateSecret: process.env.AUTH_RATE_LIMIT_SECRET,
       captchaSiteKey: process.env.NEXT_PUBLIC_AUTH_CAPTCHA_SITE_KEY,
+      captchaSecret: process.env.AUTH_CAPTCHA_SECRET,
     });
   if (!result.success)
     throw new Error("Invalid authentication configuration; values are redacted.");
@@ -52,6 +54,7 @@ export function readAuthConfig() {
     config.mode === "supabase" &&
     (process.env.SMS_PROVIDER_APPROVED !== "true" ||
       !config.captchaSiteKey ||
+      !config.captchaSecret ||
       urls[0]?.protocol !== "https:" ||
       urls[2]?.protocol !== "https:" ||
       !config.key.startsWith("sb_publishable_") ||
