@@ -65,6 +65,9 @@ assert.match(pgtap, /from private\.client_addresses/);
 assert.match(pgtap, /from private\.payment_intents/);
 assert.match(pgtap, /rollback;/i);
 assert.match(pgtap, /select \* from finish\(\)/i);
+const declaredCount = Number(pgtap.match(/select plan\((\d+)\)/i)?.[1] ?? -1);
+const assertions = [...pgtap.matchAll(/select (?:has_table|is|ok|throws_ok)\(/gi)].length;
+assert.equal(declaredCount, assertions, 'pgTAP plan must equal authored assertion count');
 
 for (const match of [...schema.matchAll(/create function private\.([a-z_]+)\(\) returns trigger[\s\S]*?revoke execute on function private\.\1\(\)/gi)]) {
   const functionBody = match[0];
