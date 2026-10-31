@@ -48,14 +48,15 @@ create policy worker_services_authenticated_read on public.worker_services for s
 
 -- IMPORTANT no mutual recursion: job_matches policy only uses worker_profiles, NOT job_requests.
 create policy job_matches_worker_read on public.job_matches for select to authenticated
-  using (exists (select 1 from public.worker_profiles w where w.id=job_matches.worker_id and w.user_id=(select auth.uid()) and w.status='approved'));
+  using (exists (select 1 from public.worker_profiles w join public.user_profiles u on u.user_id=w.user_id
+    where w.id=job_matches.worker_id and w.user_id=(select auth.uid()) and w.status='approved' and not u.is_suspended));
 create policy job_requests_participants_read on public.job_requests for select to authenticated
   using (
     client_id=(select auth.uid())
-    or (status <> 'draft' and exists (select 1 from public.worker_profiles w where w.id=job_requests.requested_worker_id and w.user_id=(select auth.uid()) and w.status='approved'))
+    or (status <> 'draft' and exists (select 1 from public.worker_profiles w where w.id=job_requests.requested_worker_id and w.user_id=(select auth.uid()) and w.status='approved' and exists (select 1 from public.user_profiles u where u.user_id=w.user_id and not u.is_suspended)))
     or (status <> 'draft' and exists (
       select 1 from public.job_matches jm join public.worker_profiles w on w.id=jm.worker_id
-      where jm.job_id=job_requests.id and w.user_id=(select auth.uid()) and w.status='approved'
+      where jm.job_id=job_requests.id and w.user_id=(select auth.uid()) and w.status='approved' and exists (select 1 from public.user_profiles u where u.user_id=w.user_id and not u.is_suspended)
     ))
   );
 create policy job_media_participants_read on public.job_media for select to authenticated
