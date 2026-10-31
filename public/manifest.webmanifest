@@ -1,0 +1,17 @@
+{
+  "name": "Duzelo — Good help, close to home",
+  "short_name": "Duzelo",
+  "description": "Discover trusted local services. Marketplace features are being built.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAFAF7",
+  "theme_color": "#123D35",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
