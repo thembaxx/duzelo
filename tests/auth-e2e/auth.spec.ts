@@ -4,7 +4,10 @@ import postgres from "postgres";
 const origin = "http://127.0.0.1:3000";
 const sql = postgres(process.env.DATABASE_URL!, { max: 1, prepare: false });
 async function post(page: Page, action: string, data: unknown) {
-  return page.request.post(`/api/v1/auth/${action}`, { data, headers: { origin } });
+  return page.request.post(`/api/v1/auth/${action}`, {
+    data,
+    headers: { origin, "Idempotency-Key": crypto.randomUUID() },
+  });
 }
 async function signIn(page: Page, phone = "0820000001") {
   await page.goto("/auth/sign-in");

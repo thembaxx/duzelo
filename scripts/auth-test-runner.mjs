@@ -1,7 +1,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 if (existsSync("supabase/.temp/project-ref")) throw new Error("Use an unlinked local checkout.");
-const env = { ...process.env };
+const env = { ...process.env, AUTH_DIAGNOSTICS: "true" };
 for (const line of readFileSync(".env.auth-test", "utf8").split("\n")) {
   const split = line.indexOf("=");
   if (split > 0) env[line.slice(0, split)] = line.slice(split + 1);

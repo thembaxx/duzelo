@@ -6,6 +6,7 @@ export function database() {
   const config = readAuthConfig();
   if (!config) throw new Error("Authentication is unavailable.");
   connection ??= postgres(config.databaseUrl, {
+    ssl: config.mode === "supabase" ? { rejectUnauthorized: true } : false,
     max: 5,
     prepare: false,
     connect_timeout: 10,

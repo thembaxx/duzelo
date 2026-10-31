@@ -30,6 +30,21 @@ export function readAuthConfig() {
     throw new Error("Invalid authentication configuration; values are redacted.");
   const config = result.data;
   const urls = [config.url, config.databaseUrl, config.origin].map((value) => new URL(value));
+  if (!["postgres:", "postgresql:"].includes(urls[1]!.protocol))
+    throw new Error("DATABASE_URL must use PostgreSQL.");
+  if (config.mode === "local" && !config.key.startsWith("sb_publishable_")) {
+    try {
+      if (
+        JSON.parse(Buffer.from(config.key.split(".")[1] ?? "", "base64url").toString()).role !==
+        "anon"
+      )
+        throw new Error();
+    } catch {
+      throw new Error(
+        "Local Auth requires a publishable or legacy anon key, never a privileged key.",
+      );
+    }
+  }
   const local = urls.every((url) => ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname));
   if (config.mode === "local" && !local)
     throw new Error("Local OTP mode requires loopback-only Auth, database and app URLs.");
@@ -40,7 +55,7 @@ export function readAuthConfig() {
       urls[0]?.protocol !== "https:" ||
       urls[2]?.protocol !== "https:" ||
       !config.key.startsWith("sb_publishable_") ||
-      !config.databaseUrl.includes("sslmode=require"))
+      urls[1]?.searchParams.get("sslmode") !== "require")
   ) {
     throw new Error(
       "Hosted authentication requires approved SMS, CAPTCHA and TLS database configuration.",

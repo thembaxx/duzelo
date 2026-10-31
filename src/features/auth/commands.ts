@@ -29,7 +29,7 @@ export async function authCommand(
     if (config.mode === "supabase" && !data.captchaToken) throw new Error("CAPTCHA");
     const client = await createAuthClient(true);
     // All sends, including provider failures, use an enumeration-safe response.
-    await client.auth.signInWithOtp({
+    const sent = await client.auth.signInWithOtp({
       phone: data.phone,
       options: {
         shouldCreateUser: true,
@@ -49,7 +49,11 @@ export async function authCommand(
       token: data.code,
       type: "sms",
     });
-    if (error) throw new Error("CODE");
+    if (error) {
+      if (config.mode === "local" && process.env.AUTH_DIAGNOSTICS === "true")
+        console.info("Local code rejected", { code: error.code, status: error.status });
+      throw new Error("CODE");
+    }
     return { redirect: "/onboarding" };
   }
   if (action === "sign-out") {
