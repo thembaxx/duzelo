@@ -1,0 +1,32 @@
+$ npm run test:e2e
+
+> duzelo@0.0.0 test:e2e
+> playwright test
+
+
+Running 12 tests using 2 workers
+
+  ✓   2 [desktop] › tests/e2e/foundation.spec.ts:4:1 › home, real navigation, accessibility and reference viewport screenshot (3.6s)
+  ✓   3 [desktop] › tests/e2e/foundation.spec.ts:68:1 › protected workspaces reject forged identity and disable caching (54ms)
+  ✓   4 [desktop] › tests/e2e/foundation.spec.ts:85:1 › PWA manifest and offline cache never store protected pages (2.0s)
+  ✓   1 [desktop] › tests/e2e/foundation.spec.ts:38:1 › public pages, absence of overflow and no broken internal links (5.9s)
+  ✓   5 [desktop] › tests/e2e/foundation.spec.ts:123:1 › mobile menu is keyboard operable and languages are honestly described (818ms)
+  ✓   6 [desktop] › tests/e2e/foundation.spec.ts:145:1 › public shell also fits 320px, tablet and small desktop (1.2s)
+  ✓   7 [mobile] › tests/e2e/foundation.spec.ts:4:1 › home, real navigation, accessibility and reference viewport screenshot (2.6s)
+  ✓   9 [mobile] › tests/e2e/foundation.spec.ts:68:1 › protected workspaces reject forged identity and disable caching (80ms)
+  ✓  10 [mobile] › tests/e2e/foundation.spec.ts:85:1 › PWA manifest and offline cache never store protected pages (1.5s)
+  ✓   8 [mobile] › tests/e2e/foundation.spec.ts:38:1 › public pages, absence of overflow and no broken internal links (3.9s)
+  ✓  11 [mobile] › tests/e2e/foundation.spec.ts:123:1 › mobile menu is keyboard operable and languages are honestly described (1.1s)
+  ✓  12 [mobile] › tests/e2e/foundation.spec.ts:145:1 › public shell also fits 320px, tablet and small desktop (1.1s)
+
+  12 passed (14.4s)
+[WebServer] (node:14452) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+(node:14467) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:14466) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:14722) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:14730) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)

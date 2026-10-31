@@ -2,7 +2,7 @@
 
 Good help, close to home.
 
-Milestone 00 foundation of a South African local-services marketplace, starting in Piet Retief / Mkhondo. **Preview only:** no accounts, workers, bookings, matching or payments are active. Duzelo is a configurable working name. The founder’s references inform provisional tokens; no final logo or brand clearance is implied.
+Milestone 00 application foundation with a Milestone 01 local database baseline for a South African local-services marketplace, starting in Piet Retief / Mkhondo. **Preview only:** no accounts, workers, bookings, matching or payments are active. Duzelo is a configurable working name. The founder’s references inform provisional tokens; no final logo or brand clearance is implied.
 
 ## Run locally
 
@@ -27,7 +27,7 @@ npx --no-install playwright install chromium
 npm run test:e2e
 ```
 
-Playwright starts the production server itself on port 3000; build first and keep that port free. On Linux, missing browser libraries may require an administrator to run `npx --no-install playwright install --with-deps chromium`. CI installs them on its isolated runner. `npm run check` groups formatting, lint, typecheck, unit and leakage scanning; **E2E and production build remain separate required checks**. There is no deployment workflow.
+Playwright starts the production server itself on port 3000; build first and keep that port free. On Linux, missing browser libraries may require an administrator to run `npx --no-install playwright install --with-deps chromium`. CI installs them on its isolated runner. `npm run check` groups formatting, lint, typecheck, unit and leakage scanning; **E2E and production build remain separate required checks**. There is no automated application deployment workflow. The founder subsequently authorized the [recorded Vercel foundation deployment](docs/evidence/vercel-deployment.md).
 
 ## What works
 
@@ -52,4 +52,4 @@ Read [AGENTS.md](AGENTS.md), [product requirements](01_PRODUCT_REQUIREMENTS.md),
 - [Milestone 00 validation, exact outcomes and blockers](docs/evidence/milestone-00.md)
 - [Changelog](CHANGELOG.md)
 
-No database migrations, seed accounts, provider actions, production account writes or public deployment were performed. pgTAP, database integration and provider tests are deferred to the milestones that implement those capabilities. **Stop after Milestone 00.**
+The application remains at Milestone 00; reviewed **local-only** migrations, synthetic non-login identities, RLS/pgTAP and geospatial checks are included for Milestone 01. See [local database setup](supabase/README.md) and [Milestone 01 evidence](docs/evidence/milestone-01.md). No hosted database, provider integration or real account workflow is configured. Stop after Milestone 01 until further instruction.

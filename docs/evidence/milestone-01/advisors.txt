@@ -1,0 +1,7 @@
+
+> duzelo@0.0.0 db:advisors
+> node scripts/db-local.mjs advisors
+
+Connecting to local database...
+No issues found
+{"results":[],"message":"db advisors"}

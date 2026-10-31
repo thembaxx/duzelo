@@ -14,7 +14,14 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "security:check": "node scripts/check-secrets.mjs",
-    "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run security:check"
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run security:check",
+    "db:start": "node scripts/db-local.mjs start",
+    "db:reset": "node scripts/db-local.mjs reset",
+    "db:test": "node scripts/db-local.mjs test",
+    "db:advisors": "node scripts/db-local.mjs advisors",
+    "db:lint": "node scripts/db-local.mjs lint",
+    "db:explain": "node scripts/db-local.mjs explain",
+    "db:concurrency": "python3 scripts/db-concurrency.py"
   },
   "dependencies": {
     "@radix-ui/react-slot": "1.5.0",
@@ -40,6 +47,7 @@
     "@types/react-dom": "19.3.0",
     "oxfmt": "0.75.0",
     "oxlint": "1.90.0",
+    "supabase": "2.122.0",
     "tailwindcss": "4.3.3",
     "typescript": "7.0.2",
     "vitest": "5.0.5"

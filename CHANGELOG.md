@@ -11,3 +11,12 @@
 - Add Oxlint/Oxfmt, Vitest, Playwright desktop/mobile smoke, security scanning, CI and architecture/validation documentation.
 
 No database, matching, OTP, approval, booking, payment, production provider integration or deployment is included. Milestone 01 awaits instruction.
+
+## Milestone 01 — local database baseline (2026-10-31)
+
+- Deploy the already-verified foundation to Vercel under the founder's new instruction; record actual production target, aliases and verification.
+- Add pinned Supabase CLI, local-only scripts, PostgreSQL/PostGIS migration, synthetic non-login identities and private-address fixtures.
+- Enforce read-only browser grants/RLS, private-schema separation, manual/category-specific publication eligibility, curated coarse markers and expiry/invalidation.
+- Add quote/booking/inspection integrity and append-only audit/ledger/event controls.
+- Add pgTAP, security advisor, application SQL lint and index-planning evidence, plus a separate database CI job.
+- Leave Auth/Storage/providers disabled and the deployed app disconnected from the local database. No hosted migrations or new UI workflows.

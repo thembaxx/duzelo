@@ -1,0 +1,32 @@
+[
+  {
+    "check": "reset",
+    "command": "npm run db:reset",
+    "exit": 0
+  },
+  {
+    "check": "pgtap",
+    "command": "npm run db:test",
+    "exit": 0
+  },
+  {
+    "check": "concurrency",
+    "command": "npm run db:concurrency",
+    "exit": 0
+  },
+  {
+    "check": "advisors",
+    "command": "npm run db:advisors",
+    "exit": 0
+  },
+  {
+    "check": "sql-lint",
+    "command": "npm run db:lint",
+    "exit": 0
+  },
+  {
+    "check": "explain",
+    "command": "npm run db:explain",
+    "exit": 0
+  }
+]
