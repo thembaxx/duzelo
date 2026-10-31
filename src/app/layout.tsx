@@ -7,6 +7,7 @@ import { SiteFooter } from '@/components/site-footer';
 import { ThemeProvider } from '@/components/theme-provider';
 import { BrowserTheme } from '@/components/browser-theme';
 import { PwaRuntime } from '@/components/pwa-runtime';
+import { RevealDirector } from '@/components/reveal-director';
 import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from '@/lib/site';
 import './globals.css';
 
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       <body>
         <ThemeProvider>
           <BrowserTheme />
+          <RevealDirector />
           <a href="#main-content" className="skip-link">Skip to main content</a>
           <SiteHeader />
           <main id="main-content" className="main-content">{children}</main>
