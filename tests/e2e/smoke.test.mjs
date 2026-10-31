@@ -10,6 +10,22 @@ test('desktop navigation, category search and colour preference persistence', as
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     await page.goto(baseURL + '/', { waitUntil: 'networkidle' });
     assert.match(await page.title(), /Duzelo/);
+    const fontStyles = await page.evaluate(async () => {
+      await document.fonts.ready;
+      const root = getComputedStyle(document.documentElement);
+      const heading = document.querySelector('h1 em');
+      return {
+        sans: root.getPropertyValue('--font-geist-sans').trim(),
+        serif: root.getPropertyValue('--font-geist-serif-regular').trim(),
+        bodyFamily: getComputedStyle(document.body).fontFamily,
+        accentFamily: heading ? getComputedStyle(heading).fontFamily : '',
+      };
+    });
+    assert.ok(fontStyles.sans.length > 0, 'Geist Sans must be registered');
+    assert.ok(fontStyles.serif.length > 0, 'Geist Serif must be registered');
+    assert.match(fontStyles.bodyFamily, /Geist/i);
+    assert.match(fontStyles.accentFamily, /Geist/i);
+
     await page.getByRole('button', { name: 'Dark theme' }).first().click();
     assert.equal(await page.locator('html').getAttribute('class').then(value => value?.includes('dark')), true);
     await page.reload();
