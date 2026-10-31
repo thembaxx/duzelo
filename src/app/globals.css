@@ -535,3 +535,17 @@ body { min-height: 100svh; background: var(--background); }
 @media (prefers-reduced-motion: reduce) {
   .skeleton-line::after,.skeleton-box::after { display: none; animation: none; }
 }
+
+
+/* Native sharing and install guidance, with no invented installation prompt. */
+.settings-native-divider { border-top: 1px solid var(--border); margin-block: 34px; }
+.native-actions { display: grid; gap: 17px; }
+.native-install-panel { display: flex; align-items: flex-start; gap: 18px; padding: 30px; border: 1px solid var(--border); border-radius: 22px; background: var(--surface-raised); }
+.native-install-panel > div { flex: 1; }
+.native-actions-icon { flex: none; width: 49px; height: 49px; display: grid; place-items: center; border-radius: 15px; color: var(--primary); background: var(--surface-elevated); }
+.native-install-panel h2 { font-size: 20px; letter-spacing: -.04em; margin-bottom: 10px; }
+.native-install-panel p { font-size: 13px; line-height: 1.75; color: var(--muted-foreground); margin-bottom: 7px; max-width: 500px; }
+.native-installed { color: var(--primary); flex: none; }
+.native-share { width: fit-content; border: 1px solid var(--border); background: var(--surface); color: var(--foreground); font-weight: 750; }
+.native-feedback { font-size: 13px; color: var(--muted-foreground); min-height: 21px; }
+@media (max-width: 480px) { .native-install-panel { padding: 20px; flex-wrap: wrap; } }
