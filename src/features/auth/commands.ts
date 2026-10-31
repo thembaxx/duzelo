@@ -36,6 +36,8 @@ export async function authCommand(
         ...(data.captchaToken ? { captchaToken: data.captchaToken } : {}),
       },
     });
+    if (config.mode === "local" && process.env.AUTH_DIAGNOSTICS === "true" && sent.error)
+      console.info("Local OTP send rejected", { code: sent.error.code, status: sent.error.status });
     return { message: "If this number can receive a code, check your messages.", retryAfter: 60 };
   }
   if (action === "verify") {
