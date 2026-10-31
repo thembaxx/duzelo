@@ -120,11 +120,10 @@ export async function documentAccess(input: unknown, key: string | null) {
     String(assets[0]!.worker_id),
     async (sql, w, current) => {
       const files =
-        await sql`select id from private.worker_assets where id=${assetId}::uuid and worker_id=${w.id}::uuid and state='stored' and retain_until>now()`;
+        await sql`select id,least(floor(extract(epoch from retain_until)),floor(extract(epoch from now()))+60)::text as expires from private.worker_assets where id=${assetId}::uuid and worker_id=${w.id}::uuid and state='stored' and retain_until>now()`;
       if (!files.length) throw new Error("FORBIDDEN");
-      const deadline = await sql`select (extract(epoch from now())::bigint+60)::text as expires`;
       await sql`insert into private.audit_events(actor_id,actor_type,action,resource_kind,resource_id,metadata_redacted) values (${current.id}::uuid,'user','worker.document-access','worker_asset',${assetId}::uuid,${sql.json({ purpose: staff ? "verification" : "owner" })})`;
-      return { assetId, expires: String(deadline[0]!.expires) };
+      return { assetId, expires: String(files[0]!.expires) };
     },
   );
   const remaining = Math.min(60, Number(grant.expires) - Math.ceil(Date.now() / 1000));
@@ -162,14 +161,14 @@ export async function purgeExpired(input: unknown, key: string | null) {
         await sql`update private.worker_assets set state='purge_pending',public_approved=false where worker_id=${w.id}::uuid and (retain_until<=now() or (state='pending' and created_at<now()-interval '1 hour')) and state in ('stored','pending','purge_pending') returning id`;
       const ids = files.map((f) => String(f.id));
       if (ids.length)
-        await sql`update private.worker_verifications v set status='expired' where exists(select 1 from private.verification_documents d where d.verification_id=v.id and d.asset_id=any(${sql.array(ids)}::uuid[]))`;
+        await sql`update private.worker_verifications v set status='expired' where exists(select 1 from private.verification_documents d where d.verification_id=v.id and d.asset_id=any(${ids}::uuid[]))`;
       return { ids: JSON.stringify(ids) };
     },
   );
   const ids = JSON.parse(intent.ids) as string[];
   if (!ids.length) return { message: "No expired files need removal." };
   const rows =
-    await database()`select storage_path from private.worker_assets where id=any(${database().array(ids)}::uuid[]) and worker_id=${workerId}::uuid and state='purge_pending'`;
+    await database()`select storage_path from private.worker_assets where id=any(${ids}::uuid[]) and worker_id=${workerId}::uuid and state='purge_pending'`;
   if (rows.length) {
     const removed = await workerStorage()
       .from(WORKER_BUCKET)
@@ -192,8 +191,8 @@ export async function purgeExpired(input: unknown, key: string | null) {
     .update("purge-finish:" + key)
     .digest("hex");
   return command("purge-complete", { workerId, ids }, doneKey, true, workerId, async (sql, w) => {
-    await sql`update private.worker_assets set state='purged' where worker_id=${w.id}::uuid and id=any(${sql.array(ids)}::uuid[]) and state='purge_pending'`;
-    await sql`update private.verification_documents set deleted_at=now() where asset_id=any(${sql.array(ids)}::uuid[]) and deleted_at is null`;
+    await sql`update private.worker_assets set state='purged' where worker_id=${w.id}::uuid and id=any(${ids}::uuid[]) and state='purge_pending'`;
+    await sql`update private.verification_documents set deleted_at=now() where asset_id=any(${ids}::uuid[]) and deleted_at is null`;
     return { message: "Expired private files removed." };
   });
 }

@@ -299,6 +299,10 @@ test("worker evidence, MFA review, publication, category denials and retention a
       })
     ).status(),
   ).toBe(200);
+  await sql`update private.worker_assets set retain_until=now()+interval '10 seconds' where id=${identity.id}::uuid`;
+  const finalLease = await post(admin, "document-access", { assetId: identity.id });
+  expect(finalLease.status()).toBe(200);
+  expect((await finalLease.json()).expiresIn).toBeLessThanOrEqual(10);
   await sql`update private.worker_assets set retain_until=now()-interval '1 second' where id=${identity.id}::uuid`;
   expect((await guest.request.get("/workers/" + slug)).status()).toBe(404);
   expect(

@@ -13,10 +13,10 @@ export async function workerCommand(action: string, input: unknown, key: string 
     return command(action, data, key, false, null, async (sql, w) => {
       const categoryIds = [...new Set(data.services.map((s) => s.categoryId))];
       const categories =
-        await sql`select id from public.service_categories where active and id=any(${sql.array(categoryIds)}::uuid[])`;
+        await sql`select id from public.service_categories where active and id=any(${categoryIds}::uuid[])`;
       const areas = [...new Set([data.areaId, ...data.townIds])];
       const towns =
-        await sql`select id from public.service_areas where active and id=any(${sql.array(areas)}::uuid[])`;
+        await sql`select id from public.service_areas where active and id=any(${areas}::uuid[])`;
       if (categories.length !== categoryIds.length || towns.length !== areas.length)
         throw new Error("INVALID");
       const revision = w.revision ? (w.state === "draft" ? w.revision : w.revision + 1) : 1;
@@ -34,7 +34,7 @@ export async function workerCommand(action: string, input: unknown, key: string 
         await sql`update public.worker_profiles set business_id=${id}::uuid where id=${w.id}::uuid`;
         await sql`insert into private.business_details(business_id,registration_number) values (${id}::uuid,${data.registrationNumber || null}) on conflict(business_id) do update set registration_number=excluded.registration_number`;
       } else await sql`update public.worker_profiles set business_id=null where id=${w.id}::uuid`;
-      await sql`insert into private.worker_coverage(worker_id,base_point,radius_km,town_allowlist,travel_fee_cents) values (${w.id}::uuid,extensions.st_setsrid(extensions.st_makepoint(${data.longitude},${data.latitude}),4326)::extensions.geography,${data.radiusKm},${sql.array(data.townIds)},${data.travelFee}) on conflict(worker_id) do update set base_point=excluded.base_point,radius_km=excluded.radius_km,town_allowlist=excluded.town_allowlist,travel_fee_cents=excluded.travel_fee_cents,updated_at=now()`;
+      await sql`insert into private.worker_coverage(worker_id,base_point,radius_km,town_allowlist,travel_fee_cents) values (${w.id}::uuid,extensions.st_setsrid(extensions.st_makepoint(${data.longitude},${data.latitude}),4326)::extensions.geography,${data.radiusKm},${data.townIds},${data.travelFee}) on conflict(worker_id) do update set base_point=excluded.base_point,radius_km=excluded.radius_km,town_allowlist=excluded.town_allowlist,travel_fee_cents=excluded.travel_fee_cents,updated_at=now()`;
       await sql`delete from public.worker_services where worker_id=${w.id}::uuid`;
       for (const service of data.services)
         await sql`insert into public.worker_services(worker_id,category_id,title,description,price_model,price_cents) values (${w.id}::uuid,${service.categoryId}::uuid,${service.title},${service.description},${service.pricing},${service.pricing === "quote" ? null : moneyCents(service.price)})`;

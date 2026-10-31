@@ -1,3 +1,4 @@
+import { workerConfig } from "@/features/workers/config";
 import { json, readMutation } from "@/lib/security/http";
 import { workerCommand } from "@/features/workers/commands";
 import { uploadWorkerImage, documentAccess, purgeExpired } from "@/features/workers/files";
@@ -5,6 +6,7 @@ import { readImage, workerError } from "@/features/workers/http";
 export const runtime = "nodejs";
 export async function POST(request: Request, { params }: { params: Promise<{ action: string }> }) {
   try {
+    if (!workerConfig()) throw new Error("UNAVAILABLE");
     const { action } = await params,
       key = request.headers.get("idempotency-key");
     if (action === "upload") {

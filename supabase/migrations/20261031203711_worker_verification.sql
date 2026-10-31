@@ -85,7 +85,8 @@ begin
  if ltrim(coalesce(event->'user'->>'phone',''),'+') not in ('27820000001','27820000002','27820000003','27820000004','27820000005','27820000006') then raise exception 'Local SMS adapter rejects non-fixture numbers'; end if;
  return '{}'::jsonb;
 end;$$;
--- The six confirmed taxonomy entries are migration data, not worker inventory.
+-- Confirmed service taxonomy plus the existing electrical review category.
+-- These are category definitions, never invented worker inventory.
 -- The local seed references these stable category IDs.
 insert into public.service_categories(id,slug,label_en,requires_trade_review) values
  ('20000000-0000-0000-0000-000000000001','plumbing','Plumbing',true),
@@ -93,7 +94,11 @@ insert into public.service_categories(id,slug,label_en,requires_trade_review) va
  ('20000000-0000-0000-0000-000000000003','home-repairs','Home repairs',false),
  ('20000000-0000-0000-0000-000000000004','electrical','Electrical',true),
  ('20000000-0000-0000-0000-000000000005','gardening','Gardening',false),
- ('20000000-0000-0000-0000-000000000006','painting','Painting',false);
+ ('20000000-0000-0000-0000-000000000006','painting','Painting',false),
+ ('20000000-0000-0000-0000-000000000007','locksmithing','Locksmithing',true),
+ ('20000000-0000-0000-0000-000000000008','window-installation','Window installation',false),
+ ('20000000-0000-0000-0000-000000000009','installations','Installations',false),
+ ('20000000-0000-0000-0000-000000000010','maintenance','Maintenance',false);
 create function private.check_verification_asset() returns trigger
 language plpgsql security invoker set search_path='' as $$
 begin

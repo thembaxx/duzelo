@@ -46,7 +46,7 @@ export async function ownerApplication(): Promise<OwnerApplication> {
 }
 export async function reviewQueue() {
   const actor = await workerActor(true);
-  return database()`select w.id,w.display_name,a.revision,a.state,a.submitted_at from private.worker_applications a join public.worker_profiles w on w.id=a.worker_id join public.user_profiles u on u.user_id=w.user_id where a.state in ('pending_review','needs_changes','reviewed') and not u.is_suspended and w.status<>'suspended' and w.user_id<>${actor.id}::uuid order by a.submitted_at nulls last limit 100`;
+  return database()`select w.id,w.display_name,a.revision,a.state,a.submitted_at from private.worker_applications a join public.worker_profiles w on w.id=a.worker_id join public.user_profiles u on u.user_id=w.user_id where a.state in ('pending_review','needs_changes','reviewed') and not u.is_suspended and w.status<>'suspended' and w.user_id<>${actor.id}::uuid order by (a.state='pending_review') desc,a.submitted_at nulls last limit 100`;
 }
 export async function reviewApplication(workerId: string) {
   z.guid().parse(workerId);
@@ -90,8 +90,8 @@ export async function publicWorkers(slug?: string): Promise<PublicWorker[]> {
   for (const row of rows) {
     const ids = row.eligible as string[];
     const [categories, services, media] = await Promise.all([
-      sql`select id,label_en as label,requires_trade_review from public.service_categories where active and id=any(${sql.array(ids)}::uuid[]) order by label_en`,
-      sql`select id,title,description,price_model,price_cents,category_id from public.worker_services where worker_id=${row.worker_id}::uuid and active and category_id=any(${sql.array(ids)}::uuid[]) order by title`,
+      sql`select id,label_en as label,requires_trade_review from public.service_categories where active and id=any(${ids}::uuid[]) order by label_en`,
+      sql`select id,title,description,price_model,price_cents,category_id from public.worker_services where worker_id=${row.worker_id}::uuid and active and category_id=any(${ids}::uuid[]) order by title`,
       sql`select id,kind,caption from private.worker_assets where worker_id=${row.worker_id}::uuid and application_revision=${row.revision} and kind in ('avatar','portfolio') and state='stored' and public_approved and retain_until>now() order by created_at`,
     ]);
     result.push({

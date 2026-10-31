@@ -38,6 +38,7 @@ export default async function Review({ params }: { params: Promise<{ id: string 
         {application.services.map((s, n) => (
           <div key={n}>
             <h3>{s.title}</h3>
+            <p>Category: {application.categories.find((c) => c.id === s.categoryId)?.label}</p>
             <p>{s.description}</p>
             <p>
               {s.pricing === "quote"
