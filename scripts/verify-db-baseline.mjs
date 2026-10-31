@@ -19,7 +19,9 @@ assert.match(schema,/revoke all on table %I\.%I from public, anon, authenticated
 assert.match(schema,/create policy job_requests_participants_read/i);
 assert.match(schema,/create policy worker_cards_public_read/i);
 assert.match(schema,/create function private\.publish_worker_card/i);
-assert.match(schema,/worker_status_unpublish/i);
+assert.match(schema,/create function private\.invalidate_worker_cards/i);
+assert.match(schema,/create trigger worker_profile_invalidate/i);
+assert.match(schema,/create trigger verification_invalidate/i);
 assert.doesNotMatch(schema,/security definer/i);
 assert.match(config,/schemas = \["public"\]/);
 assert.doesNotMatch(config,/schemas\s*=\s*\[[^\]]*private/i);
