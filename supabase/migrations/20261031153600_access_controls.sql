@@ -50,11 +50,11 @@ create policy business_profiles_owner_read on public.business_profiles for selec
   using (owner_id=(select auth.uid()));
 create policy worker_services_guest_read on public.worker_services for select to anon
   using (active and exists (
-    select 1 from public.worker_cards c where c.worker_id=worker_services.worker_id
+    select 1 from public.worker_cards c where c.worker_id=worker_services.worker_id and worker_services.category_id=any(c.category_ids)
   ));
 create policy worker_services_signed_read on public.worker_services for select to authenticated
   using (
-    (active and exists (select 1 from public.worker_cards c where c.worker_id=worker_services.worker_id))
+    (active and exists (select 1 from public.worker_cards c where c.worker_id=worker_services.worker_id and worker_services.category_id=any(c.category_ids)))
     or exists (select 1 from public.worker_profiles w
       where w.id=worker_services.worker_id and w.user_id=(select auth.uid()))
   );

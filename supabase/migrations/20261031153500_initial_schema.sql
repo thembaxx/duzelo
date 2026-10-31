@@ -505,6 +505,9 @@ create table public.bookings (
   check (scheduled_end is null or scheduled_start is null or scheduled_end>scheduled_start)
 );
 create index bookings_worker_idx on public.bookings(worker_id,status);
+-- A booking worker must be the selected invited worker for this job.
+alter table public.bookings add constraint booking_worker_job_match_fk
+  foreign key (job_id, worker_id) references public.job_matches(job_id, worker_id);
 -- Prevent linking an accepted quote from a different job or provider.
 alter table public.bookings add constraint booking_quote_same_job_worker_fk
   foreign key (quote_id, job_id, worker_id) references public.quotes(id, job_id, worker_id);

@@ -33,7 +33,7 @@ values ('a4000000-0000-4000-8000-000000000001','a0000000-0000-4000-8000-00000000
         'a1000000-0000-4000-8000-000000000001','Fixture service request',
         'Fixture description of a fake job','Fixture public town','flexible','open');
 
-select plan(24);
+select plan(26);
 
 select has_table('public','worker_cards','worker card table exists');
 select has_table('private','job_locations','exact locations kept private');
@@ -86,6 +86,11 @@ select ok((select extensions.ST_DWithin(approx_marker,
 
 insert into public.worker_services(worker_id,category_id,title,price_model) values
  ('a3000000-0000-4000-8000-000000000001','a1000000-0000-4000-8000-000000000002','Fixture plumbing','quote');
+set local role anon;
+select is((select count(*)::integer from public.worker_services),1,
+          'public directory reveals only categories published on worker card');
+reset role;
+
 select throws_ok(
   'update public.worker_cards set category_ids=array[''a1000000-0000-4000-8000-000000000001'',''a1000000-0000-4000-8000-000000000002'']::uuid[] where slug=''real-fixture''',
   'P0001',null,'regulated trade needs its own verification');
@@ -128,6 +133,10 @@ select is((select count(*)::integer from private.inspection_access_grants),1,
 select throws_ok(
   'insert into public.quotes(job_id,worker_id,pricing_type,scope) values (''a4000000-0000-4000-8000-000000000001'',''a3000000-0000-4000-8000-000000000002'',''fixed'',''Fake quote'')',
   '23503',null,'unmatched worker cannot quote');
+
+select throws_ok(
+  'insert into public.bookings(job_id,worker_id,status) values (''a4000000-0000-4000-8000-000000000001'',''a3000000-0000-4000-8000-000000000002'',''pending_worker'')',
+  '23503',null,'booking must reference an invited worker in same job');
 
 -- Approved verification revocation also hides card and demotes worker.
 update private.worker_verifications set status='rejected'
