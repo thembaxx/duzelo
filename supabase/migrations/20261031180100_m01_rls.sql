@@ -47,16 +47,35 @@ create policy worker_services_authenticated_read on public.worker_services for s
     or exists (select 1 from public.worker_profiles w where w.id=worker_services.worker_id and w.user_id=(select auth.uid())));
 
 -- IMPORTANT no mutual recursion: job_matches policy only uses worker_profiles, NOT job_requests.
+-- A worker's invitation is readable only while their manually verified, published
+-- card and the invitation are current. No policy recursion through job_requests.
 create policy job_matches_worker_read on public.job_matches for select to authenticated
-  using (exists (select 1 from public.worker_profiles w join public.user_profiles u on u.user_id=w.user_id
-    where w.id=job_matches.worker_id and w.user_id=(select auth.uid()) and w.status='approved' and not u.is_suspended));
+  using (status in ('invited','viewed','responded')
+    and (expires_at is null or expires_at > now())
+    and exists (
+      select 1 from public.worker_profiles w
+      join public.user_profiles u on u.user_id = w.user_id
+      join public.worker_cards c on c.worker_id = w.id
+      where w.id = job_matches.worker_id
+        and w.user_id = (select auth.uid()) and w.status = 'approved'
+        and not u.is_suspended
+    ));
+
 create policy job_requests_participants_read on public.job_requests for select to authenticated
   using (
-    client_id=(select auth.uid())
-    or (status <> 'draft' and exists (select 1 from public.worker_profiles w where w.id=job_requests.requested_worker_id and w.user_id=(select auth.uid()) and w.status='approved' and exists (select 1 from public.user_profiles u where u.user_id=w.user_id and not u.is_suspended)))
-    or (status <> 'draft' and exists (
-      select 1 from public.job_matches jm join public.worker_profiles w on w.id=jm.worker_id
-      where jm.job_id=job_requests.id and w.user_id=(select auth.uid()) and w.status='approved' and exists (select 1 from public.user_profiles u where u.user_id=w.user_id and not u.is_suspended)
+    client_id = (select auth.uid())
+    or (status not in ('draft','cancelled','expired') and exists (
+      select 1
+      from public.job_matches jm
+      join public.worker_profiles w on w.id = jm.worker_id
+      join public.user_profiles u on u.user_id = w.user_id
+      join public.worker_cards c on c.worker_id = w.id
+      where jm.job_id = job_requests.id
+        and jm.status in ('invited','viewed','responded')
+        and (jm.expires_at is null or jm.expires_at > now())
+        and w.user_id = (select auth.uid())
+        and w.status = 'approved' and not u.is_suspended
+        and job_requests.category_id = any(c.category_ids)
     ))
   );
 create policy job_media_participants_read on public.job_media for select to authenticated
