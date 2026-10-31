@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 export const flagNames = [
-  "AUTH_ENABLED",
   "LOCATION_MATCHING_ENABLED",
   "WORKER_APPROVAL_ENABLED",
   "PAYMENTS_ENABLED",
@@ -20,7 +19,7 @@ export function validateDisabledFlags(input: Record<string, string | undefined>)
     }
   }
   return Object.freeze({
-    auth: false,
+    auth: input.AUTH_ENABLED === "true",
     locationMatching: false,
     workerApproval: false,
     paymentsOnline: false,

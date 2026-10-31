@@ -21,7 +21,10 @@
     "db:advisors": "node scripts/db-local.mjs advisors",
     "db:lint": "node scripts/db-local.mjs lint",
     "db:explain": "node scripts/db-local.mjs explain",
-    "db:concurrency": "python3 scripts/db-concurrency.py"
+    "db:concurrency": "python3 scripts/db-concurrency.py",
+    "auth:env": "node scripts/auth-local-env.mjs",
+    "test:auth": "node scripts/auth-test-runner.mjs",
+    "auth:start": "supabase start --exclude realtime,storage-api,imgproxy,studio,postgres-meta,edge-runtime,logflare,vector,supavisor,mailpit"
   },
   "dependencies": {
     "@radix-ui/react-slot": "1.5.0",
@@ -32,6 +35,7 @@
     "clsx": "2.1.1",
     "lucide-react": "1.66.0",
     "next": "16.4.3",
+    "postgres": "4.0.0",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "server-only": "0.0.1",

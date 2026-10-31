@@ -1,20 +1,24 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { publicEnv } from "@/config/env";
-
-/** Read-only client foundation. Not invoked by M00 routes. No privileged key.
- * M02 must add proxy.ts token refresh before enabling authentication. */
-export async function createReadOnlySupabaseClient() {
-  if (!publicEnv.supabaseUrl || !publicEnv.publishableKey) {
-    throw new Error("Supabase is not configured.");
-  }
+import { readAuthConfig } from "@/config/auth";
+export async function createAuthClient(writable = false) {
+  const config = readAuthConfig();
+  if (!config) throw new Error("Authentication is unavailable.");
   const store = await cookies();
-  return createServerClient(publicEnv.supabaseUrl, publicEnv.publishableKey, {
+  return createServerClient(config.url, config.key, {
+    cookieOptions: {
+      name: "duzelo-auth",
+      httpOnly: true,
+      sameSite: "lax",
+      secure: config.secure,
+      path: "/",
+    },
     cookies: {
       getAll: () => store.getAll(),
-      setAll: () => {
-        throw new Error("Session writes require the milestone 02 SSR refresh adapter.");
+      setAll: (values) => {
+        // Server components are read-only. The proxy persists refreshed cookies.
+        if (writable) values.forEach(({ name, value, options }) => store.set(name, value, options));
       },
     },
   });

@@ -799,3 +799,73 @@ main {
     animation: none !important;
   }
 }
+.auth-form {
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: var(--card);
+}
+.auth-form label,
+.auth-form legend {
+  font-size: 14px;
+  color: var(--foreground);
+}
+.auth-form input:not([type="radio"]):not([type="checkbox"]) {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid var(--input);
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: var(--background);
+  color: var(--foreground);
+  font: inherit;
+}
+.auth-form p {
+  font-size: 13px;
+  color: var(--muted-foreground);
+  margin-bottom: 0;
+}
+.auth-form fieldset {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+.auth-form .choice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+}
+.auth-form input[type="checkbox"],
+.auth-form input[type="radio"] {
+  accent-color: var(--primary);
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.auth-form a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.auth-form .form-error {
+  color: var(--destructive);
+}
+.test-notice {
+  padding: 12px;
+  background: var(--secondary);
+  border-radius: 12px;
+}
+.setup-key {
+  display: block;
+  overflow-wrap: anywhere;
+  user-select: all;
+  padding: 16px;
+  background: var(--background);
+  margin-bottom: 24px;
+}

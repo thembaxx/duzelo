@@ -1,19 +1,51 @@
+import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-
-/** Always-denying M00 gate. Not a Supabase refresh/auth implementation.
- * Guard again in server route/layout code; proxy is not sole authorization. */
-export function proxy(request: NextRequest) {
+import { readAuthConfig } from "@/config/auth";
+export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
-  const workspace =
-    path === "/admin" || path.startsWith("/admin/")
-      ? "admin"
-      : path === "/app/worker" || path.startsWith("/app/worker/")
-        ? "worker"
-        : "client";
-  const url = new URL("/auth/sign-in", request.url);
-  url.searchParams.set("workspace", workspace);
-  const response = NextResponse.redirect(url);
+  const workspace = path.startsWith("/admin")
+    ? "admin"
+    : path.startsWith("/app/worker")
+      ? "worker"
+      : "client";
+  const protectedRoute =
+    path.startsWith("/app") || path.startsWith("/admin") || path === "/onboarding";
+  const config = readAuthConfig();
+  let response = NextResponse.next({ request });
+  const deny = () => {
+    const url = new URL("/auth/sign-in", request.url);
+    url.searchParams.set("workspace", workspace);
+    const redirect = NextResponse.redirect(url);
+    response.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
+    redirect.headers.set("Cache-Control", "private, no-store, max-age=0");
+    return redirect;
+  };
+  if (!config) return protectedRoute ? deny() : response;
+  const client = createServerClient(config.url, config.key, {
+    cookieOptions: {
+      name: "duzelo-auth",
+      httpOnly: true,
+      sameSite: "lax",
+      secure: config.secure,
+      path: "/",
+    },
+    cookies: {
+      getAll: () => request.cookies.getAll(),
+      setAll: (values, cacheHeaders) => {
+        values.forEach(({ name, value }) => request.cookies.set(name, value));
+        response = NextResponse.next({ request });
+        values.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+        Object.entries(cacheHeaders ?? {}).forEach(([name, value]) =>
+          response.headers.set(name, value),
+        );
+      },
+    },
+  });
+  const { data, error } = await client.auth.getClaims();
+  if (protectedRoute && (error || !data?.claims.sub)) return deny();
   response.headers.set("Cache-Control", "private, no-store, max-age=0");
   return response;
 }
-export const config = { matcher: ["/app/:path*", "/admin/:path*"] };
+export const config = {
+  matcher: ["/app/:path*", "/admin/:path*", "/auth/:path*", "/onboarding", "/api/v1/:path*"],
+};

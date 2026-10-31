@@ -1,5 +1,6 @@
 import "server-only";
 import { validateDisabledFlags } from "./feature-flags";
+import { readAuthConfig } from "./auth";
 import { publicEnv } from "./env";
 
 export function validateServerEnv() {
@@ -13,5 +14,6 @@ export function validateServerEnv() {
       );
     }
   }
+  readAuthConfig();
   return { public: publicEnv, features: validateDisabledFlags(process.env) };
 }

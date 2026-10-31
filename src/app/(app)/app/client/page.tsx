@@ -1,5 +1,5 @@
-import { requireWorkspace } from "@/features/auth/guard";
+import { WorkspacePage } from "@/features/auth/workspace";
 export const dynamic = "force-dynamic";
-export default async function ClientPage() {
-  return requireWorkspace("client");
+export default function Page() {
+  return <WorkspacePage mode="client" />;
 }

@@ -2,7 +2,7 @@ name: Foundation checks
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, feat/milestone-02-auth]
 permissions:
   contents: read
 concurrency:
@@ -55,3 +55,26 @@ jobs:
       - run: npm run db:advisors
       - run: npm run db:lint
       - run: npm run db:explain
+
+  auth:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run auth:start > /tmp/auth-start.log 2>&1 || (tail -40 /tmp/auth-start.log; exit 1)
+      - run: npm run auth:env
+      - run: npx --no-install playwright install --with-deps chromium
+      - run: npm run test:auth
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: auth-ui-screenshots
+          path: docs/evidence/screenshots/auth-sign-in-*.png
+          retention-days: 14
