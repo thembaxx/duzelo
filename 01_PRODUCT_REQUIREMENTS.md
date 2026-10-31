@@ -120,6 +120,7 @@ Trust over acquisition; address privacy by default; show clear status and next a
 | In-app + email notifications | Yes | Push and SMS as budget/provider gates pass |
 | Admin panel with approvals/reports/disputes/audit | Yes | Team support queues and advanced analytics |
 | PWA installation, responsive UI, offline shell | Yes | Offline draft sync and native wrappers |
+| Light / Dark / System appearance and accessible motion foundations | Yes (Milestone 00) | Further polish based on measured device performance |
 | Reporting/data export/deletion workflow | Yes | Advanced user data portability |
 
 **Feature flags**: `payments_online`, `sms_critical`, `web_push`, `google_oauth`, `team_dispatch`, `ai_assist`, `recurring_jobs`. Every disabled capability must have a complete graceful UI path, not a broken button.
@@ -199,6 +200,7 @@ Cards show category, coarse town/distance band rather than exact location, urgen
 - Tap targets at least 44×44 CSS px where practical; visible focus; accessible dialog titles; labels/field errors; functional escape/back; no inaccessible map-only controls.
 - On weak networks: image compression, lazy photos, list-first fallback if map tiles fail, no layout shifts, optimistic state only where reversible. If device is offline, let user read cached shell/previously authorized non-sensitive summaries; do not pretend a payment or quote was transmitted.
 - PWA: correct manifest/icons, installation instructions, service worker version/update experience, network-first protected data, static asset caching, never cache token/OTP/ID docs/private address HTML in public/shared caches. Push permission only after a meaningful user prompt.
+- Appearance: accessible Light/Dark/System choice available before sign-in and in `/app/settings`, persisted without a flash or hydration mismatch; preserve map state, focus, wizard drafts and content during changes. All flows support reduced motion and semantic feedback, including administrative actions.
 
 # 6. Visual design system (provisional [A])
 
@@ -217,7 +219,9 @@ Cards show category, coarse town/distance band rather than exact location, urgen
 | `--danger` | `#B42318` | Safety, validation errors |
 | `--warning` | `#9A6700` | Pending and attention |
 
-Geist or Inter with system fallback; compact but readable typography, restrained squircle-like 12–20px corners, subtle borders not heavy shadows; lightweight Motion for controlled navigation/feedback with `prefers-reduced-motion` fallback. Icons: consistent icon family across app; avoid emoji as primary navigation. Always test WCAG 2.2 AA contrast rather than assuming proposed palette passes. Dark mode optional after pilot, not a prerequisite.
+Geist or a suitably licensed premium font with system fallback; compact but readable typography, restrained squircle-like 12–20px corners, subtle borders not heavy shadows. Icons: consistent icon family across app; avoid emoji as primary navigation. Always test WCAG 2.2 AA contrast rather than assuming proposed palette passes.
+
+**Confirmed update (2026-10-31):** Light, Dark and System colour schemes, an accessible Appearance selector, persisted preference and app-wide semantic tokens are **Pilot / Milestone 00 requirements**, replacing the earlier optional-after-pilot assumption. Interaction motion must be intentional, lightweight, GSAP-enhanced only when justified, compatible with `prefers-reduced-motion`, and secondary to task completion and secure business state. The complete architecture, provisional dual-palette values, interaction choreography, component boundaries and browser acceptance gates are in [`docs/design/MOTION_AND_THEMES.md`](docs/design/MOTION_AND_THEMES.md). Do not implement marketing-style pinned animations inside transactional, map, OTP, worker verification or admin screens.
 
 **Founder's reference-photo integration protocol:** inspect each image for palette, hierarchy, spacing, typography, motion clues and illustration/photo treatment; distinguish inspiration from literal copying; propose three coherent UI directions only if requested; preserve all functional flows, accessibility and privacy constraints; document approved design tokens in `docs/design-decisions.md`.
 
@@ -227,7 +231,7 @@ Geist or Inter with system fallback; compact but readable typography, restrained
 - **Next.js App Router, React, TypeScript**, Node.js server runtime, modern supported version pinned after checking actual release/documentation [A]. Do not blindly upgrade to experimental versions.
 - **Supabase:** Auth phone OTP, managed PostgreSQL + PostGIS, private Storage buckets, Realtime for conversation state, SSR auth cookie integration with `@supabase/ssr`. Use supported SSR guidance for the installed Next.js major version (Next.js 16+ uses `proxy.ts`; older uses `middleware.ts`).
 - **MapLibre GL JS:** hosted map style and tile provider; geocoding provider interface (`search`, `reverse`, `placeLookup`). Do **not** use public OSMF Nominatim for autocomplete; obey attribution and caching contracts.
-- **Tailwind + shadcn/ui + accessible headless primitives [A]**, React Hook Form + Zod for validated forms, TanStack Query only for interactive caching, `next-intl` or equivalent dictionary-based i18n [A].
+- **Tailwind + shadcn/ui + accessible headless primitives [A]**, React Hook Form + Zod for validated forms, TanStack Query only for interactive caching, `next-intl` or equivalent dictionary-based i18n [A]. Semantic CSS theme variables with Light / Dark / System appearance and persisted preference are required from Milestone 00; scoped GSAP / `@gsap/react` motion is optional for appropriate public storytelling, with reduced-motion and cleanup. See `docs/design/MOTION_AND_THEMES.md`.
 - **Paystack integration via adapter [A/V]** only after real SA merchant capabilities checked. Use provider-hosted checkout; no payment card details in own DB.
 - **Notifications:** transactional provider(s) by adapters; server outbox + retries; email/in-app first, push/SMS gated.
 - **Hosting:** Vercel Next.js server, Supabase database/storage, server-side webhooks and scheduled jobs; monitoring via provider logs and error tracking.
@@ -551,7 +555,7 @@ Tasks: match new jobs; resend invitation waves; expire jobs/quotes; booking remi
 - **Unit (Vitest):** Zod forms, E.164 normalization, ZAR cents/line totals, quote valid-until, date windows, state machine guards, matching score/fairness, coverage radius and 1km/10km geospatial edges, utility error messages.
 - **Database (pgTAP/local Supabase):** constraints, duplicate prevention, index presence, public/private schema exposure, anonymous/owner/matched worker/unmatched worker/admin rights for all select/write paths; ensure no RLS recursion; check views `security_invoker` and definer execute grants. A policy that matches zero rows is not proof of a working update.
 - **Integration:** server commands with real test DB, transactional races, rate-limits, doc upload validation, signed media access; webhook HMAC raw-body/timing-safe validation, replay/out-of-order and reconciliation; SMS/email failures and dedupe.
-- **Playwright E2E:** 390×844 and 1440×900, both modes, OTP local test numbers, browse map/list, location denied/manual pin, multi-step job draft, worker approval, matching, quote/inspection, booking accept/decline, chat, direct payment, online sandbox gated, completion/dispute/review, admin approval and safety report, logout/mode switch, PWA update, offline states, reduced motion/keyboard/axe smoke checks.
+- **Playwright E2E:** 390×844 and 1440×900, both modes, OTP local test numbers, browse map/list, location denied/manual pin, multi-step job draft, worker approval, matching, quote/inspection, booking accept/decline, chat, direct payment, online sandbox gated, completion/dispute/review, admin approval and safety report, logout/mode switch, PWA update, offline states, reduced motion/keyboard/axe smoke checks. Validate Light/Dark/System persistence, OS preference updates, first-paint correctness, theme/map/wizard state preservation, GSAP cleanup and keyboard accessibility per `docs/design/MOTION_AND_THEMES.md`.
 - **Security regression:** cross-user IDOR for every job/quote/booking/message, self-approval attempt, direct API posting by unverified worker, address leaked via public worker/map HTML/REST, signed URL reuse/expiry, tampered quote total, duplicate payment event, forged EFT, forged webhook, duplicate booking races, malicious file upload, admin MFA bypass, suspensions and cached session.
 
 ## Release quality gates
