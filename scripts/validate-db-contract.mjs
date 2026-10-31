@@ -25,6 +25,8 @@ assert.ok(!/security\s+definer/i.test(schema + policy), 'No unreviewed security-
 assert.ok(!/grant\s+(insert|update|delete|all)\s+on\s+[^;]+\s+to\s+(anon|authenticated)/i.test(policy), 'Direct browser writes must remain denied');
 assert.ok(policy.includes('revoke all on schema private from public, anon, authenticated;'));
 assert.ok(policy.includes('revoke update, delete on private.audit_events from service_role;'));
+assert.ok(policy.includes('revoke update, delete on private.payment_ledger from service_role;'));
+assert.ok(schema.includes('create trigger payment_ledger_immutable'));
 assert.ok(policy.includes("create policy disputes_party_read"));
 assert.ok(schema.includes("private.enforce_job_location_owner"));
 assert.ok(schema.includes("private.enforce_approved_worker_card"));

@@ -8,7 +8,8 @@ insert into auth.users(id,email) values
  ('a0000000-0000-4000-8000-000000000002','fixture-client-2@example.invalid'),
  ('a0000000-0000-4000-8000-000000000003','fixture-worker-1@example.invalid'),
  ('a0000000-0000-4000-8000-000000000004','fixture-worker-2@example.invalid'),
- ('a0000000-0000-4000-8000-000000000005','fixture-admin@example.invalid');
+ ('a0000000-0000-4000-8000-000000000005','fixture-admin@example.invalid'),
+ ('a0000000-0000-4000-8000-000000000006','fixture-unverified@example.invalid');
 insert into public.user_profiles(user_id,display_name) values
  ('a0000000-0000-4000-8000-000000000001','Fixture client one'),
  ('a0000000-0000-4000-8000-000000000002','Fixture client two'),
@@ -32,7 +33,7 @@ values ('a4000000-0000-4000-8000-000000000001','a0000000-0000-4000-8000-00000000
         'a1000000-0000-4000-8000-000000000001','Fixture service request',
         'Fixture description of a fake job','Fixture public town','flexible','open');
 
-select plan(22);
+select plan(24);
 
 select has_table('public','worker_cards','worker card table exists');
 select has_table('private','job_locations','exact locations kept private');
@@ -47,6 +48,13 @@ select ok(extensions.ST_DWithin(
   50), 'ST_DWithin accepts same location');
 
 -- Critical: server role changing a profile status is not proof of review.
+select throws_ok(
+  'insert into public.worker_profiles(id,user_id,display_name,status) values (''a3000000-0000-4000-8000-000000000003'',''a0000000-0000-4000-8000-000000000006'',''Fake Direct Approval'',''approved'')',
+  'P0001',null,'approved worker cannot be inserted without reviewed evidence');
+select throws_ok(
+  'insert into private.worker_verifications(worker_id,kind,status,reviewed_by,reviewed_at) values (''a3000000-0000-4000-8000-000000000001'',''identity'',''approved'',''a0000000-0000-4000-8000-000000000001'',now())',
+  'P0001',null,'client cannot be spoofed as a verification approver');
+
 select throws_ok(
   'update public.worker_profiles set status=''approved'' where id=''a3000000-0000-4000-8000-000000000001''',
   'P0001',null,'identity verification required before promotion');

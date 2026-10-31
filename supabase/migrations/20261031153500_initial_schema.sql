@@ -685,6 +685,9 @@ create trigger audit_events_immutable
 create trigger booking_events_immutable
   before update or delete on public.booking_events
   for each row execute function private.reject_immutable_change();
+create trigger payment_ledger_immutable
+  before update or delete on private.payment_ledger
+  for each row execute function private.reject_immutable_change();
 
 -- RLS enabled on EVERY public/private application table. Grants and policies in 03_RLS_BLUEPRINT.sql.
 do $$

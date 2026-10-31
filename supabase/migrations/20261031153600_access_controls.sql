@@ -8,6 +8,7 @@ revoke all on all tables in schema private from public, anon, authenticated;
 grant select, insert, update, delete on all tables in schema private to service_role;
 -- Never give an application credential the ability to rewrite or erase evidence.
 revoke update, delete on private.audit_events from service_role;
+revoke update, delete on private.payment_ledger from service_role;
 revoke delete on private.worker_verifications from service_role;
 
 -- New projects no longer automatically expose public tables through the Data API;
