@@ -2,6 +2,8 @@
 
 Status: specification and implementation blueprint; **not a deployed application**, production-ready migration, or legal certification.
 
+**Design update (2026-10-31):** Light/Dark/System theme support and accessible motion are confirmed Milestone 00 build requirements. See [`docs/design/MOTION_AND_THEMES.md`](docs/design/MOTION_AND_THEMES.md) for the implementation contract, UX choreography and test gates. These changes are specifications, **not running UI features**.
+
 **Duzelo** is a working name only. Complete CIPC trademark, domain, marketplace name and app-store clearance before making it permanent. The visual direction is provisional until the founder supplies reference photos.
 
 Read in this order:
