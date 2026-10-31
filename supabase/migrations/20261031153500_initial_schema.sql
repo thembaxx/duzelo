@@ -4,7 +4,6 @@
 -- Target: Supabase Postgres. Review with `supabase db diff`, advisors and pgTAP before production.
 -- Reproducible clean-project schema; run local reset and pgTAP before applying anywhere hosted.
 -- If PostGIS already exists outside `extensions`, audit first; never DROP EXTENSION CASCADE on an existing project.
-begin;
 create schema if not exists extensions;
 create extension if not exists postgis with schema extensions;
 create schema if not exists private;
@@ -710,4 +709,3 @@ begin
     execute format('alter table %I.%I enable row level security',rec.schemaname,rec.tablename);
   end loop;
 end $$;
-commit;

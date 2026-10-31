@@ -1,7 +1,6 @@
 -- Duzelo migration 02: least-privilege grants and RLS.
 -- Companion to 20261031153500_initial_schema.sql; neither has been applied to a hosted project.
 -- All browser writes are DENIED. Milestones 02+ must use session-authorized commands.
-begin;
 revoke all on schema private from public, anon, authenticated;
 grant usage on schema private to service_role;
 revoke all on all tables in schema private from public, anon, authenticated;
@@ -148,4 +147,3 @@ create policy notifications_recipient_read on public.notifications for select to
 -- Zero insert/update/delete policies for anon/authenticated.
 -- Private schema and storage buckets stay outside the Data API.
 -- Real service-role commands must authenticate caller, verify ownership, and audit.
-commit;
