@@ -16,7 +16,7 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
       <h1 className="inner-heading">Explore <em>local services.</em></h1>
       <p className="inner-lede">Search service categories. Verified worker discovery and the interactive map are not yet available in this early build.</p>
       <div className="explore-search"><ServiceSearch defaultValue={query} /></div>
-      <div className="results-heading"><h2>{results.length} {results.length === 1 ? 'category' : 'categories'}{query && ' matching “' + query + '”'}</h2>{query && <Link href="/explore" className="text-link">Clear search</Link>}</div>
+      <div className="results-heading"><h2>{results.length} {' '}{results.length === 1 ? 'category' : 'categories'}{query && ' matching “' + query + '”'}</h2>{query && <Link href="/explore" className="text-link">Clear search</Link>}</div>
       {results.length ? <div className="category-grid">{results.map((category) => <CategoryCard category={category} key={category.slug} />)}</div>
         : <div className="empty-panel"><h3>No matching categories yet.</h3><p>Try a broader search, such as cleaning, repairs or gardening.</p><Link href="/explore" className="button button-primary">View all categories</Link></div>}
     </section>
