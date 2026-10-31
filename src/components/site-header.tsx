@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { List, X } from '@phosphor-icons/react';
+import { List, X, ArrowUpRight } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { AppearanceControl } from './appearance-control';
+import { BrandMark } from './brand-mark';
 
 const links = [
   { href: '/services', label: 'Services' },
@@ -22,7 +23,7 @@ export function SiteHeader() {
     <header className="site-header">
       <div className="site-header-inner shell">
         <Link href="/" className="brand-lockup" aria-label="Duzelo home">
-          <span className="brand-symbol" aria-hidden="true"><span /></span>
+          <BrandMark size={37} className="brand-logo" />
           <span>Duzelo<span className="brand-period">.</span></span>
         </Link>
         <nav className="desktop-navigation" aria-label="Main navigation">
@@ -37,6 +38,7 @@ export function SiteHeader() {
         <div className="header-actions">
           <div className="desktop-appearance"><AppearanceControl compact /></div>
           <Link href="/settings" className="header-settings">Settings</Link>
+          <Link href="/auth/sign-in" className="header-cta">Get early access <ArrowUpRight size={16} aria-hidden="true" /></Link>
           <button
             type="button"
             className="menu-toggle"
@@ -54,6 +56,7 @@ export function SiteHeader() {
           {links.map((link) => <Link key={link.href} href={link.href}
             aria-current={pathname === link.href ? 'page' : undefined}>{link.label}</Link>)}
           <Link href="/settings">Settings & appearance</Link>
+          <Link href="/auth/sign-in">Launch update</Link>
           <div className="mobile-theme"><AppearanceControl /></div>
         </nav>
       </div>
