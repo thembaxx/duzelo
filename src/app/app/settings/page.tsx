@@ -12,8 +12,8 @@ export default async function Settings() {
     <>
       <PageHeading eyebrow="Your account" title="A little more you.">
         <p>
-          Edit your display name and notification preferences. Your phone number and account
-          authority cannot be changed here.
+          Edit your display name and notification preferences. Your phone number and verification
+          details are managed separately.
         </p>
       </PageHeading>
       <h2>Appearance</h2>

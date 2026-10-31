@@ -1,0 +1,11 @@
+2026-10-31T20:05:25.3889386Z found 0 vulnerabilities
+2026-10-31T20:05:25.6406223Z All matched files use the correct format.
+2026-10-31T20:05:25.9204245Z Found 0 warnings and 0 errors.
+2026-10-31T20:05:29.0229683Z  Test Files  12 passed (12)
+2026-10-31T20:05:29.0231255Z       Tests  145 passed (145)
+2026-10-31T20:05:39.8050015Z Client/server import boundaries passed (transitive local imports + Next server-only guard).
+2026-10-31T20:05:40.3050942Z found 0 vulnerabilities
+2026-10-31T20:05:40.4663969Z Secret leakage scan passed: 155 repository files; 16 browser assets; canary checked. Pattern scan is not a complete security audit.
+2026-10-31T20:06:10.7204967Z ℹ tests 8
+2026-10-31T20:06:10.7205975Z ℹ pass 8
+2026-10-31T20:06:10.7206371Z ℹ fail 0

@@ -8,7 +8,7 @@ export default async function Admin() {
     <>
       <PageHeading eyebrow="Administrator · MFA verified" title="A careful foundation.">
         <p>
-          Your server-granted membership and authenticator were verified. Verification queues,
+          Your administrator membership and authenticator were verified. Verification queues,
           evidence access and approval actions are not active yet.
         </p>
       </PageHeading>

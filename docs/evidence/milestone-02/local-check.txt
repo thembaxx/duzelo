@@ -1,0 +1,97 @@
+
+> duzelo@0.1.0 check
+> npm run lint && npm run typecheck && npm test && npm run test:db:static && npm run build
+
+
+> duzelo@0.1.0 lint
+> oxlint src
+
+
+> duzelo@0.1.0 typecheck
+> next typegen && tsc --noEmit
+
+Generating route types...
+✓ Types generated successfully
+
+> duzelo@0.1.0 test
+> vitest run
+
+
+ RUN  v5.0.5 /workspace/duzelo
+
+
+ Test Files  12 passed (12)
+      Tests  145 passed (145)
+   Start at  20:01:40
+   Duration  1.70s (import 58%, transform 20%, tests 13%, worker 9%)
+
+    Isolate  12 workers spawned · ~88ms startup each (spawn + environment, per file)
+             at least ~968ms faster with isolate: false — reuses workers across files instead of one per file
+
+
+> duzelo@0.1.0 test:db:static
+> node scripts/verify-db-baseline.mjs
+
+Static migration contract checks passed. These do NOT replace Supabase PostgreSQL/pgTAP tests.
+
+> duzelo@0.1.0 build
+> next build
+
+▲ Next.js 16.4.3 (Turbopack)
+✓ Running next.config.ts took 22ms
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 5.0s
+  Running TypeScript ...
+  Finished TypeScript in 3.2s ...
+  Collecting page data using 2 workers ...
+  Generating static pages using 2 workers (0/22) ...
+  Generating static pages using 2 workers (5/22) 
+  Generating static pages using 2 workers (10/22) 
+  Generating static pages using 2 workers (16/22) 
+✓ Generating static pages using 2 workers (22/22) in 1222ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /admin
+├ ƒ /api/v1/auth/[action]
+├ ƒ /app/client
+├ ƒ /app/settings
+├ ƒ /app/worker
+├ ƒ /auth/admin-mfa
+├ ○ /auth/forbidden
+├ ƒ /auth/sign-in
+├ ƒ /auth/suspended
+├ ƒ /explore
+├ ○ /how-it-works
+├ ○ /icon.svg
+├ ○ /legal/privacy
+├ ○ /legal/terms
+├ ○ /offline
+├ ƒ /onboarding
+├ ○ /opengraph-image
+├ ○ /robots.txt
+├ ○ /services
+├   /services/[slug]
+│ ├ ● /services/home-repairs
+│ ├ ● /services/plumbing
+│ ├ ● /services/electrical
+│ └ ● [+3 more paths]
+├ ○ /settings
+├ ○ /sitemap.xml
+└ ○ /trust
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+

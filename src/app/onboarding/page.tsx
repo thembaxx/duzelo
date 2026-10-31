@@ -8,8 +8,7 @@ export default async function Onboarding() {
     <>
       <PageHeading eyebrow="Your account" title="Make yourself at home.">
         <p>
-          One account can find help, offer services, or do both. Switching views never grants
-          approval or access to someone else’s information.
+          Find help, offer your skills, or do both with one account. You can add another mode later.
         </p>
       </PageHeading>
       <ProfileForm
