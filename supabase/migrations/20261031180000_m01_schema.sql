@@ -160,7 +160,7 @@ begin
   -- Keep coordinate publication disabled until a vetted town centroid FK exists.
   new.approx_marker := null;
   return new;
-end; $;
+end; $$;
 revoke execute on function private.enforce_approved_worker_card() from public, anon, authenticated;
 create trigger worker_card_approved_before_publish
   before insert or update on public.worker_cards
