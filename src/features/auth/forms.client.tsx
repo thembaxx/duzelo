@@ -1,8 +1,17 @@
 "use client";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, useSyncExternalStore, type FormEvent } from "react";
 import Link from "next/link";
 import Script from "next/script";
 import { Button } from "@/components/ui/button";
+
+const subscribe = () => () => {};
+function useReady() {
+  return useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false,
+  );
+}
 
 async function command(action: string, body: unknown) {
   const response = await fetch(`/api/v1/auth/${action}`, {
@@ -15,6 +24,7 @@ async function command(action: string, body: unknown) {
   return result as { redirect?: string; message?: string; factorId?: string; secret?: string };
 }
 export function SignInForm({ local, captchaSiteKey }: { local: boolean; captchaSiteKey?: string }) {
+  const ready = useReady();
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
   const [sent, setSent] = useState(false);
@@ -39,6 +49,8 @@ export function SignInForm({ local, captchaSiteKey }: { local: boolean; captchaS
     } catch (e) {
       setError(e instanceof Error ? e.message : "Please try again.");
     } finally {
+      setCaptcha("");
+      window.hcaptcha?.reset();
       setBusy(false);
     }
   };
@@ -60,7 +72,7 @@ export function SignInForm({ local, captchaSiteKey }: { local: boolean; captchaS
     }
   };
   return (
-    <form className="auth-form" onSubmit={submit}>
+    <form method="post" className="auth-form" onSubmit={submit}>
       {local && (
         <p className="test-notice">
           Local testing only. Use a configured test number; no SMS is sent.
@@ -103,7 +115,7 @@ export function SignInForm({ local, captchaSiteKey }: { local: boolean; captchaS
         </p>
       )}
       {notice && <output aria-live="polite">{notice}</output>}
-      <Button disabled={busy || (!local && !captcha && !sent)} type="submit">
+      <Button disabled={!ready || busy || (!local && !captcha && !sent)} type="submit">
         {busy ? "Please wait…" : sent ? "Verify and continue" : "Send verification code"}
       </Button>
       {sent && (
@@ -181,6 +193,7 @@ export function ProfileForm({
   initial?: { displayName: string; emailNotifications: boolean; inAppNotifications: boolean };
   onboarding: boolean;
 }) {
+  const ready = useReady();
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
@@ -216,7 +229,7 @@ export function ProfileForm({
     }
   }
   return (
-    <form className="auth-form" onSubmit={submit}>
+    <form method="post" className="auth-form" onSubmit={submit}>
       <label htmlFor="displayName">Your display name</label>
       <input
         id="displayName"
@@ -286,7 +299,7 @@ export function ProfileForm({
         </p>
       )}
       {notice && <output aria-live="polite">{notice}</output>}
-      <Button disabled={busy}>
+      <Button disabled={!ready || busy}>
         {busy ? "Saving…" : onboarding ? "Save and continue" : "Save preferences"}
       </Button>
     </form>
@@ -349,7 +362,7 @@ export function MfaForm({ factorId: existing }: { factorId?: string }) {
           Set up authenticator
         </Button>
       ) : (
-        <form onSubmit={verify}>
+        <form method="post" onSubmit={verify}>
           {secret && (
             <>
               <p>Add this setup key to your authenticator app. Keep it private.</p>

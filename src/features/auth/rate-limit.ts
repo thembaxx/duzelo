@@ -24,7 +24,7 @@ export async function allowAuthAttempt(
       const rows =
         await sql`select attempts,window_start,window_start>now()-${window}::integer*interval '1 second' as active from private.auth_rate_limits where bucket_hash=${key}`;
       const row = rows[0];
-      const active = row && Date.now() - new Date(row.window_start).getTime() < window * 1000;
+      const active = row?.active === true;
       if (active && row.attempts >= max) return false;
       await sql`insert into private.auth_rate_limits(bucket_hash,attempts,window_start) values (${key},1,now()) on conflict(bucket_hash) do update set attempts=${active ? row.attempts + 1 : 1},window_start=case when ${Boolean(active)} then auth_rate_limits.window_start else now() end,updated_at=now()`;
     }

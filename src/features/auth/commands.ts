@@ -160,7 +160,14 @@ export async function authCommand(
         factorType: "totp",
         friendlyName: "Duzelo administrator",
       });
-      if (error || !data) throw new Error("UNAVAILABLE");
+      if (error || !data) {
+        if (config.mode === "local" && process.env.AUTH_DIAGNOSTICS === "true")
+          console.info("Local MFA enrollment rejected", {
+            code: error?.code,
+            status: error?.status,
+          });
+        throw new Error("UNAVAILABLE");
+      }
       return { factorId: data.id, secret: data.totp.secret };
     }
     const data = z

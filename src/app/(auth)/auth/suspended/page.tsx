@@ -1,6 +1,11 @@
 import { PageHeading } from "@/components/layout/page-heading";
 import { SignOutButton } from "@/features/auth/forms.client";
-export default function Suspended() {
+import { getVerifiedIdentity } from "@/features/auth/service";
+import { redirect } from "next/navigation";
+export const dynamic = "force-dynamic";
+export default async function Suspended() {
+  const actor = await getVerifiedIdentity();
+  if (!actor?.profile?.is_suspended) redirect("/auth/sign-in");
   return (
     <>
       <PageHeading eyebrow="Account access limited" title="This account is paused.">

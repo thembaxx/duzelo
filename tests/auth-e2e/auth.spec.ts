@@ -66,12 +66,17 @@ test("real local OTP, both modes, persistent settings, MFA and revoked sessions"
   await page.getByLabel("Six-digit verification code").fill("123456");
   await page.getByRole("button", { name: "Verify and continue" }).click();
   await expect(page).toHaveURL(/onboarding/);
-  if (await page.getByRole("heading", { name: "Make yourself at home." }).isVisible()) {
+  await expect(page.getByRole("heading", { name: "Make yourself at home." })).toBeVisible();
+  {
     await page.getByLabel("Your display name").fill("Fictional neighbour");
     await page.getByLabel("Both", { exact: true }).check();
     await page.getByLabel("I am 18 or older.").check();
     await page.getByLabel(/I have read the preview terms/).check();
-    await page.getByRole("button", { name: "Save and continue" }).click();
+    const [saved] = await Promise.all([
+      page.waitForResponse((response) => response.url().endsWith("/api/v1/auth/onboard")),
+      page.getByRole("button", { name: "Save and continue" }).click(),
+    ]);
+    expect(saved.status(), "Onboarding command must persist before navigation").toBe(200);
   }
   await expect(page).toHaveURL(/app\/client/);
   const id = await userId();
@@ -97,6 +102,41 @@ test("real local OTP, both modes, persistent settings, MFA and revoked sessions"
   await expect(page.getByText("Preferences saved.")).toBeVisible();
   await page.reload();
   await expect(page.getByLabel("Your display name")).toHaveValue("Fictional updated neighbour");
+  const authCookies = (await context.cookies()).filter((cookie) =>
+    cookie.name.startsWith("duzelo-auth"),
+  );
+  expect(authCookies.every((cookie) => cookie.httpOnly && cookie.sameSite === "Lax")).toBe(true);
+  // Expire only the SDK's cached expiry hint. The signed access/refresh tokens
+  // remain untouched; native Auth must issue and persist the refreshed session.
+  const joined = authCookies
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((cookie) => cookie.value)
+    .join("");
+  const cached = JSON.parse(Buffer.from(joined.replace(/^base64-/, ""), "base64url").toString());
+  cached.expires_at = 0;
+  const expiredHint = "base64-" + Buffer.from(JSON.stringify(cached)).toString("base64url");
+  const chunked = authCookies.some((cookie) => cookie.name.endsWith(".0"));
+  const chunkSize = authCookies[0]!.value.length;
+  await context.clearCookies({ name: /^duzelo-auth/ });
+  const replacements = [];
+  for (let offset = 0, index = 0; offset < expiredHint.length; offset += chunkSize, index++)
+    replacements.push({
+      ...authCookies[0]!,
+      name: chunked ? `duzelo-auth.${index}` : "duzelo-auth",
+      value: expiredHint.slice(offset, offset + chunkSize),
+    });
+  await context.addCookies(replacements);
+  const refresh = await page.goto("/app/client");
+  await expect(
+    page.getByRole("heading", { name: /Welcome, Fictional updated neighbour/ }),
+  ).toBeVisible();
+  expect(refresh?.headers()["cache-control"]).toContain("no-store");
+  expect(
+    (await context.cookies())
+      .filter((cookie) => cookie.name.startsWith("duzelo-auth"))
+      .map((cookie) => cookie.value)
+      .join("") !== expiredHint,
+  ).toBe(true);
   await page.goto("/admin?role=owner&aal=aal2");
   await expect(
     page.getByRole("heading", { name: "This workspace needs additional permission." }),
@@ -167,7 +207,7 @@ test("cross-origin requests, bounded verification, no signup authority escalatio
   await sql`delete from private.auth_rate_limits`;
   await signIn(page, "0820000003");
   const id = await userId("27820000003");
-  await sql`delete from auth.sessions where user_id=${id}::uuid`;
+  await sql`update auth.sessions set not_after=now()-interval '1 second' where user_id=${id}::uuid`;
   expect(
     (
       await post(page, "onboard", {
