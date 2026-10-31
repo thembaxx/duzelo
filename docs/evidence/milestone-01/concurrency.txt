@@ -1,0 +1,6 @@
+
+> duzelo@0.0.0 db:concurrency
+> python3 scripts/db-concurrency.py
+
+PASS: publication waits for revocation and rejects stale eligibility.
+PASS: revocation waits for publication, then removes the committed card.

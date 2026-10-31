@@ -1,0 +1,10 @@
+
+> duzelo@0.0.0 db:lint
+> node scripts/db-local.mjs lint
+
+Connecting to local database...
+Linting schema: public
+Linting schema: private
+
+No schema errors found
+{"results":[],"message":"db lint"}

@@ -1,0 +1,8 @@
+
+> duzelo@0.0.0 format:check
+> oxfmt --check .
+
+Checking formatting...
+
+All matched files use the correct format.
+Finished in 140ms on 90 files using 2 threads.

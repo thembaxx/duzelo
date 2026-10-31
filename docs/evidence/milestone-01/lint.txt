@@ -1,0 +1,5 @@
+
+> duzelo@0.0.0 lint
+> oxlint --deny-warnings && node scripts/check-boundaries.mjs
+
+Client/server import boundaries passed (transitive local imports + Next server-only guard).

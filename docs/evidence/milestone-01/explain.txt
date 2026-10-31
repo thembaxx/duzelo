@@ -1,0 +1,28 @@
+
+> duzelo@0.0.0 db:explain
+> node scripts/db-local.mjs explain
+
+                                                                                                                                   QUERY PLAN
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Index Scan using worker_coverage_base_gist_idx on worker_coverage c  (cost=0.27..58.29 rows=1 width=16) (actual time=7.482..7.490 rows=4 loops=1)
+   Index Cond: (base_point && _st_expand('0101000020E61000008D976E1283003E408D976E1283003BC0'::geography, '150000'::double precision))
+   Filter: (st_dwithin(base_point, '0101000020E61000008D976E1283003E408D976E1283003BC0'::geography, '150000'::double precision, true) AND st_dwithin(base_point, '0101000020E61000008D976E1283003E408D976E1283003BC0'::geography, ((radius_km * 1000))::double precision, true))
+   Buffers: shared hit=141
+ Planning:
+   Buffers: shared hit=139
+ Planning Time: 19.354 ms
+ Execution Time: 7.563 ms
+(8 rows)
+
+SET
+                                                                    QUERY PLAN
+---------------------------------------------------------------------------------------------------------------------------------------------------
+ Index Scan using worker_coverage_base_gist_idx on worker_coverage c  (cost=0.27..33.28 rows=1 width=16) (actual time=0.018..0.020 rows=4 loops=1)
+   Index Cond: (base_point && _st_expand('0101000020E61000008D976E1283003E408D976E1283003BC0'::geography, '150000'::double precision))
+   Filter: st_dwithin(base_point, '0101000020E61000008D976E1283003E408D976E1283003BC0'::geography, '150000'::double precision, true)
+   Buffers: shared hit=2
+ Planning Time: 0.078 ms
+ Execution Time: 0.038 ms
+(6 rows)
+
+RESET

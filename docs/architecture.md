@@ -34,3 +34,7 @@ The two root SQL files remain untouched and unexecuted. `docs/schema.md`, `docs/
 ## Rollback
 
 Revert the foundation PR to the preserved build-pack commit. No migration, provider account or deployed resource needs rollback. Browser data contains only an offline document; unregister the service worker and clear its cache via browser site-data controls when testing a rollback. Do not deploy the SQL blueprints.
+
+## Milestone 01 extension
+
+The local database baseline is now in `supabase/`, with pinned CLI, local-only scripts, reviewed migrations, synthetic non-login fixtures and pgTAP checks. See ADR 0002. It is not connected to the deployed foundation. Full runtime verification and infrastructure limitations are recorded in milestone-specific evidence; the original SQL blueprints remain reference-only.

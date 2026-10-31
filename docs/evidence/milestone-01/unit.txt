@@ -1,0 +1,15 @@
+
+> duzelo@0.0.0 test
+> vitest run
+
+
+ RUN  v5.0.5 /workspace/duzelo
+
+
+ Test Files  5 passed (5)
+      Tests  13 passed (13)
+   Start at  12:07:11
+   Duration  716ms (import 38%, tests 37%, transform 18%, worker 7%)
+
+    Isolate  5 workers spawned · ~89ms startup each (spawn + environment, per file)
+             at least ~354ms faster with isolate: false — reuses workers across files instead of one per file
