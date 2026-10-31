@@ -29,15 +29,17 @@ export function PwaRuntime() {
     window.addEventListener("appinstalled", onInstalled);
 
     let didReload = false;
+    const hadController = Boolean(navigator.serviceWorker?.controller);
     const onController = () => {
-      if (didReload) return;
+      if (!hadController || didReload) return;
       didReload = true;
       window.location.reload();
     };
     let unregisterFocus = () => {};
     if (
       "serviceWorker" in navigator &&
-      (location.protocol === "https:" || location.hostname === "localhost")
+      (location.protocol === "https:" ||
+        ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname))
     ) {
       navigator.serviceWorker.addEventListener("controllerchange", onController);
       void navigator.serviceWorker

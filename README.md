@@ -77,3 +77,9 @@ The files below remain authoritative for later milestones:
 Keep sensitive features fail-closed and server-authorized. Never claim escrow, real verified workers, working checkout or live availability without evidence. Avoid exposing exact addresses, worker home bases, identity documents, bank data or secret keys. Maintain real keyboard access, mobile performance and text-based action feedback in both colour schemes.
 
 The app is prelaunch, and the founder will supply photography/design references when available.
+
+## Milestone 02 — isolated account implementation
+
+Native local phone OTP, SSR refresh, owner onboarding/preferences, dual client/worker modes, suspension/global sign-out and administrator MFA are implemented behind **Auth OFF by default**. No production registration or SMS delivery is enabled. Follow [isolated account setup](docs/auth/LOCAL_ACCOUNTS.md), [architecture/provider gates](docs/adr/0003-authentication.md) and [current integration evidence](docs/evidence/milestone-02.md). `npm run test:public` starts a production server and runs all existing public browser checks; `npm run test:auth` requires the isolated local Supabase stack.
+
+[DESIGN.md](DESIGN.md) maps the founder's reference images and Noe/Marked thread to actual interface decisions. The current editorial identity, custom mark, Geist typography, three appearance choices and public PWA remain intact. Mode cards and phone progress use the existing theme palette. Stop before Milestone 03.

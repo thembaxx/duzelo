@@ -1,3 +1,5 @@
+> Update: native isolated account flows now exist in `src/features/auth`; see [local setup](LOCAL_ACCOUNTS.md). Production remains OFF. The contracts below remain defense-in-depth and are not an alternate source of trusted identity.
+
 # Duzelo M02 — workspace guards, navigation, and organization isolation
 
 **State:** local TypeScript security contracts and unit tests; **no active phone sign-in, session adapter, account writes or remote Supabase project**. Keep `featureFlags.phoneAuth=false` and all gated marketplace features off.

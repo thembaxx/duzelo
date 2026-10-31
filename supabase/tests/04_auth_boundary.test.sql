@@ -1,0 +1,24 @@
+begin;
+set search_path=public,extensions;
+select no_plan();
+select ok(not has_table_privilege('authenticated','private.auth_rate_limits','select'),'rate buckets are server-private');
+select ok(not has_table_privilege('authenticated','private.auth_rate_limits','insert'),'browser cannot reset rate budgets');
+select ok(not has_function_privilege('anon','private.local_sms_test_hook(jsonb)','execute'),'guest cannot call local SMS adapter');
+select ok(not has_function_privilege('authenticated','private.local_sms_test_hook(jsonb)','execute'),'user cannot call local SMS adapter');
+select ok(has_function_privilege('supabase_auth_admin','private.local_sms_test_hook(jsonb)','execute'),'only native Auth can call local adapter');
+select is(private.local_sms_test_hook('{"user":{"phone":"27820000001"}}'::jsonb),'{}'::jsonb,'local adapter accepts only a fixture');
+select throws_ok($$select private.local_sms_test_hook('{"user":{"phone":"27821111111"}}'::jsonb)$$,'P0001',null,'adapter refuses non-fixture delivery');
+-- A view capability is never worker approval.
+update public.user_profiles set worker_enabled=true where user_id='10000000-0000-0000-0000-000000000006';
+update public.worker_profiles set status='rejected' where user_id='10000000-0000-0000-0000-000000000006';
+set local role authenticated;
+select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000006',true);
+select throws_ok('update public.user_profiles set worker_enabled=true','42501',null,'user cannot grant a capability through Data API');
+select throws_ok('update public.user_profiles set is_suspended=false','42501',null,'user cannot unsuspend an account');
+select is((select count(*)::int from public.job_requests),0,'rejected worker with worker mode gets no jobs');
+select is((select count(*)::int from public.job_matches),0,'rejected worker gets no opportunities');
+select is((select count(*)::int from public.worker_cards where worker_id in (select id from public.worker_profiles where user_id='10000000-0000-0000-0000-000000000006')),0,'rejected worker has no published card');
+select throws_ok('select * from private.auth_rate_limits','42501',null,'rate data has no browser access');
+reset role;
+select * from finish();
+rollback;

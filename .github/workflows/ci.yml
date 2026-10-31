@@ -1,0 +1,81 @@
+name: Application checks
+on:
+  pull_request:
+  push:
+    branches: [main, feat/m02-integrated-accounts]
+permissions:
+  contents: read
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      SUPABASE_SECRET_KEY: CI_ONLY_NOT_A_CREDENTIAL_LEAK_CANARY_M00
+      SECURITY_SCAN_CANARY: CI_ONLY_NOT_A_CREDENTIAL_LEAK_CANARY_M00
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run check
+      - run: node scripts/check-boundaries.mjs
+      - run: npm audit --audit-level=high
+      - run: npm run security:check
+      - run: npx --no-install playwright install --with-deps chromium
+      - run: npm run test:public
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: foundation-browser-evidence
+          path: |
+            playwright-report/
+            test-results/
+            docs/evidence/screenshots/
+          retention-days: 14
+  database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run db:start
+      - run: npm run db:reset
+      - run: npm run db:test
+      - run: npm run db:concurrency
+      - run: npm run db:advisors
+      - run: npm run db:lint
+      - run: npm run db:explain
+
+  auth:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run auth:start > /tmp/auth-start.log 2>&1 || (tail -40 /tmp/auth-start.log; exit 1)
+      - run: npm run auth:env
+      - run: npx --no-install playwright install --with-deps chromium
+      - run: npm run test:auth
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: auth-ui-screenshots
+          path: docs/evidence/screenshots/auth-*.png
+          retention-days: 14

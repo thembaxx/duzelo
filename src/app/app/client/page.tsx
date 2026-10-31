@@ -1,2 +1,5 @@
-import { redirect } from 'next/navigation';
-export default function ClientShell() { redirect('/auth/sign-in'); }
+import { WorkspacePage } from "@/features/auth/workspace";
+export const dynamic = "force-dynamic";
+export default function Page() {
+  return <WorkspacePage mode="client" />;
+}

@@ -1,2 +1,18 @@
-import { redirect } from 'next/navigation';
-export default function AdminShell() { redirect('/auth/sign-in'); }
+import { requireWorkspace } from "@/features/auth/guard";
+import { PageHeading } from "@/features/auth/page-heading";
+import { SignOutButton } from "@/features/auth/forms.client";
+export const dynamic = "force-dynamic";
+export default async function Admin() {
+  await requireWorkspace("admin");
+  return (
+    <>
+      <PageHeading eyebrow="Administrator · MFA verified" title="A careful foundation.">
+        <p>
+          Your server-granted membership and authenticator were verified. Verification queues,
+          evidence access and approval actions are not active yet.
+        </p>
+      </PageHeading>
+      <SignOutButton />
+    </>
+  );
+}
