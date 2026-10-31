@@ -404,6 +404,7 @@ begin
     select 1 from public.job_matches jm
     where jm.job_id = new.job_id and jm.worker_id = new.worker_id
       and jm.status in ('invited','viewed','responded')
+      and (jm.expires_at is null or jm.expires_at > now())
   ) then
     raise exception 'Inspection grant requires job owner and eligible matched worker';
   end if;
