@@ -315,16 +315,19 @@ test("coarse discovery, real map, fallback, theme, pagination and saved-address 
   // Real native identity + transactionally saved private address, never a public DTO.
   await signIn(page, "0820000006", "client");
   await page.goto("/explore");
-  await page.getByText("Save a private address", { exact: true }).click();
-  await page.getByLabel("Address label", { exact: true }).fill("Fictional saved farm");
-  await page.getByLabel("Private street or rural directions").fill("PRIVATE-RURAL-DIRECTIONS-42");
-  await page.getByLabel("Address town", { exact: true }).fill("Fictional town");
-  await page
+  const accountContent = page.locator("#main-content");
+  await accountContent.getByText("Save a private address", { exact: true }).click();
+  await accountContent.getByLabel("Address label", { exact: true }).fill("Fictional saved farm");
+  await accountContent
+    .getByLabel("Private street or rural directions")
+    .fill("PRIVATE-RURAL-DIRECTIONS-42");
+  await accountContent.getByLabel("Address town", { exact: true }).fill("Fictional town");
+  await accountContent
     .getByRole("combobox", { name: "Address province", exact: true })
     .selectOption("Mpumalanga");
-  await page.getByLabel("Private address latitude").fill("-27.001234");
-  await page.getByLabel("Private address longitude").fill("30.001234");
-  await page
+  await accountContent.getByLabel("Private address latitude").fill("-27.001234");
+  await accountContent.getByLabel("Private address longitude").fill("30.001234");
+  await accountContent
     .getByRole("checkbox", { name: "I choose to save this private address for my account." })
     .check();
   const [saved] = await Promise.all([
