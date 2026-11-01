@@ -7,12 +7,12 @@ Run npm ci | 2026-11-01T22:29:03.7435353Z   NEXT_TELEMETRY_DISABLED: 1
 Run npm ci | 2026-11-01T22:29:03.7435689Z   SUPABASE_SECRET_KEY: CI_ONLY_NOT_A_CREDENTIAL_LEAK_CANARY_M00
 Run npm ci | 2026-11-01T22:29:03.7436136Z   SECURITY_SCAN_CANARY: CI_ONLY_NOT_A_CREDENTIAL_LEAK_CANARY_M00
 Run npm ci | 2026-11-01T22:29:03.7436472Z ##[endgroup]
-Run npm ci | 2026-11-01T22:29:15.2853699Z 
+Run npm ci | 2026-11-01T22:29:15.2853699Z
 Run npm ci | 2026-11-01T22:29:15.2864266Z added 147 packages, and audited 148 packages in 11s
-Run npm ci | 2026-11-01T22:29:15.2864751Z 
+Run npm ci | 2026-11-01T22:29:15.2864751Z
 Run npm ci | 2026-11-01T22:29:15.2865004Z 36 packages are looking for funding
 Run npm ci | 2026-11-01T22:29:15.2865420Z   run `npm fund` for details
-Run npm ci | 2026-11-01T22:29:15.2869227Z 
+Run npm ci | 2026-11-01T22:29:15.2869227Z
 Run npm ci | 2026-11-01T22:29:15.2869568Z found 0 vulnerabilities
 Run npm run format:check | ﻿2026-11-01T22:29:15.4302087Z ##[group]Run npm run format:check
 Run npm run format:check | 2026-11-01T22:29:15.4302631Z npm run format:check
@@ -22,12 +22,12 @@ Run npm run format:check | 2026-11-01T22:29:15.4331814Z   NEXT_TELEMETRY_DISABLE
 Run npm run format:check | 2026-11-01T22:29:15.4332622Z   SUPABASE_SECRET_KEY: CI_ONLY_NOT_A_CREDENTIAL_LEAK_CANARY_M00
 Run npm run format:check | 2026-11-01T22:29:15.4333361Z   SECURITY_SCAN_CANARY: CI_ONLY_NOT_A_CREDENTIAL_LEAK_CANARY_M00
 Run npm run format:check | 2026-11-01T22:29:15.4334195Z ##[endgroup]
-Run npm run format:check | 2026-11-01T22:29:15.5394655Z 
+Run npm run format:check | 2026-11-01T22:29:15.5394655Z
 Run npm run format:check | 2026-11-01T22:29:15.5395600Z > duzelo@0.1.0 format:check
 Run npm run format:check | 2026-11-01T22:29:15.5396204Z > oxfmt --check src tests
-Run npm run format:check | 2026-11-01T22:29:15.5396489Z 
+Run npm run format:check | 2026-11-01T22:29:15.5396489Z
 Run npm run format:check | 2026-11-01T22:29:15.5945212Z Checking formatting...
-Run npm run format:check | 2026-11-01T22:29:15.5974335Z 
+Run npm run format:check | 2026-11-01T22:29:15.5974335Z
 Run npm run format:check | 2026-11-01T22:29:15.6345097Z All matched files use the correct format.
 Run npm run format:check | 2026-11-01T22:29:15.6346382Z Finished in 41ms on 239 files using 4 threads.
 Run npm run format:check | 2026-11-01T22:29:15.6355281Z No config found, using defaults. Please add a config file or try `oxfmt --init` if needed.
@@ -39,29 +39,29 @@ Run npm run check | 2026-11-01T22:29:15.6649354Z   NEXT_TELEMETRY_DISABLED: 1
 Run npm run check | 2026-11-01T22:29:15.6650109Z   SUPABASE_SECRET_KEY: CI_ONLY_NOT_A_CREDENTIAL_LEAK_CANARY_M00
 Run npm run check | 2026-11-01T22:29:15.6651038Z   SECURITY_SCAN_CANARY: CI_ONLY_NOT_A_CREDENTIAL_LEAK_CANARY_M00
 Run npm run check | 2026-11-01T22:29:15.6651740Z ##[endgroup]
-Run npm run check | 2026-11-01T22:29:15.7698973Z 
+Run npm run check | 2026-11-01T22:29:15.7698973Z
 Run npm run check | 2026-11-01T22:29:15.7700008Z > duzelo@0.1.0 check
 Run npm run check | 2026-11-01T22:29:15.7701364Z > npm run lint && npm run typecheck && npm test && npm run test:db:static && npm run build
-Run npm run check | 2026-11-01T22:29:15.7702348Z 
-Run npm run check | 2026-11-01T22:29:15.8773785Z 
+Run npm run check | 2026-11-01T22:29:15.7702348Z
+Run npm run check | 2026-11-01T22:29:15.8773785Z
 Run npm run check | 2026-11-01T22:29:15.8774733Z > duzelo@0.1.0 lint
 Run npm run check | 2026-11-01T22:29:15.8775297Z > oxlint src
-Run npm run check | 2026-11-01T22:29:15.8775533Z 
+Run npm run check | 2026-11-01T22:29:15.8775533Z
 Run npm run check | 2026-11-01T22:29:15.9332902Z Found 0 warnings and 0 errors.
 Run npm run check | 2026-11-01T22:29:15.9334022Z Finished in 18ms on 215 files with 96 rules using 4 threads.
-Run npm run check | 2026-11-01T22:29:16.0844665Z 
+Run npm run check | 2026-11-01T22:29:16.0844665Z
 Run npm run check | 2026-11-01T22:29:16.0875005Z > duzelo@0.1.0 typecheck
 Run npm run check | 2026-11-01T22:29:16.0880558Z > next typegen && tsc --noEmit
-Run npm run check | 2026-11-01T22:29:16.0881127Z 
+Run npm run check | 2026-11-01T22:29:16.0881127Z
 Run npm run check | 2026-11-01T22:29:16.3975775Z Generating route types...
 Run npm run check | 2026-11-01T22:29:16.4213395Z ✓ Types generated successfully
-Run npm run check | 2026-11-01T22:29:18.7375081Z 
+Run npm run check | 2026-11-01T22:29:18.7375081Z
 Run npm run check | 2026-11-01T22:29:18.7376015Z > duzelo@0.1.0 test
 Run npm run check | 2026-11-01T22:29:18.7376359Z > vitest run
-Run npm run check | 2026-11-01T22:29:18.7376495Z 
-Run npm run check | 2026-11-01T22:29:19.0440465Z 
+Run npm run check | 2026-11-01T22:29:18.7376495Z
+Run npm run check | 2026-11-01T22:29:19.0440465Z
 Run npm run check | 2026-11-01T22:29:19.0444676Z  RUN  v5.0.5 /home/runner/work/duzelo/duzelo
-Run npm run check | 2026-11-01T22:29:19.0445493Z 
+Run npm run check | 2026-11-01T22:29:19.0445493Z
 Run npm run check | 2026-11-01T22:29:19.3258187Z  ✓ src/features/discovery/config.test.ts (12 tests) 12ms
 Run npm run check | 2026-11-01T22:29:19.4257741Z  ✓ src/features/quotes/schema.test.ts (21 tests) 33ms
 Run npm run check | 2026-11-01T22:29:19.4389695Z  ✓ src/features/jobs/schema.test.ts (18 tests) 29ms
@@ -87,40 +87,40 @@ Run npm run check | 2026-11-01T22:29:20.9786662Z  ✓ src/features/discovery/geo
 Run npm run check | 2026-11-01T22:29:21.0015032Z  ✓ src/lib/site.test.ts (2 tests) 5ms
 Run npm run check | 2026-11-01T22:29:21.1135128Z  ✓ src/lib/feature-flags.test.ts (1 test) 3ms
 Run npm run check | 2026-11-01T22:29:21.1215237Z  ✓ src/features/auth/guard.test.ts (4 tests) 7ms
-Run npm run check | 2026-11-01T22:29:21.1261425Z 
+Run npm run check | 2026-11-01T22:29:21.1261425Z
 Run npm run check | 2026-11-01T22:29:21.1268601Z  Test Files  25 passed (25)
 Run npm run check | 2026-11-01T22:29:21.1270165Z       Tests  259 passed (259)
 Run npm run check | 2026-11-01T22:29:21.1271139Z    Start at  22:29:19
 Run npm run check | 2026-11-01T22:29:21.1277853Z    Duration  2.07s (import 56%, transform 23%, tests 16%, worker 6%)
-Run npm run check | 2026-11-01T22:29:21.1291858Z 
+Run npm run check | 2026-11-01T22:29:21.1291858Z
 Run npm run check | 2026-11-01T22:29:21.1293094Z     Isolate  25 workers spawned · ~132ms startup each (spawn + environment, per file)
 Run npm run check | 2026-11-01T22:29:21.1295389Z              at least ~968ms faster with isolate: false — reuses workers across files instead of one per file
-Run npm run check | 2026-11-01T22:29:21.1296320Z 
-Run npm run check | 2026-11-01T22:29:21.2755142Z 
+Run npm run check | 2026-11-01T22:29:21.1296320Z
+Run npm run check | 2026-11-01T22:29:21.2755142Z
 Run npm run check | 2026-11-01T22:29:21.2755645Z > duzelo@0.1.0 test:db:static
 Run npm run check | 2026-11-01T22:29:21.2756296Z > node scripts/verify-db-baseline.mjs
-Run npm run check | 2026-11-01T22:29:21.2756561Z 
+Run npm run check | 2026-11-01T22:29:21.2756561Z
 Run npm run check | 2026-11-01T22:29:21.3086856Z Static migration contract checks passed. These do NOT replace Supabase PostgreSQL/pgTAP tests.
-Run npm run check | 2026-11-01T22:29:21.4156910Z 
+Run npm run check | 2026-11-01T22:29:21.4156910Z
 Run npm run check | 2026-11-01T22:29:21.4157599Z > duzelo@0.1.0 build
 Run npm run check | 2026-11-01T22:29:21.4158024Z > next build
-Run npm run check | 2026-11-01T22:29:21.4158185Z 
+Run npm run check | 2026-11-01T22:29:21.4158185Z
 Run npm run check | 2026-11-01T22:29:21.7948226Z ▲ Next.js 16.4.3 (Turbopack)
 Run npm run check | 2026-11-01T22:29:21.8215460Z ✓ Running next.config.ts took 26ms
 Run npm run check | 2026-11-01T22:29:21.8218445Z ⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
-Run npm run check | 2026-11-01T22:29:21.8329758Z 
+Run npm run check | 2026-11-01T22:29:21.8329758Z
 Run npm run check | 2026-11-01T22:29:21.8719569Z   Creating an optimized production build ...
 Run npm run check | 2026-11-01T22:29:31.6485111Z ✓ Compiled successfully in 9.8s
 Run npm run check | 2026-11-01T22:29:31.6512460Z   Running TypeScript ...
 Run npm run check | 2026-11-01T22:29:34.3669019Z   Finished TypeScript in 2.7s ...
 Run npm run check | 2026-11-01T22:29:34.3688959Z   Collecting page data using 3 workers ...
 Run npm run check | 2026-11-01T22:29:35.5456449Z   Generating static pages using 3 workers (0/22) ...
-Run npm run check | 2026-11-01T22:29:35.8219632Z   Generating static pages using 3 workers (5/22) 
-Run npm run check | 2026-11-01T22:29:36.0857614Z   Generating static pages using 3 workers (10/22) 
-Run npm run check | 2026-11-01T22:29:36.1210732Z   Generating static pages using 3 workers (16/22) 
+Run npm run check | 2026-11-01T22:29:35.8219632Z   Generating static pages using 3 workers (5/22)
+Run npm run check | 2026-11-01T22:29:36.0857614Z   Generating static pages using 3 workers (10/22)
+Run npm run check | 2026-11-01T22:29:36.1210732Z   Generating static pages using 3 workers (16/22)
 Run npm run check | 2026-11-01T22:29:36.2072292Z ✓ Generating static pages using 3 workers (22/22) in 662ms
 Run npm run check | 2026-11-01T22:29:36.2129243Z   Finalizing page optimization ...
-Run npm run check | 2026-11-01T22:29:36.2244990Z 
+Run npm run check | 2026-11-01T22:29:36.2244990Z
 Run npm run check | 2026-11-01T22:29:36.2289655Z Route (app)
 Run npm run check | 2026-11-01T22:29:36.2305262Z ┌ ○ /
 Run npm run check | 2026-11-01T22:29:36.2306406Z ├ ○ /_not-found
@@ -175,14 +175,14 @@ Run npm run check | 2026-11-01T22:29:36.2348795Z ├ ○ /sitemap.xml
 Run npm run check | 2026-11-01T22:29:36.2349573Z ├ ○ /trust
 Run npm run check | 2026-11-01T22:29:36.2350360Z ├ ƒ /workers
 Run npm run check | 2026-11-01T22:29:36.2351251Z └ ƒ /workers/[slug]
-Run npm run check | 2026-11-01T22:29:36.2351522Z 
-Run npm run check | 2026-11-01T22:29:36.2351534Z 
+Run npm run check | 2026-11-01T22:29:36.2351522Z
+Run npm run check | 2026-11-01T22:29:36.2351534Z
 Run npm run check | 2026-11-01T22:29:36.2351777Z ƒ Proxy (Middleware)
-Run npm run check | 2026-11-01T22:29:36.2352050Z 
+Run npm run check | 2026-11-01T22:29:36.2352050Z
 Run npm run check | 2026-11-01T22:29:36.2352458Z ○  (Static)   prerendered as static content
 Run npm run check | 2026-11-01T22:29:36.2353347Z ●  (SSG)      prerendered as static HTML (uses generateStaticParams)
 Run npm run check | 2026-11-01T22:29:36.2354452Z ƒ  (Dynamic)  server-rendered on demand
-Run npm run check | 2026-11-01T22:29:36.2354842Z 
+Run npm run check | 2026-11-01T22:29:36.2354842Z
 Run node scripts/check-boundaries.mjs | ﻿2026-11-01T22:29:36.3868678Z ##[group]Run node scripts/check-boundaries.mjs
 Run node scripts/check-boundaries.mjs | 2026-11-01T22:29:36.3890390Z node scripts/check-boundaries.mjs
 Run node scripts/check-boundaries.mjs | 2026-11-01T22:29:36.3910453Z shell: /usr/bin/bash -e {0}
@@ -209,10 +209,10 @@ Run npm run security:check | 2026-11-01T22:29:36.9199070Z   NEXT_TELEMETRY_DISAB
 Run npm run security:check | 2026-11-01T22:29:36.9199402Z   SUPABASE_SECRET_KEY: CI_ONLY_NOT_A_CREDENTIAL_LEAK_CANARY_M00
 Run npm run security:check | 2026-11-01T22:29:36.9199831Z   SECURITY_SCAN_CANARY: CI_ONLY_NOT_A_CREDENTIAL_LEAK_CANARY_M00
 Run npm run security:check | 2026-11-01T22:29:36.9200175Z ##[endgroup]
-Run npm run security:check | 2026-11-01T22:29:37.0215833Z 
+Run npm run security:check | 2026-11-01T22:29:37.0215833Z
 Run npm run security:check | 2026-11-01T22:29:37.0216434Z > duzelo@0.1.0 security:check
 Run npm run security:check | 2026-11-01T22:29:37.0216919Z > node scripts/check-secrets.mjs
-Run npm run security:check | 2026-11-01T22:29:37.0217140Z 
+Run npm run security:check | 2026-11-01T22:29:37.0217140Z
 Run npm run security:check | 2026-11-01T22:29:37.1097714Z Secret leakage scan passed: 384 repository files; 42 browser assets; canary checked. Pattern scan is not a complete security audit.
 Run npm run test:public | ﻿2026-11-01T22:29:57.8816033Z ##[group]Run npm run test:public
 Run npm run test:public | 2026-11-01T22:29:57.8816387Z npm run test:public
@@ -222,10 +222,10 @@ Run npm run test:public | 2026-11-01T22:29:57.8838938Z   NEXT_TELEMETRY_DISABLED
 Run npm run test:public | 2026-11-01T22:29:57.8839268Z   SUPABASE_SECRET_KEY: CI_ONLY_NOT_A_CREDENTIAL_LEAK_CANARY_M00
 Run npm run test:public | 2026-11-01T22:29:57.8839715Z   SECURITY_SCAN_CANARY: CI_ONLY_NOT_A_CREDENTIAL_LEAK_CANARY_M00
 Run npm run test:public | 2026-11-01T22:29:57.8840061Z ##[endgroup]
-Run npm run test:public | 2026-11-01T22:29:57.9874020Z 
+Run npm run test:public | 2026-11-01T22:29:57.9874020Z
 Run npm run test:public | 2026-11-01T22:29:57.9875020Z > duzelo@0.1.0 test:public
 Run npm run test:public | 2026-11-01T22:29:57.9875949Z > node scripts/test-public.mjs
-Run npm run test:public | 2026-11-01T22:29:57.9876335Z 
+Run npm run test:public | 2026-11-01T22:29:57.9876335Z
 Run npm run test:public | 2026-11-01T22:30:01.9911949Z ✔ editorial demo is clearly labelled and navigation reaches real category pages (2673.518601ms)
 Run npm run test:public | 2026-11-01T22:30:03.3742727Z ✔ 320px mobile, dark mode and reduced motion avoid overflow and illegible content (1391.410367ms)
 Run npm run test:public | 2026-11-01T22:30:03.4127956Z ✔ service category tabs filter real taxonomy and work with arrow keys (2196.754009ms)

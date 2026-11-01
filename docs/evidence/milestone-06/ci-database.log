@@ -3,21 +3,21 @@ Run npm ci | ﻿2026-11-01T22:29:01.7462192Z ##[group]Run npm ci
 Run npm ci | 2026-11-01T22:29:01.7462719Z npm ci
 Run npm ci | 2026-11-01T22:29:01.7498620Z shell: /usr/bin/bash -e {0}
 Run npm ci | 2026-11-01T22:29:01.7499088Z ##[endgroup]
-Run npm ci | 2026-11-01T22:29:13.5665858Z 
+Run npm ci | 2026-11-01T22:29:13.5665858Z
 Run npm ci | 2026-11-01T22:29:13.5675588Z added 147 packages, and audited 148 packages in 12s
-Run npm ci | 2026-11-01T22:29:13.5676053Z 
+Run npm ci | 2026-11-01T22:29:13.5676053Z
 Run npm ci | 2026-11-01T22:29:13.5676343Z 36 packages are looking for funding
 Run npm ci | 2026-11-01T22:29:13.5676780Z   run `npm fund` for details
-Run npm ci | 2026-11-01T22:29:13.5680975Z 
+Run npm ci | 2026-11-01T22:29:13.5680975Z
 Run npm ci | 2026-11-01T22:29:13.5681429Z found 0 vulnerabilities
 Run npm run db:reset | ﻿2026-11-01T22:30:14.9442910Z ##[group]Run npm run db:reset
 Run npm run db:reset | 2026-11-01T22:30:14.9443262Z npm run db:reset
 Run npm run db:reset | 2026-11-01T22:30:14.9464254Z shell: /usr/bin/bash -e {0}
 Run npm run db:reset | 2026-11-01T22:30:14.9464665Z ##[endgroup]
-Run npm run db:reset | 2026-11-01T22:30:15.0452218Z 
+Run npm run db:reset | 2026-11-01T22:30:15.0452218Z
 Run npm run db:reset | 2026-11-01T22:30:15.0452840Z > duzelo@0.1.0 db:reset
 Run npm run db:reset | 2026-11-01T22:30:15.0453497Z > node scripts/db-local.mjs reset
-Run npm run db:reset | 2026-11-01T22:30:15.0454151Z 
+Run npm run db:reset | 2026-11-01T22:30:15.0454151Z
 Run npm run db:reset | 2026-11-01T22:30:15.5979270Z Resetting local database...
 Run npm run db:reset | 2026-11-01T22:30:15.9584402Z Recreating database...
 Run npm run db:reset | 2026-11-01T22:30:26.5097477Z Initialising schema...
@@ -35,10 +35,10 @@ Run npm run db:test | ﻿2026-11-01T22:30:29.2490728Z ##[group]Run npm run db:te
 Run npm run db:test | 2026-11-01T22:30:29.2491065Z npm run db:test
 Run npm run db:test | 2026-11-01T22:30:29.2512851Z shell: /usr/bin/bash -e {0}
 Run npm run db:test | 2026-11-01T22:30:29.2513129Z ##[endgroup]
-Run npm run db:test | 2026-11-01T22:30:29.3494262Z 
+Run npm run db:test | 2026-11-01T22:30:29.3494262Z
 Run npm run db:test | 2026-11-01T22:30:29.3495064Z > duzelo@0.1.0 db:test
 Run npm run db:test | 2026-11-01T22:30:29.3495738Z > node scripts/db-local.mjs test
-Run npm run db:test | 2026-11-01T22:30:29.3496111Z 
+Run npm run db:test | 2026-11-01T22:30:29.3496111Z
 Run npm run db:test | 2026-11-01T22:30:29.8465253Z Connecting to local database...
 Run npm run db:test | 2026-11-01T22:30:30.1574351Z Error response from daemon: toomanyrequests: Rate exceeded
 Run npm run db:test | 2026-11-01T22:30:30.1593138Z Retrying after 4s: public.ecr.aws/supabase/pg_prove:3.36
@@ -79,44 +79,44 @@ Run npm run db:concurrency | ﻿2026-11-01T22:30:36.8532001Z ##[group]Run npm ru
 Run npm run db:concurrency | 2026-11-01T22:30:36.8532626Z npm run db:concurrency
 Run npm run db:concurrency | 2026-11-01T22:30:36.8562458Z shell: /usr/bin/bash -e {0}
 Run npm run db:concurrency | 2026-11-01T22:30:36.8562921Z ##[endgroup]
-Run npm run db:concurrency | 2026-11-01T22:30:36.9641040Z 
+Run npm run db:concurrency | 2026-11-01T22:30:36.9641040Z
 Run npm run db:concurrency | 2026-11-01T22:30:36.9641704Z > duzelo@0.1.0 db:concurrency
 Run npm run db:concurrency | 2026-11-01T22:30:36.9642401Z > python3 scripts/db-concurrency.py
-Run npm run db:concurrency | 2026-11-01T22:30:36.9642787Z 
+Run npm run db:concurrency | 2026-11-01T22:30:36.9642787Z
 Run npm run db:concurrency | 2026-11-01T22:30:41.5986063Z PASS: publication waits for revocation and rejects stale eligibility.
 Run npm run db:concurrency | 2026-11-01T22:30:41.5987139Z PASS: revocation waits for publication, then removes the committed card.
 Run npm run db:advisors | ﻿2026-11-01T22:30:41.6154662Z ##[group]Run npm run db:advisors
 Run npm run db:advisors | 2026-11-01T22:30:41.6155205Z npm run db:advisors
 Run npm run db:advisors | 2026-11-01T22:30:41.6176816Z shell: /usr/bin/bash -e {0}
 Run npm run db:advisors | 2026-11-01T22:30:41.6177101Z ##[endgroup]
-Run npm run db:advisors | 2026-11-01T22:30:41.7312890Z 
+Run npm run db:advisors | 2026-11-01T22:30:41.7312890Z
 Run npm run db:advisors | 2026-11-01T22:30:41.7313762Z > duzelo@0.1.0 db:advisors
 Run npm run db:advisors | 2026-11-01T22:30:41.7315002Z > node scripts/db-local.mjs advisors
-Run npm run db:advisors | 2026-11-01T22:30:41.7324504Z 
+Run npm run db:advisors | 2026-11-01T22:30:41.7324504Z
 Run npm run db:advisors | 2026-11-01T22:30:42.2776248Z Connecting to local database...
 Run npm run db:advisors | 2026-11-01T22:30:42.4642742Z No issues found
 Run npm run db:lint | ﻿2026-11-01T22:30:42.8127604Z ##[group]Run npm run db:lint
 Run npm run db:lint | 2026-11-01T22:30:42.8127961Z npm run db:lint
 Run npm run db:lint | 2026-11-01T22:30:42.8151926Z shell: /usr/bin/bash -e {0}
 Run npm run db:lint | 2026-11-01T22:30:42.8152216Z ##[endgroup]
-Run npm run db:lint | 2026-11-01T22:30:42.9211411Z 
+Run npm run db:lint | 2026-11-01T22:30:42.9211411Z
 Run npm run db:lint | 2026-11-01T22:30:42.9211939Z > duzelo@0.1.0 db:lint
 Run npm run db:lint | 2026-11-01T22:30:42.9212542Z > node scripts/db-local.mjs lint
-Run npm run db:lint | 2026-11-01T22:30:42.9212791Z 
+Run npm run db:lint | 2026-11-01T22:30:42.9212791Z
 Run npm run db:lint | 2026-11-01T22:30:43.4324142Z Connecting to local database...
 Run npm run db:lint | 2026-11-01T22:30:43.4592830Z Linting schema: public
 Run npm run db:lint | 2026-11-01T22:30:43.4618398Z Linting schema: private
-Run npm run db:lint | 2026-11-01T22:30:43.4942370Z 
+Run npm run db:lint | 2026-11-01T22:30:43.4942370Z
 Run npm run db:lint | 2026-11-01T22:30:43.4943265Z No schema errors found
 Run npm run db:explain | ﻿2026-11-01T22:30:43.8442742Z ##[group]Run npm run db:explain
 Run npm run db:explain | 2026-11-01T22:30:43.8443088Z npm run db:explain
 Run npm run db:explain | 2026-11-01T22:30:43.8464776Z shell: /usr/bin/bash -e {0}
 Run npm run db:explain | 2026-11-01T22:30:43.8465051Z ##[endgroup]
-Run npm run db:explain | 2026-11-01T22:30:43.9507163Z 
+Run npm run db:explain | 2026-11-01T22:30:43.9507163Z
 Run npm run db:explain | 2026-11-01T22:30:43.9507784Z > duzelo@0.1.0 db:explain
 Run npm run db:explain | 2026-11-01T22:30:43.9508257Z > node scripts/db-local.mjs explain
-Run npm run db:explain | 2026-11-01T22:30:43.9508513Z 
-Run npm run db:explain | 2026-11-01T22:30:44.0702085Z                                                                                                                                    QUERY PLAN                                                                                                                                    
+Run npm run db:explain | 2026-11-01T22:30:43.9508513Z
+Run npm run db:explain | 2026-11-01T22:30:44.0702085Z                                                                                                                                    QUERY PLAN
 Run npm run db:explain | 2026-11-01T22:30:44.0704963Z ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Run npm run db:explain | 2026-11-01T22:30:44.0708048Z  Index Scan using worker_coverage_base_gist_idx on worker_coverage c  (cost=0.27..58.29 rows=1 width=16) (actual time=8.606..8.615 rows=4 loops=1)
 Run npm run db:explain | 2026-11-01T22:30:44.0709622Z    Index Cond: (base_point && _st_expand('0101000020E61000008D976E1283003E408D976E1283003BC0'::geography, '150000'::double precision))
@@ -127,9 +127,9 @@ Run npm run db:explain | 2026-11-01T22:30:44.0713840Z    Buffers: shared hit=143
 Run npm run db:explain | 2026-11-01T22:30:44.0714231Z  Planning Time: 22.099 ms
 Run npm run db:explain | 2026-11-01T22:30:44.0714634Z  Execution Time: 8.725 ms
 Run npm run db:explain | 2026-11-01T22:30:44.0715081Z (8 rows)
-Run npm run db:explain | 2026-11-01T22:30:44.0715274Z 
+Run npm run db:explain | 2026-11-01T22:30:44.0715274Z
 Run npm run db:explain | 2026-11-01T22:30:44.0715426Z SET
-Run npm run db:explain | 2026-11-01T22:30:44.0716269Z                                                                     QUERY PLAN                                                                     
+Run npm run db:explain | 2026-11-01T22:30:44.0716269Z                                                                     QUERY PLAN
 Run npm run db:explain | 2026-11-01T22:30:44.0717853Z ---------------------------------------------------------------------------------------------------------------------------------------------------
 Run npm run db:explain | 2026-11-01T22:30:44.0719583Z  Index Scan using worker_coverage_base_gist_idx on worker_coverage c  (cost=0.27..33.28 rows=1 width=16) (actual time=0.028..0.033 rows=4 loops=1)
 Run npm run db:explain | 2026-11-01T22:30:44.0721385Z    Index Cond: (base_point && _st_expand('0101000020E61000008D976E1283003E408D976E1283003BC0'::geography, '150000'::double precision))
@@ -138,10 +138,10 @@ Run npm run db:explain | 2026-11-01T22:30:44.0724341Z    Buffers: shared hit=2
 Run npm run db:explain | 2026-11-01T22:30:44.0724819Z  Planning Time: 0.103 ms
 Run npm run db:explain | 2026-11-01T22:30:44.0725260Z  Execution Time: 0.054 ms
 Run npm run db:explain | 2026-11-01T22:30:44.0725667Z (6 rows)
-Run npm run db:explain | 2026-11-01T22:30:44.0725867Z 
+Run npm run db:explain | 2026-11-01T22:30:44.0725867Z
 Run npm run db:explain | 2026-11-01T22:30:44.0726002Z RESET
 Run npm run db:explain | 2026-11-01T22:30:44.0726370Z SET
-Run npm run db:explain | 2026-11-01T22:30:44.0727129Z                                                                             QUERY PLAN                                                                            
+Run npm run db:explain | 2026-11-01T22:30:44.0727129Z                                                                             QUERY PLAN
 Run npm run db:explain | 2026-11-01T22:30:44.0728646Z ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Run npm run db:explain | 2026-11-01T22:30:44.0730173Z  Index Scan using worker_cards_approx_gist_idx on worker_cards c  (cost=0.27..33.29 rows=1 width=16) (actual time=0.039..0.040 rows=1 loops=1)
 Run npm run db:explain | 2026-11-01T22:30:44.0731472Z    Index Cond: (approx_marker && _st_expand('0101000020E61000000000000000003E400000000000003BC0'::geography, '30000'::double precision))
@@ -152,5 +152,5 @@ Run npm run db:explain | 2026-11-01T22:30:44.0736215Z    Buffers: shared hit=101
 Run npm run db:explain | 2026-11-01T22:30:44.0736642Z  Planning Time: 0.342 ms
 Run npm run db:explain | 2026-11-01T22:30:44.0737047Z  Execution Time: 0.057 ms
 Run npm run db:explain | 2026-11-01T22:30:44.0737448Z (8 rows)
-Run npm run db:explain | 2026-11-01T22:30:44.0737671Z 
+Run npm run db:explain | 2026-11-01T22:30:44.0737671Z
 Run npm run db:explain | 2026-11-01T22:30:44.0737814Z RESET

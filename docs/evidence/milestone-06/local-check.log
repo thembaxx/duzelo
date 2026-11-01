@@ -46,9 +46,9 @@ Static migration contract checks passed. These do NOT replace Supabase PostgreSQ
   Finished TypeScript in 1685ms ...
   Collecting page data using 2 workers ...
   Generating static pages using 2 workers (0/22) ...
-  Generating static pages using 2 workers (5/22) 
-  Generating static pages using 2 workers (10/22) 
-  Generating static pages using 2 workers (16/22) 
+  Generating static pages using 2 workers (5/22)
+  Generating static pages using 2 workers (10/22)
+  Generating static pages using 2 workers (16/22)
 ✓ Generating static pages using 2 workers (22/22) in 542ms
   Finalizing page optimization ...
 
@@ -113,4 +113,3 @@ Route (app)
 ○  (Static)   prerendered as static content
 ●  (SSG)      prerendered as static HTML (uses generateStaticParams)
 ƒ  (Dynamic)  server-rendered on demand
-
