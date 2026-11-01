@@ -138,7 +138,7 @@ export async function jobsCommand(action: string, input: unknown, key: string | 
         else
           await sql`delete from private.user_blocks where owner_id=${actor.id}::uuid and subject_id=${match.client_id}::uuid`;
         if (blocked)
-          await sql`update public.job_matches set status='declined' where id=${match.id}::uuid and status in ('invited','viewed')`;
+          await sql`update public.job_matches m set status='declined' from public.job_requests j where m.job_id=j.id and j.client_id=${match.client_id}::uuid and m.worker_id=${match.worker_id}::uuid and m.status in ('invited','viewed')`;
         return {
           jobId: String(match.job_id),
           message: blocked

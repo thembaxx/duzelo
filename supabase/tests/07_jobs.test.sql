@@ -35,6 +35,7 @@ select is((select count(*)::int from private.job_candidates('51000000-0000-0000-
 update private.job_locations set exact_point=null where job_id='51000000-0000-0000-0000-000000000001';
 select ok((select approximate from private.job_candidates('51000000-0000-0000-0000-000000000001')),'town-only fallback is explicitly approximate');
 update private.worker_coverage set town_allowlist=array['Different town'] where worker_id='30000000-0000-0000-0000-000000000002';
+select private.publish_worker_card('30000000-0000-0000-0000-000000000002','40000000-0000-0000-0000-000000000001','Synthetic M05 worker','Synthetic M05 scope');
 select is((select count(*)::int from private.job_candidates('51000000-0000-0000-0000-000000000001')),0,'town-only fallback respects the explicit worker town allowlist');
 update private.worker_coverage set town_allowlist='{}' where worker_id='30000000-0000-0000-0000-000000000002';
 -- Coverage changes withdraw publication; restoration requires actual republishing.
@@ -83,5 +84,8 @@ select throws_ok('select * from private.job_assets','42501',null,'private media 
 select throws_ok('select * from private.job_locations','42501',null,'private precise location is denied');
 reset role;
 select ok(exists(select 1 from pg_policies where schemaname='storage' and policyname='job_objects_deny' and permissive='RESTRICTIVE'),'job photo bucket has durable restrictive RLS');
+select throws_ok($$insert into private.job_assets(job_id,owner_id,storage_path,sha256,byte_size,retain_until) values ('51000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000003','fixture/wrong-owner.jpg',repeat('b',64),100,now()+interval '1 day')$$,'P0001',null,'media cannot be bound to a different job owner');
+insert into private.job_assets(id,job_id,owner_id,storage_path,sha256,byte_size,retain_until) values ('d0500000-0000-0000-0000-000000000001','51000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001','fixture/m05.jpg',repeat('a',64),100,now()+interval '1 day');
+select throws_ok($$update private.job_assets set retain_until=now()+interval '2 days' where id='d0500000-0000-0000-0000-000000000001'$$,'P0001',null,'media retention cannot be silently extended');
 select * from finish();
 rollback;

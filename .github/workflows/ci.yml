@@ -89,4 +89,5 @@ jobs:
             docs/evidence/screenshots/auth-*.png
             docs/evidence/screenshots/worker-*.png
             docs/evidence/screenshots/discovery-*.png
+            docs/evidence/screenshots/jobs-*.png
           retention-days: 14

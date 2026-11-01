@@ -55,6 +55,15 @@ create table private.job_assets (
  created_at timestamptz not null default now()
 );
 create index job_assets_owner_job_idx on private.job_assets(owner_id,job_id,state);
+create function private.check_job_asset() returns trigger
+language plpgsql security invoker set search_path='' as $$
+begin
+ if new.owner_id is distinct from (select j.client_id from public.job_requests j where j.id=new.job_id) then raise exception 'Job media must belong to the request owner';end if;
+ if tg_op='UPDATE' and (new.id<>old.id or new.owner_id<>old.owner_id or new.job_id<>old.job_id or new.storage_path<>old.storage_path or new.sha256<>old.sha256 or new.byte_size<>old.byte_size or new.retain_until>old.retain_until) then raise exception 'Job media identity and retention are immutable';end if;
+ if new.retain_until>new.created_at+interval '90 days' then raise exception 'Job media retention exceeds its limit';end if;
+ return new;
+end;$$;
+create trigger job_asset_integrity before insert or update on private.job_assets for each row execute function private.check_job_asset();
 alter table public.job_matches add column wave integer not null default 1 check(wave between 1 and 3);
 alter table public.job_matches add column rationale text not null default '';
 alter table public.notifications add column source_outbox_id uuid unique references private.notification_outbox(id);
@@ -137,4 +146,6 @@ select s.* from scored s order by floor(s.score/5.0) desc,s.exposure,s.last_invi
 $$;
 revoke all on function private.job_candidates(uuid,uuid,boolean) from public,anon,authenticated;
 grant execute on function private.job_candidates(uuid,uuid,boolean) to service_role;
+revoke all on function private.check_job_asset() from public,anon,authenticated;
+grant execute on function private.check_job_asset() to service_role;
 commit;

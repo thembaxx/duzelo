@@ -4,6 +4,7 @@ import type { TransactionSql } from "postgres";
 import { database } from "@/lib/db/server";
 import { getVerifiedIdentity, type Identity } from "@/features/auth/service";
 import { jobsConfig } from "./config";
+import { allowAuthAttempt } from "@/features/auth/rate-limit";
 export async function jobActor(worker = false) {
   if (!jobsConfig()) throw new Error("UNAVAILABLE");
   const actor = await getVerifiedIdentity();
@@ -40,6 +41,8 @@ export async function jobCommand<T extends Record<string, unknown>>(
 ): Promise<T> {
   if (!key || !/^[-a-zA-Z0-9_]{16,128}$/.test(key)) throw new Error("INVALID");
   const actor = await jobActor(worker);
+  if (!(await allowAuthAttempt("jobs-" + action, actor.id, action === "save" ? 60 : 30, 60)))
+    throw new Error("LIMITED");
   const hash = createHash("sha256")
     .update(JSON.stringify({ action: "jobs." + action, input }))
     .digest("hex");

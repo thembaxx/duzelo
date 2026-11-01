@@ -4,6 +4,7 @@ import { database } from "@/lib/db/server";
 import { catalog } from "@/features/workers/queries";
 import { jobActor, lockActor } from "./boundary";
 import { jobsConfig } from "./config";
+import { discoveryConfig } from "@/features/discovery/config";
 import { storedDraft } from "./stored-draft";
 import type { JobOptions, OwnerJob, Opportunity } from "./types";
 const iso = (value: unknown) => (value ? new Date(String(value)).toISOString() : null);
@@ -17,6 +18,7 @@ export async function jobOptions(): Promise<JobOptions> {
     ...options,
     saved: saved.map((r) => ({ id: String(r.id), label: String(r.label), town: String(r.town) })),
     local: jobsConfig()!.mode === "local",
+    map: discoveryConfig()?.map ?? null,
   };
 }
 export async function ownerJobs() {
@@ -32,20 +34,28 @@ export async function getOwnerJob(id: string): Promise<OwnerJob> {
       await sql`select j.*,d.waves,d.next_wave_at,d.expires_at,d.approximate,c.public_name as direct_worker from public.job_requests j join private.job_dispatch d on d.job_id=j.id left join public.worker_cards c on c.worker_id=j.requested_worker_id where j.id=${id}::uuid and j.client_id=${actor.id}::uuid`;
     if (!job) throw new Error("FORBIDDEN");
     const assets =
-      await sql`select id,state from private.job_assets where job_id=${id}::uuid and owner_id=${actor.id}::uuid and state in ('pending','stored','purge_pending') order by created_at`;
+      await sql`select id,state,retain_until>now() as retained from private.job_assets where job_id=${id}::uuid and owner_id=${actor.id}::uuid and state in ('pending','stored','purge_pending') order by created_at`;
     const matches =
       await sql`select m.worker_id,coalesce(c.public_name,'Previously invited provider') as name,m.status,m.expires_at,exists(select 1 from private.user_blocks b where b.owner_id=${actor.id}::uuid and b.subject_id=w.user_id) as blocked from public.job_matches m join public.worker_profiles w on w.id=m.worker_id left join public.worker_cards c on c.worker_id=w.id and c.safe_until>now() where m.job_id=${id}::uuid order by m.dispatched_at,m.id`;
     return {
       id,
       version: Number(job.version),
       step: Number(job.draft_step),
-      status: String(job.status),
+      status:
+        ["open", "matching"].includes(String(job.status)) &&
+        job.expires_at &&
+        Date.parse(String(job.expires_at)) <= Date.now()
+          ? "expired"
+          : String(job.status),
       town: String(job.public_town),
       data: await storedDraft(sql, job),
       directWorker: job.requested_worker_id
         ? String(job.direct_worker ?? "Selected provider")
         : null,
-      assets: assets.map((a) => ({ id: String(a.id), state: String(a.state) })),
+      assets: assets.map((a) => ({
+        id: String(a.id),
+        state: a.state === "stored" && !a.retained ? "expired" : String(a.state),
+      })),
       waves: Number(job.waves),
       invited: matches.length,
       nextWave: iso(job.next_wave_at),
@@ -54,7 +64,11 @@ export async function getOwnerJob(id: string): Promise<OwnerJob> {
       matches: matches.map((m) => ({
         workerId: String(m.worker_id),
         name: String(m.name),
-        status: String(m.status),
+        status:
+          ["invited", "viewed"].includes(String(m.status)) &&
+          Date.parse(String(m.expires_at)) <= Date.now()
+            ? "expired"
+            : String(m.status),
         expires: iso(m.expires_at)!,
         blocked: Boolean(m.blocked),
       })),
@@ -103,9 +117,15 @@ export async function matchSettings() {
     await sql`select urgent_ready,daily_limit from private.worker_match_settings where worker_id=${worker.id}::uuid`;
   const blocks =
     await sql`select id,starts_at,ends_at from private.worker_schedule_blocks where worker_id=${worker.id}::uuid and ends_at>now() order by starts_at limit 20`;
+  const blockedClients =
+    await sql`select distinct on (j.client_id) m.id,j.id as job_id from private.user_blocks b join public.job_requests j on j.client_id=b.subject_id join public.job_matches m on m.job_id=j.id and m.worker_id=${worker.id}::uuid where b.owner_id=${actor.id}::uuid order by j.client_id,m.dispatched_at desc nulls last,m.id limit 100`;
   return {
     urgentReady: Boolean(settings?.urgent_ready),
     dailyLimit: Number(settings?.daily_limit ?? 6),
+    blockedClients: blockedClients.map((b) => ({
+      matchId: String(b.id),
+      reference: String(b.job_id).slice(0, 8),
+    })),
     blocks: blocks.map((b) => ({
       id: String(b.id),
       start: iso(b.starts_at)!,

@@ -14,6 +14,9 @@ import "@/features/auth/auth.css";
 import { discoveryConfig } from "@/features/discovery/config";
 import { workerConfig } from "@/features/workers/config";
 import { readAuthConfig } from "@/config/auth";
+import { jobsConfig } from "@/features/jobs/config";
+import "@/features/jobs/jobs.css";
+import "@/features/discovery/discovery.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -59,6 +62,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
   readAuthConfig();
   workerConfig();
   discoveryConfig();
+  jobsConfig();
   return (
     <html
       lang="en"

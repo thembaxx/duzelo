@@ -1,9 +1,11 @@
 import type { DraftData } from "./schema";
+import type { DiscoveryOptions } from "@/features/discovery/types";
 export interface JobOptions {
   categories: { id: string; label: string; requiresTrade: boolean }[];
   areas: { id: string; label: string }[];
   saved: { id: string; label: string; town: string }[];
   local: boolean;
+  map: DiscoveryOptions["map"] | null;
 }
 export interface OwnerJob {
   id: string;

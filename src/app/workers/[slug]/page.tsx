@@ -1,4 +1,5 @@
 import { workerConfig } from "@/features/workers/config";
+import { jobsConfig } from "@/features/jobs/config";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -85,12 +86,28 @@ export default async function WorkerProfile({ params }: { params: Promise<{ slug
         <p>No portfolio photographs have been published.</p>
       )}
       <section className="standout-panel">
-        <h2>Booking is not open yet.</h2>
+        <h2>{jobsConfig() ? "Request help from this provider." : "Booking is not open yet."}</h2>
         <p>
           Listed prices describe the worker's proposed services. Scope, materials and any travel
           fees must be agreed before work begins. No payment or service request is created by
           viewing this profile.
         </p>
+        {jobsConfig() && (
+          <Link
+            href={
+              "/app/client/jobs/new?worker=" + worker.slug + "&category=" + worker.categories[0]!.id
+            }
+            className="button button-primary"
+          >
+            Start a direct service request
+          </Link>
+        )}
+        {jobsConfig() && (
+          <p>
+            Only this provider will be invited if currently eligible. No appointment or payment is
+            created. Quotes and bookings are not open yet.
+          </p>
+        )}
       </section>
     </section>
   );
