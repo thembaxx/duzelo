@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import postgres from "postgres";
+import sharp from "sharp";
 import { discoveryFixtures } from "./helpers/discovery-fixtures";
 import { signIn, origin, area, cleaning } from "./helpers/worker-fixtures";
 const sql = postgres(process.env.DATABASE_URL!, { max: 1, prepare: false });
@@ -160,6 +161,18 @@ test("coarse discovery, real map, fallback, theme, pagination and saved-address 
   await dark;
   if (info.project.name === "mobile")
     await page.getByRole("button", { name: "Close menu" }).click();
+  // Wait for the synthetic dark background to be painted, not just fetched.
+  await expect
+    .poll(async () => {
+      const { data, info } = await sharp(await page.locator(".discovery-map").screenshot())
+        .removeAlpha()
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+      const pixel =
+        (Math.floor(info.height * 0.25) * info.width + Math.floor(info.width * 0.8)) * 3;
+      return [...data.subarray(pixel, pixel + 3)];
+    })
+    .toEqual([21, 44, 38]);
   await expect(page.locator(".discovery-card.selected")).toHaveCount(1);
   const afterTheme = await box();
   expect(Math.abs(afterTheme.x - beforeTheme.x)).toBeLessThan(3);
@@ -176,7 +189,10 @@ test("coarse discovery, real map, fallback, theme, pagination and saved-address 
     (await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze())
       .violations,
   ).toEqual([]);
-  await page.locator("#worker-results").scrollIntoViewIfNeeded();
+  await page.locator("#worker-results").evaluate((node) => {
+    node.scrollTop = 0;
+    node.scrollIntoView({ block: "start", behavior: "instant" });
+  });
   await page.screenshot({
     path: `docs/evidence/screenshots/discovery-list-${info.project.name}.png`,
   });
