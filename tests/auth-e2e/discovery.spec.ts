@@ -267,6 +267,14 @@ test("coarse discovery, real map, fallback, theme, pagination and saved-address 
     outage.getByText("Map content could not load. The worker list remains available."),
   ).toBeVisible();
   await outage.locator(".discovery-layout").scrollIntoViewIfNeeded();
+  if (info.project.name === "mobile") {
+    const expand = outage.getByRole("button", { name: "Expand worker list", exact: true });
+    await expect(expand).toBeInViewport();
+    await expand.click();
+    await expect(
+      outage.getByRole("heading", { name: "20 reviewed profiles on this page", exact: true }),
+    ).toBeInViewport();
+  }
   await outage.screenshot({
     path: `docs/evidence/screenshots/discovery-fallback-${info.project.name}.png`,
   });

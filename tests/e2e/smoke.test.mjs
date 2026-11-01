@@ -34,7 +34,7 @@ test("desktop navigation, category search and colour preference persistence", as
         .then((value) => value?.includes("dark")),
       true,
     );
-    await page.reload();
+    await page.reload({ waitUntil: "networkidle" });
     assert.equal(
       await page
         .locator("html")
