@@ -1,0 +1,145 @@
+Source run 41357207287 / bea3e49d153eb602066de0dcf5e6281398be9fa5; selected command output; credential-bearing setup omitted.
+Run npm ci | ﻿2026-11-01T22:29:37.4549297Z ##[group]Run npm ci
+Run npm ci | 2026-11-01T22:29:37.4549784Z npm ci
+Run npm ci | 2026-11-01T22:29:37.4569448Z shell: /usr/bin/bash -e {0}
+Run npm ci | 2026-11-01T22:29:37.4569903Z env:
+Run npm ci | 2026-11-01T22:29:37.4570230Z   NEXT_TELEMETRY_DISABLED: 1
+Run npm ci | 2026-11-01T22:29:37.4570598Z ##[endgroup]
+Run npm ci | 2026-11-01T22:29:47.6479648Z 
+Run npm ci | 2026-11-01T22:29:47.6491818Z added 147 packages, and audited 148 packages in 10s
+Run npm ci | 2026-11-01T22:29:47.6492281Z 
+Run npm ci | 2026-11-01T22:29:47.6492784Z 36 packages are looking for funding
+Run npm ci | 2026-11-01T22:29:47.6493413Z   run `npm fund` for details
+Run npm ci | 2026-11-01T22:29:47.6493741Z 
+Run npm ci | 2026-11-01T22:29:47.6494021Z found 0 vulnerabilities
+Run npm run test:auth | ﻿2026-11-01T22:31:16.0009787Z ##[group]Run npm run test:auth
+Run npm run test:auth | 2026-11-01T22:31:16.0010415Z npm run test:auth
+Run npm run test:auth | 2026-11-01T22:31:16.0029572Z shell: /usr/bin/bash -e {0}
+Run npm run test:auth | 2026-11-01T22:31:16.0030117Z env:
+Run npm run test:auth | 2026-11-01T22:31:16.0030538Z   NEXT_TELEMETRY_DISABLED: 1
+Run npm run test:auth | 2026-11-01T22:31:16.0031135Z ##[endgroup]
+Run npm run test:auth | 2026-11-01T22:31:16.0945891Z 
+Run npm run test:auth | 2026-11-01T22:31:16.0946460Z > duzelo@0.1.0 test:auth
+Run npm run test:auth | 2026-11-01T22:31:16.0947043Z > node scripts/auth-test-runner.mjs
+Run npm run test:auth | 2026-11-01T22:31:16.0947307Z 
+Run npm run test:auth | 2026-11-01T22:31:16.6127737Z ▲ Next.js 16.4.3 (Turbopack)
+Run npm run test:auth | 2026-11-01T22:31:16.6356832Z ✓ Running next.config.ts took 22ms
+Run npm run test:auth | 2026-11-01T22:31:16.6358775Z ⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
+Run npm run test:auth | 2026-11-01T22:31:16.6436398Z 
+Run npm run test:auth | 2026-11-01T22:31:16.6833890Z   Creating an optimized production build ...
+Run npm run test:auth | 2026-11-01T22:31:24.7710473Z ✓ Compiled successfully in 8.1s
+Run npm run test:auth | 2026-11-01T22:31:24.7770077Z   Running TypeScript ...
+Run npm run test:auth | 2026-11-01T22:31:27.0680903Z   Finished TypeScript in 2.3s ...
+Run npm run test:auth | 2026-11-01T22:31:27.0699761Z   Collecting page data using 3 workers ...
+Run npm run test:auth | 2026-11-01T22:31:28.0865717Z   Generating static pages using 3 workers (0/22) ...
+Run npm run test:auth | 2026-11-01T22:31:28.3604192Z   Generating static pages using 3 workers (5/22) 
+Run npm run test:auth | 2026-11-01T22:31:28.5829945Z   Generating static pages using 3 workers (10/22) 
+Run npm run test:auth | 2026-11-01T22:31:28.6194483Z   Generating static pages using 3 workers (16/22) 
+Run npm run test:auth | 2026-11-01T22:31:28.7132850Z ✓ Generating static pages using 3 workers (22/22) in 627ms
+Run npm run test:auth | 2026-11-01T22:31:28.7185784Z   Finalizing page optimization ...
+Run npm run test:auth | 2026-11-01T22:31:28.7299047Z 
+Run npm run test:auth | 2026-11-01T22:31:28.7320545Z Route (app)
+Run npm run test:auth | 2026-11-01T22:31:28.7321495Z ┌ ○ /
+Run npm run test:auth | 2026-11-01T22:31:28.7323022Z ├ ○ /_not-found
+Run npm run test:auth | 2026-11-01T22:31:28.7323676Z ├ ƒ /admin
+Run npm run test:auth | 2026-11-01T22:31:28.7324329Z ├ ƒ /admin/verifications
+Run npm run test:auth | 2026-11-01T22:31:28.7324957Z ├ ƒ /admin/verifications/[id]
+Run npm run test:auth | 2026-11-01T22:31:28.7325565Z ├ ƒ /api/v1/agreements/[action]
+Run npm run test:auth | 2026-11-01T22:31:28.7326324Z ├ ƒ /api/v1/auth/[action]
+Run npm run test:auth | 2026-11-01T22:31:28.7327046Z ├ ƒ /api/v1/discovery/[action]
+Run npm run test:auth | 2026-11-01T22:31:28.7327626Z ├ ƒ /api/v1/jobs/[action]
+Run npm run test:auth | 2026-11-01T22:31:28.7328115Z ├ ƒ /api/v1/jobs/media/[id]
+Run npm run test:auth | 2026-11-01T22:31:28.7329097Z ├ ƒ /api/v1/workers/[action]
+Run npm run test:auth | 2026-11-01T22:31:28.7329891Z ├ ƒ /api/v1/workers/media/[id]
+Run npm run test:auth | 2026-11-01T22:31:28.7330585Z ├ ƒ /app/client
+Run npm run test:auth | 2026-11-01T22:31:28.7331079Z ├ ƒ /app/client/bookings
+Run npm run test:auth | 2026-11-01T22:31:28.7331605Z ├ ƒ /app/client/bookings/[id]
+Run npm run test:auth | 2026-11-01T22:31:28.7332193Z ├ ƒ /app/client/jobs
+Run npm run test:auth | 2026-11-01T22:31:28.7332765Z ├ ƒ /app/client/jobs/[id]
+Run npm run test:auth | 2026-11-01T22:31:28.7333448Z ├ ƒ /app/client/jobs/[id]/quotes
+Run npm run test:auth | 2026-11-01T22:31:28.7334079Z ├ ƒ /app/client/jobs/new
+Run npm run test:auth | 2026-11-01T22:31:28.7334627Z ├ ƒ /app/settings
+Run npm run test:auth | 2026-11-01T22:31:28.7335097Z ├ ƒ /app/worker
+Run npm run test:auth | 2026-11-01T22:31:28.7335606Z ├ ƒ /app/worker/bookings
+Run npm run test:auth | 2026-11-01T22:31:28.7336216Z ├ ƒ /app/worker/bookings/[id]
+Run npm run test:auth | 2026-11-01T22:31:28.7336736Z ├ ƒ /app/worker/onboarding
+Run npm run test:auth | 2026-11-01T22:31:28.7337323Z ├ ƒ /app/worker/opportunities
+Run npm run test:auth | 2026-11-01T22:31:28.7337966Z ├ ƒ /app/worker/opportunities/[id]
+Run npm run test:auth | 2026-11-01T22:31:28.7339445Z ├ ƒ /app/worker/quotes
+Run npm run test:auth | 2026-11-01T22:31:28.7340008Z ├ ○ /app/worker/services
+Run npm run test:auth | 2026-11-01T22:31:28.7340592Z ├ ƒ /app/worker/verification
+Run npm run test:auth | 2026-11-01T22:31:28.7341263Z ├ ƒ /auth/admin-mfa
+Run npm run test:auth | 2026-11-01T22:31:28.7341604Z ├ ○ /auth/forbidden
+Run npm run test:auth | 2026-11-01T22:31:28.7342016Z ├ ƒ /auth/sign-in
+Run npm run test:auth | 2026-11-01T22:31:28.7342347Z ├ ƒ /auth/suspended
+Run npm run test:auth | 2026-11-01T22:31:28.7342674Z ├ ƒ /explore
+Run npm run test:auth | 2026-11-01T22:31:28.7343001Z ├ ○ /how-it-works
+Run npm run test:auth | 2026-11-01T22:31:28.7343358Z ├ ○ /icon.svg
+Run npm run test:auth | 2026-11-01T22:31:28.7343710Z ├ ○ /legal/privacy
+Run npm run test:auth | 2026-11-01T22:31:28.7344044Z ├ ○ /legal/terms
+Run npm run test:auth | 2026-11-01T22:31:28.7344939Z ├ ○ /offline
+Run npm run test:auth | 2026-11-01T22:31:28.7345294Z ├ ƒ /onboarding
+Run npm run test:auth | 2026-11-01T22:31:28.7345701Z ├ ○ /opengraph-image
+Run npm run test:auth | 2026-11-01T22:31:28.7346165Z ├ ○ /robots.txt
+Run npm run test:auth | 2026-11-01T22:31:28.7346559Z ├ ○ /services
+Run npm run test:auth | 2026-11-01T22:31:28.7346978Z ├   /services/[slug]
+Run npm run test:auth | 2026-11-01T22:31:28.7347489Z │ ├ ● /services/home-repairs
+Run npm run test:auth | 2026-11-01T22:31:28.7347947Z │ ├ ● /services/plumbing
+Run npm run test:auth | 2026-11-01T22:31:28.7348449Z │ ├ ● /services/electrical
+Run npm run test:auth | 2026-11-01T22:31:28.7349129Z │ └ ● [+3 more paths]
+Run npm run test:auth | 2026-11-01T22:31:28.7350106Z ├ ○ /settings
+Run npm run test:auth | 2026-11-01T22:31:28.7350482Z ├ ○ /sitemap.xml
+Run npm run test:auth | 2026-11-01T22:31:28.7350865Z ├ ○ /trust
+Run npm run test:auth | 2026-11-01T22:31:28.7351215Z ├ ƒ /workers
+Run npm run test:auth | 2026-11-01T22:31:28.7351522Z └ ƒ /workers/[slug]
+Run npm run test:auth | 2026-11-01T22:31:28.7351744Z 
+Run npm run test:auth | 2026-11-01T22:31:28.7351756Z 
+Run npm run test:auth | 2026-11-01T22:31:28.7351909Z ƒ Proxy (Middleware)
+Run npm run test:auth | 2026-11-01T22:31:28.7352132Z 
+Run npm run test:auth | 2026-11-01T22:31:28.7352393Z ○  (Static)   prerendered as static content
+Run npm run test:auth | 2026-11-01T22:31:28.7352988Z ●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+Run npm run test:auth | 2026-11-01T22:31:28.7353530Z ƒ  (Dynamic)  server-rendered on demand
+Run npm run test:auth | 2026-11-01T22:31:28.7353768Z 
+Run npm run test:auth | 2026-11-01T22:31:28.8978776Z Secret leakage scan passed: 384 repository files; 42 browser assets; canary checked. Pattern scan is not a complete security audit.
+Run npm run test:auth | 2026-11-01T22:31:28.9789723Z Secret leakage scan passed: 384 repository files; 42 browser assets; canary checked. Pattern scan is not a complete security audit.
+Run npm run test:auth | 2026-11-01T22:31:29.0643576Z Secret leakage scan passed: 384 repository files; 42 browser assets; canary checked. Pattern scan is not a complete security audit.
+Run npm run test:auth | 2026-11-01T22:31:29.7179289Z [WebServer] 
+Run npm run test:auth | 2026-11-01T22:31:29.7180173Z [WebServer] > duzelo@0.1.0 start
+Run npm run test:auth | 2026-11-01T22:31:29.7180738Z [WebServer] > next start
+Run npm run test:auth | 2026-11-01T22:31:29.7181274Z [WebServer] 
+Run npm run test:auth | 2026-11-01T22:31:29.9042261Z [WebServer] ▲ Next.js 16.4.3
+Run npm run test:auth | 2026-11-01T22:31:29.9043708Z [WebServer] - Local:         http://localhost:3000
+Run npm run test:auth | 2026-11-01T22:31:29.9044790Z [WebServer] - Network:       http://10.1.0.120:3000
+Run npm run test:auth | 2026-11-01T22:31:29.9045850Z [WebServer] ✓ Ready in 98ms
+Run npm run test:auth | 2026-11-01T22:31:29.9397475Z [WebServer] ✓ Running next.config.ts took 33ms
+Run npm run test:auth | 2026-11-01T22:31:30.7101953Z 
+Run npm run test:auth | 2026-11-01T22:31:30.7102923Z Running 12 tests using 1 worker
+Run npm run test:auth | 2026-11-01T22:31:33.3281578Z 
+Run npm run test:auth | 2026-11-01T22:31:33.3282662Z [WebServer] Local code rejected { code: 'otp_expired', status: 403 }
+Run npm run test:auth | 2026-11-01T22:31:38.9201234Z   ✓   1 [desktop] › tests/auth-e2e/auth.spec.ts:53:1 › real local OTP, both modes, persistent settings, MFA and revoked sessions (7.5s)
+Run npm run test:auth | 2026-11-01T22:31:39.3644861Z [WebServer] Local code rejected { code: 'otp_expired', status: 403 }
+Run npm run test:auth | 2026-11-01T22:31:39.3782414Z [WebServer] Local code rejected { code: 'otp_expired', status: 403 }
+Run npm run test:auth | 2026-11-01T22:31:39.3930613Z [WebServer] Local code rejected { code: 'otp_expired', status: 403 }
+Run npm run test:auth | 2026-11-01T22:31:39.4081501Z [WebServer] Local code rejected { code: 'otp_expired', status: 403 }
+Run npm run test:auth | 2026-11-01T22:31:39.4229260Z [WebServer] Local code rejected { code: 'otp_expired', status: 403 }
+Run npm run test:auth | 2026-11-01T22:31:40.3572092Z   ✓   2 [desktop] › tests/auth-e2e/auth.spec.ts:253:1 › cross-origin requests, bounded verification, no signup authority escalation (1.4s)
+Run npm run test:auth | 2026-11-01T22:31:56.8300171Z   ✓   3 [desktop] › tests/auth-e2e/discovery.spec.ts:21:1 › coarse discovery, real map, fallback, theme, pagination and saved-address privacy (16.4s)
+Run npm run test:auth | 2026-11-01T22:31:58.6172688Z [WebServer] Local OTP send rejected { code: 'over_sms_send_rate_limit', status: 429 }
+Run npm run test:auth | 2026-11-01T22:32:11.5884331Z   ✓   4 [desktop] › tests/auth-e2e/jobs.spec.ts:20:1 › persistent request, real private photo, bounded matching and coarsened worker opportunities (14.7s)
+Run npm run test:auth | 2026-11-01T22:32:32.5789597Z   ✓   5 [desktop] › tests/auth-e2e/quotes.spec.ts:35:1 › real quotes, single booking, explicit confirmation and bounded inspection consent (21.0s)
+Run npm run test:auth | 2026-11-01T22:32:47.7294842Z   ✓   6 [desktop] › tests/auth-e2e/workers.spec.ts:25:1 › worker evidence, MFA review, publication, category denials and retention are real (15.1s)
+Run npm run test:auth | 2026-11-01T22:32:49.7808943Z [WebServer] Local code rejected { code: 'otp_expired', status: 403 }
+Run npm run test:auth | 2026-11-01T22:32:53.6732381Z   ✓   7 [mobile] › tests/auth-e2e/auth.spec.ts:53:1 › real local OTP, both modes, persistent settings, MFA and revoked sessions (5.4s)
+Run npm run test:auth | 2026-11-01T22:32:53.9276269Z [WebServer] Local code rejected { code: 'otp_expired', status: 403 }
+Run npm run test:auth | 2026-11-01T22:32:53.9392149Z [WebServer] Local code rejected { code: 'otp_expired', status: 403 }
+Run npm run test:auth | 2026-11-01T22:32:53.9499507Z [WebServer] Local code rejected { code: 'otp_expired', status: 403 }
+Run npm run test:auth | 2026-11-01T22:32:53.9610643Z [WebServer] Local code rejected { code: 'otp_expired', status: 403 }
+Run npm run test:auth | 2026-11-01T22:32:53.9727648Z [WebServer] Local code rejected { code: 'otp_expired', status: 403 }
+Run npm run test:auth | 2026-11-01T22:32:54.6013306Z   ✓   8 [mobile] › tests/auth-e2e/auth.spec.ts:253:1 › cross-origin requests, bounded verification, no signup authority escalation (896ms)
+Run npm run test:auth | 2026-11-01T22:33:08.0965815Z   ✓   9 [mobile] › tests/auth-e2e/discovery.spec.ts:21:1 › coarse discovery, real map, fallback, theme, pagination and saved-address privacy (13.4s)
+Run npm run test:auth | 2026-11-01T22:33:09.7189599Z [WebServer] Local OTP send rejected { code: 'over_sms_send_rate_limit', status: 429 }
+Run npm run test:auth | 2026-11-01T22:33:22.6643318Z   ✓  10 [mobile] › tests/auth-e2e/jobs.spec.ts:20:1 › persistent request, real private photo, bounded matching and coarsened worker opportunities (14.5s)
+Run npm run test:auth | 2026-11-01T22:33:43.5824230Z   ✓  11 [mobile] › tests/auth-e2e/quotes.spec.ts:35:1 › real quotes, single booking, explicit confirmation and bounded inspection consent (20.9s)
+Run npm run test:auth | 2026-11-01T22:34:02.5054742Z   ✓  12 [mobile] › tests/auth-e2e/workers.spec.ts:25:1 › worker evidence, MFA review, publication, category denials and retention are real (18.9s)
+Run npm run test:auth | 2026-11-01T22:34:02.6029074Z 
+Run npm run test:auth | 2026-11-01T22:34:02.6034487Z   12 passed (2.6m)

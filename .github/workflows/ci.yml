@@ -2,7 +2,7 @@ name: Application checks
 on:
   pull_request:
   push:
-    branches: [main, feat/milestone-06-quotes]
+    branches: [main]
 permissions:
   contents: read
 concurrency:
