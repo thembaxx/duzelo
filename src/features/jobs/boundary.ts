@@ -40,6 +40,7 @@ export async function jobCommand<T extends Record<string, unknown>>(
   key: string | null,
   worker: boolean,
   run: (sql: TransactionSql, actor: Identity) => Promise<T>,
+  beforeReplay?: (sql: TransactionSql, actor: Identity) => Promise<void>,
 ): Promise<T> {
   if (!key || !/^[-a-zA-Z0-9_]{16,128}$/.test(key)) throw new Error("INVALID");
   const actor = await jobActor(worker);
@@ -51,6 +52,7 @@ export async function jobCommand<T extends Record<string, unknown>>(
   return database().begin(async (sql) => {
     await sql`select pg_advisory_xact_lock(hashtextextended(${actor.id + ":" + key},2))`;
     await lockActor(sql, actor, worker);
+    await beforeReplay?.(sql, actor);
     const [prior] =
       await sql`select request_hash,status,response_json from private.command_idempotency where actor_id=${actor.id}::uuid and idempotency_key=${key}`;
     if (prior) {

@@ -426,6 +426,9 @@ enabled = true
 27820000004 = "123456"
 27820000005 = "123456"
 27820000006 = "123456"
+27820000007 = "123456"
+27820000008 = "123456"
+27820000009 = "123456"
 
 # Local no-delivery adapter. Native Auth still generates/verifies OTPs; requests
 # outside the explicit test allowlist are rejected, never sent to an SMS vendor.
