@@ -40,6 +40,8 @@ export async function quotesForJob(jobId: string, worker = false, page = 0): Pro
     const job = await lockJob(sql, jobId, actor, worker);
     const [booking] =
       await sql`select id,status,worker_id from public.bookings where job_id=${jobId}::uuid`;
+    const selectedBooking =
+      booking && (!worker || booking.worker_id === job.match!.worker_id) ? booking : null;
     let canQuote = false;
     let eligibilityMessage = "Read the supplied terms carefully. An invitation is not a booking.";
     if (worker) {
@@ -66,7 +68,7 @@ export async function quotesForJob(jobId: string, worker = false, page = 0): Pro
     const historical = rows.filter((q) => !active.includes(q));
     const shown = worker ? historical : historical.slice(page * 20, page * 20 + 20);
     const latest = worker ? (rows[0] ?? null) : null;
-    if (worker && !canQuote && !rows.length && !booking) throw new Error("FORBIDDEN");
+    if (worker && !canQuote && !rows.length && !selectedBooking) throw new Error("FORBIDDEN");
     const [offers, history, latestView] = await Promise.all([
       Promise.all(
         active.map((q) =>
@@ -104,7 +106,7 @@ export async function quotesForJob(jobId: string, worker = false, page = 0): Pro
       jobVersion: job.version,
       title: job.title,
       description:
-        worker && !canQuote && !booking
+        worker && !canQuote && !selectedBooking
           ? "Original request details are no longer shared. Your quotation history is retained."
           : job.description,
       town: job.public_town,
@@ -117,7 +119,7 @@ export async function quotesForJob(jobId: string, worker = false, page = 0): Pro
       history,
       historyPage: page,
       hasMore: !worker && historical.length > (page + 1) * 20,
-      bookingId: booking ? String(booking.id) : null,
+      bookingId: selectedBooking ? String(selectedBooking.id) : null,
       media: media.map((m) => String(m.id)),
       grants: grants.map((g) => ({
         id: String(g.id),

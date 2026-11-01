@@ -19,7 +19,7 @@ export async function exactLocation(input: unknown, key: string | null) {
       const confirmed =
         await sql`select id from public.bookings where job_id=${data.jobId}::uuid and worker_id=${job.match!.worker_id}::uuid and status='confirmed' and ${job.status}='booked'`;
       const [grant] =
-        await sql`select g.expires_at from private.inspection_access_grants g join public.quotes q on q.id=g.quote_id and q.pricing_type='inspection_required' and q.status='submitted' where g.job_id=${data.jobId}::uuid and g.worker_id=${job.match!.worker_id}::uuid and g.revoked_at is null and g.access_from<=now() and g.expires_at>now() and ${job.status} in ('open','matching','quoted') order by g.expires_at desc limit 1`;
+        await sql`select expires_at from private.current_inspection_access(${data.jobId}::uuid,${job.match!.worker_id}::uuid)`;
       if (!confirmed.length && !grant) throw new Error("FORBIDDEN");
       const [location] =
         await sql`select service_address_snapshot,access_notes,extensions.st_x(exact_point::extensions.geometry) as longitude,extensions.st_y(exact_point::extensions.geometry) as latitude from private.job_locations where job_id=${data.jobId}::uuid`;

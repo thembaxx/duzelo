@@ -90,4 +90,6 @@ jobs:
             docs/evidence/screenshots/worker-*.png
             docs/evidence/screenshots/discovery-*.png
             docs/evidence/screenshots/jobs-*.png
+            docs/evidence/screenshots/quotes-*.png
+            docs/evidence/screenshots/booking-*.png
           retention-days: 14

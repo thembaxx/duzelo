@@ -1,5 +1,6 @@
 import { workerConfig } from "@/features/workers/config";
 import { jobsConfig } from "@/features/jobs/config";
+import { quotesConfig } from "@/features/quotes/config";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -105,7 +106,10 @@ export default async function WorkerProfile({ params }: { params: Promise<{ slug
         {jobsConfig() && (
           <p>
             Only this provider will be invited if currently eligible. No appointment or payment is
-            created. Quotes and bookings are not open yet.
+            created.{" "}
+            {quotesConfig()
+              ? "A priced booking requires your choice and the provider’s explicit confirmation. Payments are not open."
+              : "Quotes and bookings are not open yet."}
           </p>
         )}
       </section>

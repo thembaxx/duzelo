@@ -49,9 +49,13 @@ select throws_ok($$insert into private.inspection_access_grants(job_id,worker_id
 insert into private.inspection_access_grants(id,job_id,worker_id,granted_by_client_id,reason,expires_at,quote_id,visit_starts_at,visit_ends_at,access_from,fee_cents) values
  ('96000000-0000-0000-0000-000000000001','56000000-0000-0000-0000-000000000001','30000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000001','Synthetic explicit visit and fee consent.',now()+interval '2 days 1 hour','76000000-0000-0000-0000-000000000003',now()+interval '2 days',now()+interval '2 days 1 hour',now()+interval '2 days'-interval '1 hour',15000);
 select ok(not private.worker_time_free('30000000-0000-0000-0000-000000000002',now()+interval '2 days',now()+interval '2 days 1 hour'),'authorized inspection reserves the visit time');
+select is((select count(*)::integer from private.current_inspection_access('56000000-0000-0000-0000-000000000001','30000000-0000-0000-0000-000000000002',now())),0,'future inspection does not reveal location before its access window');
+select is((select count(*)::integer from private.current_inspection_access('56000000-0000-0000-0000-000000000001','30000000-0000-0000-0000-000000000002',now()+interval '2 days')),1,'the approved visit window can authorize location access');
+select is((select count(*)::integer from private.current_inspection_access('56000000-0000-0000-0000-000000000001','30000000-0000-0000-0000-000000000002',now()+interval '2 days 1 hour')),0,'exact expiry revokes location access');
 select throws_ok($$update private.inspection_access_grants set expires_at=expires_at+interval '1 hour' where id='96000000-0000-0000-0000-000000000001'$$,'P0001',null,'address consent cannot be silently extended');
 select lives_ok($$update private.inspection_access_grants set revoked_at=now() where id='96000000-0000-0000-0000-000000000001'$$,'inspection consent is revocable');
 select ok(private.worker_time_free('30000000-0000-0000-0000-000000000002',now()+interval '2 days',now()+interval '2 days 1 hour'),'revocation releases the inspection reservation');
+select is((select count(*)::integer from private.current_inspection_access('56000000-0000-0000-0000-000000000001','30000000-0000-0000-0000-000000000002',now()+interval '2 days')),0,'revocation overrides an otherwise valid access time');
 select throws_ok($$update private.inspection_access_grants set revoked_at=null where id='96000000-0000-0000-0000-000000000001'$$,'P0001',null,'revoked consent cannot be restored');
 
 update public.quotes set status='accepted' where id='76000000-0000-0000-0000-000000000001';
@@ -73,6 +77,7 @@ select is((select count(*)::integer from public.quote_items),0,'client cannot by
 select is((select count(*)::integer from public.bookings),0,'client cannot bypass booking projection');
 select throws_ok('select * from private.inspection_access_grants','42501',null,'inspection grants are never browser tables');
 select throws_ok($$select private.agreement_worker_eligible(null,null,true)$$,'42501',null,'current-approval helper is not a browser RPC');
+select throws_ok($$select * from private.current_inspection_access(null,null,now())$$,'42501',null,'a browser cannot inject a clock into inspection authorization');
 reset role;
 update public.worker_profiles set status='suspended' where id='30000000-0000-0000-0000-000000000002';
 select ok(not private.agreement_worker_eligible('56000000-0000-0000-0000-000000000001','30000000-0000-0000-0000-000000000002'),'suspension revokes quote/address eligibility');
