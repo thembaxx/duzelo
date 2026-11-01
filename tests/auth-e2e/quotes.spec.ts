@@ -9,6 +9,7 @@ import {
   noPrecise,
   savedQuote,
   publishQuote,
+  agreementWidths,
 } from "./helpers/agreement-actions";
 import {
   resetAgreementFixtures,
@@ -210,6 +211,12 @@ test("real quotes, single booking, explicit confirmation and bounded inspection 
   await expect(
     page.getByRole("heading", { name: "Choose with the details in view.", exact: true }),
   ).toBeVisible();
+  // A client navigation retains the initial owner's private request RSC script.
+  // Reload to inspect the quotation route's own response, not that authorized history.
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "Current sent offers", exact: true }),
+  ).toBeVisible();
   await page
     .getByRole("heading", { name: "Current sent offers", exact: true })
     .scrollIntoViewIfNeeded();
@@ -219,6 +226,7 @@ test("real quotes, single booking, explicit confirmation and bounded inspection 
   noPrecise(await page.content());
   noPrecise(await one.content());
   expect((await new AxeBuilder({ page }).include(".quotes-page").analyze()).violations).toEqual([]);
+  await agreementWidths(page);
   const view = await agreementView(page, made.jobId);
   const offers = view.offers as QuoteView[];
   expect(offers).toHaveLength(2);
@@ -355,6 +363,7 @@ test("real quotes, single booking, explicit confirmation and bounded inspection 
   expect(
     (await new AxeBuilder({ page: selected }).include(".booking-detail").analyze()).violations,
   ).toEqual([]);
+  await agreementWidths(selected);
   await selected.clock.install({ time: new Date() });
   await selected.getByRole("button", { name: "View authorized location", exact: true }).click();
   await expect(selected.getByText(privateStreet, { exact: true })).toBeVisible();

@@ -34,7 +34,18 @@ export function noPrecise(text: string) {
     "base_point",
     "match_score",
   ])
-    expect(text).not.toContain(value);
+    expect(text.includes(value), "Private field unexpectedly present: " + value).toBe(false);
+}
+export async function agreementWidths(page: Page) {
+  const original = page.viewportSize();
+  for (const width of [320, 768, 1024]) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
+      "Agreement overflow at " + width + "px",
+    ).toBe(true);
+  }
+  if (original) await page.setViewportSize(original);
 }
 export async function savedQuote(page: Page) {
   const [response] = await Promise.all([
