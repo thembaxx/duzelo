@@ -1,5 +1,6 @@
 import { workerConfig } from "@/features/workers/config";
 import { jobsConfig } from "@/features/jobs/config";
+import { quotesConfig } from "@/features/quotes/config";
 import Link from "next/link";
 import { requireWorkspace } from "./guard";
 import { PageHeading } from "@/features/auth/page-heading";
@@ -40,7 +41,9 @@ export async function WorkspacePage({ mode }: { mode: "client" | "worker" }) {
         <p>
           {mode === "client"
             ? jobsConfig()
-              ? "Your account is ready. Save a private request and invite eligible workers. Bookings and payments are not open."
+              ? quotesConfig()
+                ? "Save a private request, compare real quote terms and request an appointment. Payments are not open."
+                : "Your account is ready. Save a private request and invite eligible workers. Bookings and payments are not open."
               : "Your account is ready. Job requests and bookings are not open yet."
             : `Worker profile: ${actor.workerStatus ?? "not started"}. Manual review is required before publication or opportunities.`}
         </p>
@@ -76,6 +79,21 @@ export async function WorkspacePage({ mode }: { mode: "client" | "worker" }) {
                   className={buttonVariants({ variant: "outline" })}
                 >
                   Start a job request
+                </Link>
+              )}
+            </>
+          )}
+          {quotesConfig() && (
+            <>
+              <Link
+                href={"/app/" + mode + "/bookings"}
+                className={buttonVariants({ variant: "outline" })}
+              >
+                Appointments
+              </Link>
+              {mode === "worker" && (
+                <Link href="/app/worker/quotes" className={buttonVariants({ variant: "outline" })}>
+                  Quote workspace
                 </Link>
               )}
             </>

@@ -15,6 +15,8 @@ import { discoveryConfig } from "@/features/discovery/config";
 import { workerConfig } from "@/features/workers/config";
 import { readAuthConfig } from "@/config/auth";
 import { jobsConfig } from "@/features/jobs/config";
+import { quotesConfig } from "@/features/quotes/config";
+import "@/features/quotes/quotes.css";
 import "@/features/jobs/jobs.css";
 import "@/features/discovery/discovery.css";
 
@@ -63,6 +65,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
   workerConfig();
   discoveryConfig();
   jobsConfig();
+  quotesConfig();
   return (
     <html
       lang="en"

@@ -16,7 +16,7 @@ export function assertMutationOrigin(request: Request) {
   )
     throw new Error("FORBIDDEN");
 }
-export async function readMutation(request: Request) {
+export async function readMutation(request: Request, maxBytes = 8192) {
   assertMutationOrigin(request);
   if (!request.headers.get("content-type")?.startsWith("application/json"))
     throw new Error("INVALID");
@@ -29,7 +29,7 @@ export async function readMutation(request: Request) {
     const chunk = await reader.read();
     if (chunk.done) break;
     length += chunk.value.byteLength;
-    if (length > 8192) {
+    if (length > maxBytes) {
       await reader.cancel();
       throw new Error("INVALID");
     }

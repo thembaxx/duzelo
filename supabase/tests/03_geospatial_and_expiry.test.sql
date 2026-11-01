@@ -18,7 +18,7 @@ select is((select count(*)::integer from public.worker_services),0,'expired card
 reset role;
 alter table public.worker_cards enable trigger worker_card_expiry;
 select throws_ok($$insert into private.inspection_access_grants(job_id,worker_id,granted_by_client_id,reason,expires_at) values ('50000000-0000-0000-0000-000000000001','30000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000003','Synthetic invalid consent',now()+interval '1 hour')$$,'P0001',null,'inspection requires actual job owner consent');
-select lives_ok($$insert into private.inspection_access_grants(job_id,worker_id,granted_by_client_id,reason,expires_at) values ('50000000-0000-0000-0000-000000000001','30000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000001','Synthetic valid consent',now()+interval '1 hour')$$,'inspection allows owner and invited worker');
+select throws_ok($$insert into private.inspection_access_grants(job_id,worker_id,granted_by_client_id,reason,expires_at) values ('50000000-0000-0000-0000-000000000001','30000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000001','Synthetic valid consent',now()+interval '1 hour')$$,'P0001',null,'owner consent also requires a current inspection proposal and bounded visit');
 update private.worker_verifications set reviewed_by='10000000-0000-0000-0000-000000000002' where worker_id='30000000-0000-0000-0000-000000000002' and kind='identity';
 select throws_ok($$select private.publish_worker_card('30000000-0000-0000-0000-000000000002','40000000-0000-0000-0000-000000000001','Self-reviewed fixture',null)$$,'P0001',null,'self-reviewed identity cannot publish even from privileged code');
 select * from finish();

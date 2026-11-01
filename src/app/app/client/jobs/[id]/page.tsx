@@ -2,6 +2,8 @@ import { z } from "zod";
 import { notFound } from "next/navigation";
 import { requireWorkspace } from "@/features/auth/guard";
 import { jobsConfig } from "@/features/jobs/config";
+import { quotesConfig } from "@/features/quotes/config";
+import Link from "next/link";
 import { getOwnerJob, jobOptions } from "@/features/jobs/queries";
 import { JobsNavigation, JobsClosed } from "@/features/jobs/navigation";
 import { PageHeading } from "@/features/auth/page-heading";
@@ -34,7 +36,14 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       {job.status === "draft" ? (
         <JobWizard initial={job} options={options} />
       ) : (
-        <JobStatus job={job} options={options} />
+        <>
+          <JobStatus job={job} options={options} />
+          {quotesConfig() && (
+            <Link className="button button-primary" href={"/app/client/jobs/" + job.id + "/quotes"}>
+              Review quote offers
+            </Link>
+          )}
+        </>
       )}
     </>
   );
