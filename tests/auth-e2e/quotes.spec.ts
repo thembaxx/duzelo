@@ -18,6 +18,7 @@ import {
   quoteTerms,
   privateStreet,
   privateDescription,
+  privateTitle,
 } from "./helpers/agreement-fixtures";
 import { inspectionChecks } from "./helpers/agreement-inspection-checks";
 import { secondaryQuoteChecks } from "./helpers/agreement-policy-checks";
@@ -269,8 +270,16 @@ test("real quotes, single booking, explicit confirmation and bounded inspection 
   ).toBe(1);
   const lost = await agreementView(loser, made.jobId, true);
   expect(lost.bookingId).toBeNull();
+  expect(lost.title).not.toContain(privateTitle);
   expect(lost.description).not.toContain(privateDescription);
   noPrecise(JSON.stringify(lost));
+  await loser.goto("/app/worker/quotes");
+  await expect(
+    loser.getByRole("heading", { name: "Your work, clearly priced.", exact: true }),
+  ).toBeVisible();
+  expect((await loser.content()).includes(privateTitle), "Lost-request title in quote list").toBe(
+    false,
+  );
   expect(
     (
       await loser.request.get("/api/v1/agreements/booking?id=" + receipt.bookingId + "&mode=worker")
@@ -298,6 +307,20 @@ test("real quotes, single booking, explicit confirmation and bounded inspection 
     ).status(),
   ).toBe(403);
   await sql`update public.worker_profiles set status='suspended' where id=${selectedWorker.id}::uuid`;
+  const restricted = await agreementView(selected, made.jobId, true);
+  expect(restricted.title).not.toContain(privateTitle);
+  expect(restricted.description).not.toContain(privateDescription);
+  const restrictedBooking = await selected.request.get(
+    "/api/v1/agreements/booking?id=" + receipt.bookingId + "&mode=worker",
+  );
+  expect(restrictedBooking.status()).toBe(200);
+  expect((await restrictedBooking.json()).jobTitle).not.toContain(privateTitle);
+  const restrictedList = await selected.request.get("/api/v1/agreements/bookings?mode=worker");
+  expect(restrictedList.status()).toBe(200);
+  expect(
+    (await restrictedList.text()).includes(privateTitle),
+    "Restricted title in appointment list",
+  ).toBe(false);
   expect(
     (
       await agreementPost(
@@ -408,6 +431,10 @@ test("real quotes, single booking, explicit confirmation and bounded inspection 
   const notices =
     await sql`select payload from private.notification_outbox where template like 'quote-%' or template like 'booking-%' or template like 'inspection-%'`;
   noPrecise(JSON.stringify(notices));
+  const [delivery] =
+    await sql`select count(n.id)::int as linked,count(*) filter(where n.id is null)::int as unlinked from private.notification_outbox o left join public.notifications n on n.source_outbox_id=o.id and n.user_id=o.user_id where o.channel='in_app' and o.status='sent' and (o.template like 'quote-%' or o.template like 'booking-%' or o.template like 'inspection-%')`;
+  expect(delivery!.linked).toBeGreaterThan(0);
+  expect(delivery!.unlinked).toBe(0);
   const [owner] = await sql`select id from auth.users where phone='27820000007'`;
   await sql`update auth.sessions set not_after=now()-interval '1 second' where user_id=${owner!.id}::uuid`;
   expect((await page.request.get("/api/v1/agreements/bookings?mode=client")).status()).toBe(401);

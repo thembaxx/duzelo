@@ -42,11 +42,12 @@ export async function quotesForJob(jobId: string, worker = false, page = 0): Pro
       await sql`select id,status,worker_id from public.bookings where job_id=${jobId}::uuid`;
     const selectedBooking =
       booking && (!worker || booking.worker_id === job.match!.worker_id) ? booking : null;
-    let canQuote = false;
+    let canQuote = false,
+      canReadDetails = !worker;
     let eligibilityMessage = "Read the supplied terms carefully. An invitation is not a booking.";
     if (worker) {
       const [check] =
-        await sql`select private.agreement_worker_eligible(${jobId}::uuid,${job.match!.worker_id}::uuid,true) as allowed`;
+        await sql`select private.agreement_worker_eligible(${jobId}::uuid,${job.match!.worker_id}::uuid,true) as allowed,private.agreement_worker_eligible(${jobId}::uuid,${job.match!.worker_id}::uuid,false) as read_allowed`;
       if (check?.allowed && !booking) {
         try {
           await responseRight(sql, job);
@@ -56,6 +57,11 @@ export async function quotesForJob(jobId: string, worker = false, page = 0): Pro
             throw error;
         }
       }
+      canReadDetails =
+        canQuote ||
+        (!!check?.read_allowed &&
+          !!selectedBooking &&
+          ["pending_worker", "confirmed"].includes(String(selectedBooking.status)));
       eligibilityMessage = canQuote
         ? "Current approval, category and coverage checks pass. The schedule is checked again when sending and confirming."
         : "New quotes are unavailable: check approval, category, coverage, invitation expiry, blocks or the existing appointment.";
@@ -104,11 +110,10 @@ export async function quotesForJob(jobId: string, worker = false, page = 0): Pro
     return {
       jobId,
       jobVersion: job.version,
-      title: job.title,
-      description:
-        worker && !canQuote && !selectedBooking
-          ? "Original request details are no longer shared. Your quotation history is retained."
-          : job.description,
+      title: canReadDetails ? job.title : "Original request details withheld",
+      description: canReadDetails
+        ? job.description
+        : "Original request details are no longer shared. Your quotation history is retained.",
       town: job.public_town,
       jobStatus: job.status,
       worker,
@@ -139,11 +144,18 @@ export async function workerQuoteJobs() {
   const actor = await quoteActor(true);
   return database().begin(async (sql) => {
     await lockActor(sql, actor, true);
-    const rows =
-      await sql`select j.id,j.title,j.public_town,j.status from public.job_matches m join public.worker_profiles w on w.id=m.worker_id join public.job_requests j on j.id=m.job_id where w.user_id=${actor.id}::uuid and (exists(select 1 from public.quotes q where q.job_id=j.id and q.worker_id=w.id and q.scheduled_start is not null) or (m.status in ('invited','viewed') and m.expires_at>now() and j.status in ('open','matching','quoted') and private.agreement_worker_eligible(j.id,w.id,true))) order by j.updated_at desc limit 100`;
+    const rows = await sql`select j.id,j.title,j.public_town,j.status,
+        (private.agreement_worker_eligible(j.id,w.id,false) and (
+          exists(select 1 from public.bookings b where b.job_id=j.id and b.worker_id=w.id and b.status in ('pending_worker','confirmed'))
+          or (private.agreement_worker_eligible(j.id,w.id,true) and j.status in ('open','matching','quoted')
+            and not exists(select 1 from public.bookings b where b.job_id=j.id)
+            and ((m.status in ('invited','viewed') and m.expires_at>now() and d.expires_at>now())
+              or (m.status='responded' and exists(select 1 from public.quotes q where q.job_id=j.id and q.worker_id=w.id and q.published_at>now()-interval '7 days'))))
+        )) as may_read_details
+        from public.job_matches m join public.worker_profiles w on w.id=m.worker_id join public.job_requests j on j.id=m.job_id left join private.job_dispatch d on d.job_id=j.id where w.user_id=${actor.id}::uuid and (exists(select 1 from public.quotes q where q.job_id=j.id and q.worker_id=w.id and q.scheduled_start is not null) or (m.status in ('invited','viewed') and m.expires_at>now() and j.status in ('open','matching','quoted') and private.agreement_worker_eligible(j.id,w.id,true))) order by j.updated_at desc limit 100`;
     return rows.map((j) => ({
       id: String(j.id),
-      title: String(j.title),
+      title: j.may_read_details ? String(j.title) : "Original request details withheld",
       town: String(j.public_town),
       status: String(j.status),
     }));

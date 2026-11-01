@@ -4,7 +4,7 @@ Date: 2026-11-01. Milestone 06. Production quotations and bookings remain OFF.
 
 ## Agreement boundary
 
-A sent quotation is a worker-authored proposal, not an appointment or payment. Saving appends a new private draft version; it does not alter an already sent offer. Sending the latest draft supersedes that provider's prior unsent/sent versions, records a response and stops invitation waves. Clients see genuine published offers and retained history; other workers never see competitors' terms. Workers retain their own quote history after losing eligibility, with original request details and other providers' booking identifiers withheld.
+A sent quotation is a worker-authored proposal, not an appointment or payment. Saving appends a new private draft version; it does not alter an already sent offer. Sending the latest draft supersedes that provider's prior unsent/sent versions, records a response and stops invitation waves. Clients see genuine published offers and retained history; other workers never see competitors' terms. Workers retain their own quote history after losing eligibility, with original request titles/descriptions and other providers' booking identifiers withheld. The same title policy applies to history lists and appointment projections. Current selected participants retain active appointment details after approval/safety checks; marking a provider unavailable for new invitations alone does not hide their current appointment.
 
 Terms and line items are immutable once written. Lifecycle status may change, but an accepted quote cannot be rewritten or withdrawn. A worker can create at most twenty versions per request. Every active control calls a session-validated server command: no client-supplied owner, approval, status, total or currency is authoritative.
 
@@ -27,6 +27,8 @@ A shared worker appointment lock serializes reservations. Database schedule guar
 ## Inspection and exact-location access
 
 An `inspection_required` proposal has no work subtotal or work total. An optional visit fee is separate, with no payment collected. The client must independently consent to the proposal, disclosed fee and precise-address access. Approval creates a quote-bound private grant, never a work booking or acceptance of a final price. Access opens no earlier than one hour before the visit and expires at the visit's end. Grant terms cannot be extended, reassigned or restored after revocation; a changed visit needs a new proposal and fresh consent.
+
+Revoking an already revoked grant returns an acknowledgement without advancing the request version or delivering another notice, including with a fresh idempotency key.
 
 A later priced quote supersedes the inspection proposal and revokes its grant. It still needs a new client acceptance and worker confirmation before normal work booking. Closing the request or choosing a work quote revokes all inspection permissions. No inspection indication silently becomes a binding full-work quote.
 

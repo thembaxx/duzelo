@@ -54,6 +54,18 @@ it("keeps inspection fees separate from an unpriced work proposal", () =>
       taxMode: "none",
     }),
   ).toMatchObject({ totalCents: null, subtotalCents: null, inspectionFeeCents: 15000 }));
+it("rounds separate half-cent lines before summing", () =>
+  expect(
+    priceQuote({
+      ...terms,
+      items: [
+        { ...terms.items[0]!, quantityHundredths: 50, unitPriceCents: 1 },
+        { ...terms.items[0]!, quantityHundredths: 50, unitPriceCents: 1 },
+      ],
+      travelFeeCents: 0,
+      taxMode: "none",
+    }).totalCents,
+  ).toBe(2));
 it.each([
   { ...terms, inspectionFeeCents: 1 },
   { ...terms, items: [] },

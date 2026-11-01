@@ -202,7 +202,10 @@ export async function quotesCommand(action: string, input: unknown, key: string 
         await sql`select g.job_id,w.user_id from private.inspection_access_grants g join public.worker_profiles w on w.id=g.worker_id where g.id=${data.grantId}::uuid`;
       if (!ref) throw new Error("FORBIDDEN");
       const job = await lockJob(sql, String(ref.job_id), actor);
-      await sql`update private.inspection_access_grants set revoked_at=now() where id=${data.grantId}::uuid and revoked_at is null`;
+      const revoked =
+        await sql`update private.inspection_access_grants set revoked_at=now() where id=${data.grantId}::uuid and revoked_at is null returning id`;
+      if (!revoked.length)
+        return { jobId: String(job.id), message: "Inspection permission was already revoked." };
       await sql`update public.job_requests set version=version+1,updated_at=now() where id=${job.id}::uuid`;
       await notify(
         sql,

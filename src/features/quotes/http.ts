@@ -3,11 +3,12 @@ import { ZodError } from "zod";
 import { json } from "@/lib/security/http";
 export function agreementError(error: unknown) {
   let code =
-    error instanceof ZodError ? "INVALID" : error instanceof Error ? error.message : "UNAVAILABLE";
+    error instanceof ZodError ? "INVALID" : error instanceof Error ? error.message : "DATABASE";
   if (error && typeof error === "object" && "code" in error && error.code === "23P01")
     code = "SCHEDULE";
   const errors: Record<string, [number, string]> = {
     UNAVAILABLE: [503, "Quotations and bookings are not open yet."],
+    DATABASE: [503, "Quotations and bookings are temporarily unavailable. Try again later."],
     UNAUTHORIZED: [401, "Your session has ended. Sign in again."],
     FORBIDDEN: [403, "This agreement or address is not available to this account."],
     INVALID: [
@@ -54,7 +55,7 @@ export function agreementError(error: unknown) {
     /^[A-Z0-9]{5}$/.test(String(error.code))
   )
     console.info("Local agreement database rejection", { code: String(error.code) });
-  const [status, message] = errors[code] ?? errors.UNAVAILABLE!;
+  const [status, message] = errors[code] ?? errors.DATABASE!;
   const response = json({ error: { message } }, status);
   if (status === 429) response.headers.set("Retry-After", "60");
   return response;

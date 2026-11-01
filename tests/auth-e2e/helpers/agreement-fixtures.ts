@@ -12,7 +12,8 @@ if (
   throw new Error("Agreement fixtures require loopback Auth and database.");
 export const privateStreet = "M06-PRIVATE-STREET-42",
   privateNotes = "M06-PRIVATE-ACCESS-42",
-  privateDescription = "M06-CLOSED-DETAILS-42";
+  privateDescription = "M06-CLOSED-DETAILS-42",
+  privateTitle = "M06-CLOSED-TITLE-42";
 export async function resetAgreementFixtures(sql: ReturnType<typeof postgres>) {
   await sql`update private.inspection_access_grants set revoked_at=now() where granted_by_client_id in (select id from auth.users where phone='27820000007') and revoked_at is null`;
   await sql`update public.bookings set status='cancelled',cancelled_at=now() where job_id in(select id from public.job_requests where client_id in(select id from auth.users where phone='27820000007')) and status in ('pending_worker','confirmed')`;
@@ -73,7 +74,7 @@ export function quoteTerms(offsetHours = 48): QuoteTerms {
 }
 export const agreementJob = {
   categoryId: cleaning,
-  title: "Fictional M06 cleaning",
+  title: "Fictional M06 cleaning " + privateTitle,
   description: "Fictional cleaning details. " + privateDescription,
   urgency: "flexible" as const,
   slots: [],

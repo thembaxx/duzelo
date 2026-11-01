@@ -129,6 +129,15 @@ export async function inspectionChecks({
   ).toBe(true);
   view = await agreementView(page, request.jobId);
   expect(
+    (await agreementPost(page, "revoke-inspection", { grantId: grant.grantId })).status(),
+  ).toBe(200);
+  expect((await agreementView(page, request.jobId)).jobVersion).toBe(view.jobVersion);
+  expect(
+    (
+      await sql`select count(*)::int as n from private.notification_outbox where template='inspection-revoked' and payload->>'reference'=${grant.grantId}`
+    )[0]!.n,
+  ).toBe(1);
+  expect(
     (
       await agreementPost(page, "authorize-inspection", {
         quoteId: q.quoteId,

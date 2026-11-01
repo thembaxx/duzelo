@@ -10,10 +10,10 @@ export async function bookingList(worker = false) {
   return database().begin(async (sql) => {
     await lockActor(sql, actor, worker);
     const rows =
-      await sql`select b.id,b.status,b.scheduled_start,b.scheduled_end,j.title,j.public_town from public.bookings b join public.job_requests j on j.id=b.job_id join public.worker_profiles w on w.id=b.worker_id where (${worker} and w.user_id=${actor.id}::uuid or not ${worker} and j.client_id=${actor.id}::uuid) and b.scheduled_start is not null order by b.created_at desc limit 100`;
+      await sql`select b.id,b.status,b.scheduled_start,b.scheduled_end,j.title,j.public_town,(b.status in ('pending_worker','confirmed') and private.agreement_worker_eligible(b.job_id,b.worker_id,false)) as may_read_details from public.bookings b join public.job_requests j on j.id=b.job_id join public.worker_profiles w on w.id=b.worker_id where (${worker} and w.user_id=${actor.id}::uuid or not ${worker} and j.client_id=${actor.id}::uuid) and b.scheduled_start is not null order by b.created_at desc limit 100`;
     return rows.map((b) => ({
       id: String(b.id),
-      title: String(b.title),
+      title: !worker || b.may_read_details ? String(b.title) : "Original request details withheld",
       town: String(b.public_town),
       status: String(b.status),
       startsAt: iso(b.scheduled_start),
@@ -29,7 +29,7 @@ export async function bookingDetail(id: string, worker = false): Promise<Booking
     if (!ref) throw new Error("FORBIDDEN");
     const job = await lockJob(sql, String(ref.job_id), actor, worker);
     const [b] =
-      await sql`select b.*,private.agreement_worker_eligible(b.job_id,b.worker_id,true) as eligible,private.worker_time_free(b.worker_id,b.scheduled_start,b.scheduled_end,b.id,null) as free from public.bookings b where b.id=${id}::uuid`;
+      await sql`select b.*,private.agreement_worker_eligible(b.job_id,b.worker_id,true) as eligible,private.agreement_worker_eligible(b.job_id,b.worker_id,false) as read_allowed,private.worker_time_free(b.worker_id,b.scheduled_start,b.scheduled_end,b.id,null) as free from public.bookings b where b.id=${id}::uuid`;
     if (!b || (worker && b.worker_id !== job.match!.worker_id) || !b.scheduled_start)
       throw new Error("FORBIDDEN");
     const [q] = await sql`select * from public.quotes where id=${b.quote_id}::uuid`;
@@ -40,7 +40,10 @@ export async function bookingDetail(id: string, worker = false): Promise<Booking
     return {
       id,
       jobId: String(job.id),
-      jobTitle: job.title,
+      jobTitle:
+        !worker || (b.read_allowed && ["pending_worker", "confirmed"].includes(b.status))
+          ? job.title
+          : "Original request details withheld",
       town: job.public_town,
       provider: quote.workerName,
       status: String(b.status),

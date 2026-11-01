@@ -12,6 +12,11 @@ beforeEach(() => {
 });
 afterEach(() => vi.unstubAllEnvs());
 it("keeps quotations and bookings off by default", () => expect(quotesConfig()).toBeNull());
+it("keeps quotations and bookings off when both flags are unset", () => {
+  delete process.env.QUOTATIONS_ENABLED;
+  delete process.env.BOOKINGS_ENABLED;
+  expect(quotesConfig()).toBeNull();
+});
 it("rejects partial or unreviewed hosted activation", () => {
   vi.stubEnv("BOOKINGS_ENABLED", "true");
   expect(() => quotesConfig()).toThrow();
