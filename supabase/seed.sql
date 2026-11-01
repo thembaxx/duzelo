@@ -8,9 +8,6 @@ select ('10000000-0000-0000-0000-' || lpad(i::text,12,'0'))::uuid from generate_
 insert into public.user_profiles(user_id, display_name, is_suspended)
 select id, 'Fictional adult fixture ' || right(id::text,1), right(id::text,1) = '5' from auth.users where id::text like '10000000-0000-0000-0000-%';
 insert into private.admin_members(user_id,admin_role) values ('10000000-0000-0000-0000-000000000004','owner');
-insert into public.service_categories(id,slug,label_en,requires_trade_review) values
- ('20000000-0000-0000-0000-000000000001','plumbing','Plumbing',true),
- ('20000000-0000-0000-0000-000000000002','cleaning','Cleaning',false);
 insert into public.service_areas(id,slug,label,centroid) values
  ('40000000-0000-0000-0000-000000000001','synthetic-test-area','Synthetic test area',extensions.st_setsrid(extensions.st_makepoint(30,-27),4326)::extensions.geography);
 insert into public.worker_profiles(id,user_id,slug,display_name,status)

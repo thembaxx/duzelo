@@ -1,0 +1,9 @@
+2026-10-31T22:01:07.3780977Z found 0 vulnerabilities
+2026-10-31T22:03:16.5114506Z Files=5, Tests=122,  0 wallclock secs ( 0.04 usr  0.01 sys +  0.04 cusr  0.03 csys =  0.12 CPU)
+2026-10-31T22:03:16.5115264Z Result: PASS
+2026-10-31T22:03:21.7690185Z PASS: publication waits for revocation and rejects stale eligibility.
+2026-10-31T22:03:21.7691224Z PASS: revocation waits for publication, then removes the committed card.
+2026-10-31T22:03:22.6130038Z No issues found
+2026-10-31T22:03:23.6264613Z No schema errors found
+2026-10-31T22:03:24.2118374Z  Index Scan using worker_coverage_base_gist_idx on worker_coverage c  (cost=0.27..58.29 rows=1 width=16) (actual time=9.123..9.133 rows=4 loops=1)
+2026-10-31T22:03:24.2130902Z  Index Scan using worker_coverage_base_gist_idx on worker_coverage c  (cost=0.27..33.28 rows=1 width=16) (actual time=0.024..0.027 rows=4 loops=1)

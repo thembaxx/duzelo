@@ -76,10 +76,17 @@ The files below remain authoritative for later milestones:
 
 Keep sensitive features fail-closed and server-authorized. Never claim escrow, real verified workers, working checkout or live availability without evidence. Avoid exposing exact addresses, worker home bases, identity documents, bank data or secret keys. Maintain real keyboard access, mobile performance and text-based action feedback in both colour schemes.
 
-The app is prelaunch, and the founder will supply photography/design references when available.
+The app is prelaunch. Founder-supplied UI references are mapped in `DESIGN.md`; brand clearance and launch approval remain outstanding.
 
 ## Milestone 02 — isolated account implementation
 
 Native local phone OTP, SSR refresh, owner onboarding/preferences, dual client/worker modes, suspension/global sign-out and administrator MFA are implemented behind **Auth OFF by default**. No production registration or SMS delivery is enabled. Follow [isolated account setup](docs/auth/LOCAL_ACCOUNTS.md), [architecture/provider gates](docs/adr/0003-authentication.md) and [current integration evidence](docs/evidence/milestone-02.md). `npm run test:public` starts a production server and runs all existing public browser checks; `npm run test:auth` requires the isolated local Supabase stack.
 
-[DESIGN.md](DESIGN.md) maps the founder's reference images and Noe/Marked thread to actual interface decisions. The current editorial identity, custom mark, Geist typography, three appearance choices and public PWA remain intact. Mode cards and phone progress use the existing theme palette. Stop before Milestone 03.
+[DESIGN.md](DESIGN.md) maps the founder's reference images and Noe/Marked thread to actual interface decisions. The current editorial identity, custom mark, Geist typography, three appearance choices and public PWA remain intact. Mode cards and phone progress use the existing theme palette. M02 remains the identity boundary for later work.
+
+
+## Milestone 03 — isolated worker profiles and evidence review
+
+Individual/business drafts, confirmed service categories, fixed/starting/custom prices, private coverage, real scanned/scrubbed private photo uploads, revision-bound submission, independent MFA evidence review and sanitized public profiles are implemented behind **worker approval OFF by default**. Review reasons/history, per-category trade claims, retention expiry, suspension withdrawal and idempotent provider deletion have explicit server boundaries. No real worker, document, hosted Storage or paid scanner was provisioned.
+
+Follow [local review setup](docs/workers/LOCAL_REVIEW.md), [ADR 0004](docs/adr/0004-worker-evidence.md) and [M03 acceptance evidence](docs/evidence/milestone-03.md). The native test suite now requires private Storage plus a healthy local ClamAV scanner. Keep production Auth/worker gates OFF until provider/privacy/retention operations are reviewed. Existing editorial branding, fonts, themes and public PWA are preserved. Stop before Milestone 04.

@@ -1,0 +1,9 @@
+2026-10-31T22:01:08.8905513Z found 0 vulnerabilities
+2026-10-31T22:01:13.1117850Z  Test Files  16 passed (16)
+2026-10-31T22:01:13.1119185Z       Tests  179 passed (179)
+2026-10-31T22:01:21.4365598Z ✓ Compiled successfully in 7.6s
+2026-10-31T22:01:26.0633230Z found 0 vulnerabilities
+2026-10-31T22:01:26.2318352Z Secret leakage scan passed: 206 repository files; 21 browser assets; canary checked. Pattern scan is not a complete security audit.
+2026-10-31T22:01:56.3717561Z ℹ tests 8
+2026-10-31T22:01:56.3720959Z ℹ pass 8
+2026-10-31T22:01:56.3721652Z ℹ fail 0

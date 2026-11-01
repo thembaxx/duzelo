@@ -7,7 +7,7 @@ export function json(data: unknown, status = 200) {
     headers: { "Cache-Control": "private, no-store, max-age=0", Pragma: "no-cache" },
   });
 }
-export async function readMutation(request: Request) {
+export function assertMutationOrigin(request: Request) {
   const config = readAuthConfig();
   if (!config) throw new Error("UNAVAILABLE");
   if (
@@ -15,6 +15,9 @@ export async function readMutation(request: Request) {
     request.headers.get("sec-fetch-site") === "cross-site"
   )
     throw new Error("FORBIDDEN");
+}
+export async function readMutation(request: Request) {
+  assertMutationOrigin(request);
   if (!request.headers.get("content-type")?.startsWith("application/json"))
     throw new Error("INVALID");
   const reader = request.body?.getReader();

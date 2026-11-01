@@ -114,7 +114,7 @@ port = 54324
 # sender_name = "Admin"
 
 [storage]
-enabled = false
+enabled = true
 # The maximum file size allowed (e.g. "5MB", "500KB").
 file_size_limit = "50MiB"
 
@@ -127,7 +127,7 @@ file_size_limit = "50MiB"
 
 # Allow connections via S3 compatible clients
 [storage.s3_protocol]
-enabled = true
+enabled = false
 
 # Image transformation API is available to Supabase Pro plan.
 # [storage.image_transformation]
@@ -290,6 +290,7 @@ max_frequency = "5s"
 # Configure one of the supported SMS providers: `twilio`, `twilio_verify`, `messagebird`, `textlocal`, `vonage`.
 # CLI phone-provider gate only. Inert credentials; the local send hook below
 # overrides delivery and fixed OTPs bypass sending. Never copy to hosted config.
+
 [auth.sms.twilio]
 enabled = true
 account_sid = "AC00000000000000000000000000000000"
@@ -417,11 +418,14 @@ enabled = true
 # and column/key alignment. Set to "null" to emit raw, unformatted SQL.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":180,\"commaStyle\":\"trailing\"}"
 
-# Local-only fixed OTPs: no SMS provider is enabled. Never copy into hosted settings.
+# Local-only fixed OTPs and no-delivery hook; never copy into hosted settings.
 [auth.sms.test_otp]
 27820000001 = "123456"
 27820000002 = "123456"
 27820000003 = "123456"
+27820000004 = "123456"
+27820000005 = "123456"
+27820000006 = "123456"
 
 # Local no-delivery adapter. Native Auth still generates/verifies OTPs; requests
 # outside the explicit test allowlist are rejected, never sent to an SMS vendor.

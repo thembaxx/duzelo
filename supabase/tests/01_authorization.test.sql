@@ -13,12 +13,12 @@ select is((select count(*)::integer from information_schema.role_table_grants wh
 select is((select count(*)::integer from information_schema.columns where table_schema='public' and column_name in ('street_address','exact_point','base_point','storage_path_private','encrypted_token','registration_number')),0,'precise/private fields are not public columns');
 
 set local role anon;
-select is((select count(*)::integer from public.service_categories),2,'guest sees active categories');
+select is((select count(*)::integer from public.service_categories),10,'guest sees active categories');
 select is((select count(*)::integer from public.worker_cards),1,'guest sees reviewed sanitized fixture card');
 select throws_ok('select * from public.job_requests','42501',null,'guest cannot read jobs');
 select throws_ok('select * from private.client_addresses','42501',null,'guest cannot read exact addresses');
 select throws_ok('select * from private.worker_verifications','42501',null,'guest cannot read verification evidence');
-select ok(not exists(select 1 from information_schema.role_table_grants where table_schema='storage' and grantee in ('anon','authenticated') and privilege_type in ('SELECT','INSERT','UPDATE','DELETE')), 'disabled storage has no browser data grants');
+select is((select count(*)::int from pg_policies where schemaname='storage' and policyname in ('worker_evidence_objects_deny','worker_evidence_bucket_deny') and permissive='RESTRICTIVE'),2,'private evidence has durable restrictive Storage policies');
 reset role;
 
 set local role authenticated;

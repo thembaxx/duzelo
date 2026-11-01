@@ -5,7 +5,7 @@ export function PageHeading({
 }: {
   eyebrow: string;
   title: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }) {
   return (
     <div className="page-heading">

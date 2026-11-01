@@ -2,7 +2,7 @@ name: Application checks
 on:
   pull_request:
   push:
-    branches: [main, feat/m02-integrated-accounts]
+    branches: [main, feat/milestone-03-workers]
 permissions:
   contents: read
 concurrency:
@@ -58,6 +58,14 @@ jobs:
       - run: npm run db:explain
 
   auth:
+    services:
+      clamav:
+        image: clamav/clamav:1.5.4@sha256:bda39705e291105049c3936e2803ac90b955172af8030f94f05dce1252df6c6d
+        env:
+          CLAMAV_NO_FRESHCLAMD: "true"
+        ports:
+          - 3310:3310
+        options: --health-cmd "clamdcheck.sh" --health-interval 10s --health-timeout 5s --health-retries 30
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -77,5 +85,7 @@ jobs:
         if: always()
         with:
           name: auth-ui-screenshots
-          path: docs/evidence/screenshots/auth-*.png
+          path: |
+            docs/evidence/screenshots/auth-*.png
+            docs/evidence/screenshots/worker-*.png
           retention-days: 14
