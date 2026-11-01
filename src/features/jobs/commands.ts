@@ -98,8 +98,9 @@ export async function jobsCommand(action: string, input: unknown, key: string | 
         ).length
       )
         throw new Error("INCOMPLETE");
-      await sql`update private.job_dispatch set submitted_at=now(),expires_at=now()+case when ${draft.urgency}='urgent' then interval '2 hours' else interval '24 hours' end where job_id=${data.jobId}::uuid`;
-      await sql`update public.job_requests set status='open',time_slots=${sql.json(draft.slots)},preferred_start=${draft.slots[0]?.start ?? null}::timestamptz,preferred_end=${draft.slots[0]?.end ?? null}::timestamptz,quote_deadline=now()+case when ${draft.urgency}='urgent' then interval '2 hours' else interval '24 hours' end where id=${data.jobId}::uuid`;
+      const [dispatch] =
+        await sql`update private.job_dispatch set submitted_at=now(),expires_at=least(now()+case when ${draft.urgency}='urgent' then interval '2 hours' else interval '24 hours' end,coalesce((select max((slot->>'end')::timestamptz) from jsonb_array_elements(${sql.json(draft.slots)}::jsonb) slot),'infinity'::timestamptz)) where job_id=${data.jobId}::uuid returning expires_at`;
+      await sql`update public.job_requests set status='open',time_slots=${sql.json(draft.slots)},preferred_start=${draft.slots[0]?.start ?? null}::timestamptz,preferred_end=${draft.slots[0]?.end ?? null}::timestamptz,quote_deadline=${dispatch!.expires_at}::timestamptz where id=${data.jobId}::uuid`;
       return dispatchWave(sql, data.jobId);
     });
   }

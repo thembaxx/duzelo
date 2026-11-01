@@ -117,6 +117,7 @@ export function readyToSubmit(data: DraftData, now = Date.now()): DraftData {
       start < now - 60000 ||
       start > now + 90 * 86400000 ||
       end <= start ||
+      end <= now ||
       end - start > 86400000 ||
       (data.urgency === "urgent" &&
         (start > now + 86400000 ||

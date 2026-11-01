@@ -58,6 +58,11 @@ select is((select count(*)::int from private.job_candidates('51000000-0000-0000-
 insert into private.worker_match_settings(worker_id,urgent_ready) values ('30000000-0000-0000-0000-000000000002',true);
 select is((select count(*)::int from private.job_candidates('51000000-0000-0000-0000-000000000001')),1,'urgent opt-in allows an otherwise eligible worker');
 update public.job_requests set urgency='scheduled',time_slots=jsonb_build_array(jsonb_build_object('start',now()+interval '1 day','end',now()+interval '1 day 2 hours')) where id='51000000-0000-0000-0000-000000000001';
+update public.job_requests set time_slots=jsonb_build_array(jsonb_build_object('start',now()-interval '2 hours','end',now()-interval '1 hour')) where id='51000000-0000-0000-0000-000000000001';
+select is((select count(*)::int from private.job_candidates('51000000-0000-0000-0000-000000000001')),0,'ended requested windows cannot receive a later invitation');
+update public.job_requests set time_slots=time_slots||jsonb_build_array(jsonb_build_object('start',now()+interval '1 day','end',now()+interval '1 day 2 hours')) where id='51000000-0000-0000-0000-000000000001';
+select is((select count(*)::int from private.job_candidates('51000000-0000-0000-0000-000000000001')),1,'a remaining future window preserves eligibility');
+update public.job_requests set time_slots=jsonb_build_array(jsonb_build_object('start',now()+interval '1 day','end',now()+interval '1 day 2 hours')) where id='51000000-0000-0000-0000-000000000001';
 insert into private.worker_schedule_blocks(worker_id,starts_at,ends_at) values ('30000000-0000-0000-0000-000000000002',now()+interval '1 day',now()+interval '1 day 2 hours');
 select is((select count(*)::int from private.job_candidates('51000000-0000-0000-0000-000000000001')),0,'private hard schedule block prevents invitation');
 delete from private.worker_schedule_blocks;

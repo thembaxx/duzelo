@@ -86,6 +86,19 @@ it("requires a slot for scheduled jobs and rejects past or reversed timing", () 
     ),
   ).toThrow("TIMING");
 });
+it("rejects a window that just ended even within the allowed start tolerance", () => {
+  expect(() =>
+    readyToSubmit(
+      {
+        ...valid,
+        slots: [
+          { start: new Date(now - 50000).toISOString(), end: new Date(now - 10000).toISOString() },
+        ],
+      },
+      now,
+    ),
+  ).toThrow("TIMING");
+});
 it("bounds urgent timing to today in Africa/Johannesburg", () => {
   const request = readyToSubmit({ ...valid, urgency: "urgent" }, now);
   expect(request.slots).toEqual([

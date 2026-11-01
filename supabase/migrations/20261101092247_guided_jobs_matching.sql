@@ -129,7 +129,8 @@ with recursive category_tree as (
    or (l.exact_point is null and (j.public_town=any(cov.town_allowlist) or (cardinality(cov.town_allowlist)=0 and card.town_label=j.public_town))))
  and (jsonb_array_length(j.time_slots)=0 or exists(
   select 1 from jsonb_array_elements(j.time_slots) slot
-  where not exists(select 1 from public.bookings b where b.worker_id=w.id and b.status in ('pending_worker','confirmed','in_progress','completion_pending') and b.scheduled_start<(slot->>'end')::timestamptz and b.scheduled_end>(slot->>'start')::timestamptz)
+  where (slot->>'end')::timestamptz>now()
+  and not exists(select 1 from public.bookings b where b.worker_id=w.id and b.status in ('pending_worker','confirmed','in_progress','completion_pending') and b.scheduled_start<(slot->>'end')::timestamptz and b.scheduled_end>(slot->>'start')::timestamptz)
   and not exists(select 1 from private.worker_schedule_blocks b where b.worker_id=w.id and b.starts_at<(slot->>'end')::timestamptz and b.ends_at>(slot->>'start')::timestamptz)))
  and (p_existing or (
   not exists(select 1 from public.job_matches m where m.job_id=j.id and m.worker_id=w.id)

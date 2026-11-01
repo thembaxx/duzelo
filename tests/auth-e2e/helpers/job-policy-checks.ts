@@ -217,6 +217,11 @@ export async function jobPolicyChecks({
   }
   expect(urgentSent.status()).toBe(200);
   expect((await urgentSent.json()).invited).toBe(1);
+  const urgentRead = await (await page.request.get("/api/v1/jobs/" + urgent.jobId)).json();
+  if (urgentRead.data.slots.length)
+    expect(Date.parse(urgentRead.expires)).toBeLessThanOrEqual(
+      Math.max(...urgentRead.data.slots.map((slot: { end: string }) => Date.parse(slot.end))),
+    );
   const extra = await createSavedJob(page, { ...jobData, title: "Fictional M05 quota check" });
   const limited = await jobPost(page, "submit", {
     jobId: extra.jobId,
