@@ -2,7 +2,7 @@ name: Application checks
 on:
   pull_request:
   push:
-    branches: [main, feat/milestone-03-workers]
+    branches: [main, feat/milestone-04-discovery]
 permissions:
   contents: read
 concurrency:
@@ -88,4 +88,5 @@ jobs:
           path: |
             docs/evidence/screenshots/auth-*.png
             docs/evidence/screenshots/worker-*.png
+            docs/evidence/screenshots/discovery-*.png
           retention-days: 14
