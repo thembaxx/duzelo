@@ -38,9 +38,21 @@ export async function geocode(input: unknown) {
       signal: AbortSignal.timeout(6000),
     });
     if (!response.ok) throw new Error();
-    const body = await response.text();
-    if (body.length > 65536) throw new Error();
-    return { places: providerPlaces(JSON.parse(body)) };
+    const reader = response.body?.getReader();
+    if (!reader) throw new Error();
+    const chunks: Uint8Array[] = [];
+    let size = 0;
+    for (;;) {
+      const part = await reader.read();
+      if (part.done) break;
+      size += part.value.byteLength;
+      if (size > 65536) {
+        await reader.cancel();
+        throw new Error();
+      }
+      chunks.push(part.value);
+    }
+    return { places: providerPlaces(JSON.parse(Buffer.concat(chunks).toString("utf8"))) };
   } catch {
     throw new Error("PROVIDER");
   }

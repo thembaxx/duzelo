@@ -7,7 +7,7 @@ create function private.search_worker_cards(
 ) returns table(slug text,name text,bio text,town text,longitude double precision,latitude double precision,available boolean,identity_reviewed boolean,business_reviewed boolean,avatar_id uuid,categories jsonb,distance_band text)
 language plpgsql volatile security invoker set search_path='' as $$
 begin
- if p_radius is null or p_radius not between 5 and 150 or p_limit is null or p_limit not between 1 and 21 or p_offset is null or p_offset not between 0 and 1000 or p_sort not in ('name','distance') or p_sort is null
+ if p_available is null or p_trade is null or p_radius is null or p_radius not between 5 and 150 or p_limit is null or p_limit not between 1 and 21 or p_offset is null or p_offset not between 0 and 1000 or p_sort not in ('name','distance') or p_sort is null
  or (p_lon is null)<>(p_lat is null) or p_lon not between 16 and 33 or p_lat not between -35 and -22
  or p_lon in ('NaN'::float8,'Infinity'::float8,'-Infinity'::float8) or p_lat in ('NaN'::float8,'Infinity'::float8,'-Infinity'::float8) then raise exception 'Invalid discovery bounds' using errcode='22023';end if;
  return query
@@ -36,4 +36,32 @@ begin
 end;$$;
 revoke all on function private.search_worker_cards(uuid,uuid,float8,float8,integer,boolean,boolean,text,integer,integer) from public,anon,authenticated;
 grant execute on function private.search_worker_cards(uuid,uuid,float8,float8,integer,boolean,boolean,text,integer,integer) to service_role;
+
+-- Publish the actual worker setting rather than the legacy card default true.
+create or replace function private.publish_worker_card(p_worker uuid, p_area uuid, p_public_name text, p_short_bio text)
+returns void language plpgsql security invoker set search_path = '' as $$
+declare categories uuid[];
+begin
+  categories := private.eligible_worker_categories(p_worker);
+  insert into public.worker_cards(worker_id, slug, public_name, short_bio, town_label, approx_marker,
+      category_ids, verified_identity, verified_trade_category_ids,is_available)
+  select w.id, w.slug, p_public_name, p_short_bio, a.label, a.centroid,
+    categories, true, array(select c.id from public.service_categories c where c.id = any(categories) and c.requires_trade_review order by c.id),w.is_available
+  from public.worker_profiles w cross join public.service_areas a where w.id = p_worker and a.id = p_area
+  on conflict (worker_id) do update set public_name = excluded.public_name, short_bio = excluded.short_bio,
+    town_label = excluded.town_label, approx_marker = excluded.approx_marker, category_ids = excluded.category_ids,
+    verified_identity = excluded.verified_identity, verified_trade_category_ids = excluded.verified_trade_category_ids,
+    is_available=excluded.is_available,published_at = now();
+  if not found then raise exception 'Worker or public area is missing'; end if;
+end;
+$$;
+update public.worker_cards c set is_available=w.is_available from public.worker_profiles w where w.id=c.worker_id and c.is_available is distinct from w.is_available;
+create function private.check_discovery_availability() returns trigger
+language plpgsql security invoker set search_path='' as $$
+begin
+ perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('duzelo.worker-publication',0));
+ if new.is_available is distinct from (select w.is_available from public.worker_profiles w where w.id=new.worker_id) then raise exception 'Availability must match the worker setting';end if;
+ return new;
+end;$$;
+create trigger worker_card_availability before insert or update on public.worker_cards for each row execute function private.check_discovery_availability();
 commit;

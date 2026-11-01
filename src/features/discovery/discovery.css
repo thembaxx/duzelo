@@ -317,3 +317,13 @@
     font-size: 1.125rem;
   }
 }
+
+/* Attribution stays above every mobile sheet state. */
+.discovery-map-shell .map-credit {
+  top: 0;
+  bottom: auto;
+  right: 3.5rem;
+}
+.discovery-map-shell .map-theme-notice {
+  top: 2.5rem;
+}

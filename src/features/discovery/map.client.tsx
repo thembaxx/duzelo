@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTheme } from "next-themes";
 import { Map as LibreMap, Marker, NavigationControl, setWorkerUrl } from "maplibre-gl";
-import type { StyleSpecification } from "maplibre-gl";
+import { applyMapStyle } from "./map-style";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { workerMarkers } from "./map-markers";
 import { coarsePoint, pointSchema, type Point } from "./schema";
@@ -17,6 +17,7 @@ export default function DiscoveryMap({
   onPoint,
   placing,
   visible,
+  sheetExpanded,
 }: {
   cards: DiscoveryCard[];
   selected: string | null;
@@ -26,6 +27,7 @@ export default function DiscoveryMap({
   onPoint: (point: Point) => void;
   placing: boolean;
   visible: boolean;
+  sheetExpanded: boolean;
 }) {
   const root = useRef<HTMLDivElement>(null),
     map = useRef<LibreMap | null>(null),
@@ -98,16 +100,7 @@ export default function DiscoveryMap({
       controller = new AbortController();
     async function updateStyle() {
       try {
-        const response = await fetch(style!, { signal: controller.signal });
-        if (!response.ok) throw new Error();
-        const next = (await response.json()) as StyleSpecification;
-        if (next.version !== 8 || !next.sources || !Array.isArray(next.layers)) throw new Error();
-        if (controller.signal.aborted) return;
-        const camera = instance.getCenter(),
-          zoom = instance.getZoom(),
-          bearing = instance.getBearing(),
-          pitch = instance.getPitch();
-        instance.setStyle({ ...next, center: [camera.lng, camera.lat], zoom, bearing, pitch });
+        await applyMapStyle(instance, style!, controller.signal);
       } catch {
         if (!controller.signal.aborted)
           setError(
@@ -157,6 +150,24 @@ export default function DiscoveryMap({
     }
     pin.current.setLngLat([center.longitude, center.latitude]);
   }, [center, ready]);
+  useEffect(() => {
+    const instance = map.current;
+    if (!instance || !ready || !root.current) return;
+    function layout() {
+      const mobile = window.matchMedia("(max-width:767px)").matches;
+      instance!.setPadding({
+        top: 44,
+        bottom: mobile ? instance!.getContainer().clientHeight * (sheetExpanded ? 0.7 : 0.34) : 44,
+        left: 12,
+        right: 12,
+      });
+      instance!.resize();
+    }
+    layout();
+    const observer = new ResizeObserver(layout);
+    observer.observe(root.current);
+    return () => observer.disconnect();
+  }, [sheetExpanded, ready]);
   useEffect(() => {
     if (visible) map.current?.resize();
   }, [visible]);

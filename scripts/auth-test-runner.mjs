@@ -40,4 +40,5 @@ const result = spawnSync(
   ["test", "--config", "playwright.auth.config.ts"],
   { env, stdio: "inherit" },
 );
+fixture?.kill();
 process.exitCode = result.status ?? 1;

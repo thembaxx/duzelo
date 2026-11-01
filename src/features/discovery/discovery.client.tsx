@@ -1,9 +1,9 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useDiscoverySearch } from "./use-search";
 import { DiscoveryFilters } from "./filters.client";
-import { DiscoveryCards } from "./cards";
+import { DiscoveryResults } from "./results.client";
 import { AddressForm } from "./address-form.client";
 import { coarsePoint, type SearchInput, type Point } from "./schema";
 import type { DiscoveryOptions, SearchResult } from "./types";
@@ -27,7 +27,6 @@ export function Discovery({
     [expanded, setExpanded] = useState(false),
     [placing, setPlacing] = useState(false),
     [point, setPoint] = useState<Point | null>(initial.center);
-  const gesture = useRef<number | null>(null);
   function openMap() {
     setOpened(true);
     setView("map");
@@ -58,8 +57,7 @@ export function Discovery({
       </p>
       {options.local && (
         <p className="test-notice">
-          Isolated local testing. Profiles, places and map backgrounds are synthetic fixtures, not
-          live workers or a geographic basemap.
+          Isolated local testing. Profiles are test records, not live workers.
         </p>
       )}
       <DiscoveryFilters
@@ -135,79 +133,17 @@ export function Discovery({
               onPoint={manualPoint}
               placing={placing}
               visible={view === "map"}
+              sheetExpanded={expanded}
             />
           </div>
         )}
-        <section
-          id="worker-results"
-          tabIndex={-1}
-          className={"discovery-results" + (expanded ? " expanded" : "")}
-          aria-busy={state.busy}
-          aria-label="Worker search results"
-        >
-          {view === "map" && (
-            <button
-              type="button"
-              className="discovery-sheet-handle"
-              aria-expanded={expanded}
-              onClick={() => setExpanded((n) => !n)}
-              onPointerDown={(e) => {
-                gesture.current = e.clientY;
-                e.currentTarget.setPointerCapture(e.pointerId);
-              }}
-              onPointerUp={(e) => {
-                if (gesture.current !== null && Math.abs(gesture.current - e.clientY) > 40)
-                  setExpanded(gesture.current > e.clientY);
-                gesture.current = null;
-              }}
-            >
-              {expanded ? "Collapse worker list" : "Expand worker list"}
-            </button>
-          )}
-          <h2 aria-live="polite">
-            {state.busy
-              ? "Searching…"
-              : state.result.workers.length + " reviewed profiles on this page"}
-            {state.error ? " · previous search" : ""}
-          </h2>
-          <p>
-            Approximate distances are to public town centres. They do not confirm service coverage
-            or appointment availability.
-          </p>
-          {state.result.workers.length ? (
-            <DiscoveryCards
-              cards={state.result.workers}
-              selected={state.selected}
-              onSelect={select}
-            />
-          ) : (
-            <div className="empty-panel">
-              <h3>No reviewed profiles match this search.</h3>
-              <p>
-                Try another town, a wider approximate radius or fewer filters. A submitted
-                application appears only after manual review.
-              </p>
-            </div>
-          )}
-          <div className="discovery-pagination">
-            <button
-              type="button"
-              className="button button-secondary"
-              disabled={!state.previous.length || state.busy}
-              onClick={() => void state.back()}
-            >
-              Previous page
-            </button>
-            <button
-              type="button"
-              className="button button-secondary"
-              disabled={!state.result.nextCursor || state.busy}
-              onClick={() => void state.next()}
-            >
-              Next page
-            </button>
-          </div>
-        </section>
+        <DiscoveryResults
+          state={state}
+          mapView={view === "map"}
+          expanded={expanded}
+          setExpanded={setExpanded}
+          onSelect={select}
+        />
       </div>
     </section>
   );

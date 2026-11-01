@@ -26,11 +26,23 @@ export const searchSchema = z
   .strict();
 export type SearchInput = z.infer<typeof searchSchema>;
 export const geocodeSchema = z.object({ query: z.string().trim().min(3).max(160) }).strict();
+export const provinces = [
+  "Eastern Cape",
+  "Free State",
+  "Gauteng",
+  "KwaZulu-Natal",
+  "Limpopo",
+  "Mpumalanga",
+  "North West",
+  "Northern Cape",
+  "Western Cape",
+] as const;
 export const saveAddressSchema = z
   .object({
     label: z.string().trim().min(2).max(60),
     street: z.string().trim().min(3).max(160),
     town: z.string().trim().min(2).max(80),
+    province: z.enum(provinces),
     point: pointSchema,
     consent: z.literal(true),
   })

@@ -1,8 +1,8 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { coarsePoint, pointSchema, type Point, type SearchLocation } from "./schema";
-import { discoveryRequest } from "./client-api";
-import type { DiscoveryOptions, Place } from "./types";
+import { GeocodeSearch } from "./geocode-search.client";
+import type { DiscoveryOptions } from "./types";
 export function LocationControls({
   options,
   location,
@@ -16,11 +16,8 @@ export function LocationControls({
 }) {
   const [latitude, setLatitude] = useState(""),
     [longitude, setLongitude] = useState(""),
-    [query, setQuery] = useState(""),
-    [places, setPlaces] = useState<Place[]>([]),
     [message, setMessage] = useState(""),
     [busy, setBusy] = useState(false);
-  const cache = useRef(new Map<string, { until: number; places: Place[] }>());
   useEffect(() => {
     if (location?.kind === "coordinates") {
       setLatitude(String(location.point.latitude));
@@ -65,32 +62,6 @@ export function LocationControls({
       },
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 0 },
     );
-  }
-  async function findPlaces() {
-    setMessage("");
-    setBusy(true);
-    try {
-      const key = query.trim().toLocaleLowerCase(),
-        prior = cache.current.get(key);
-      const result =
-        prior && prior.until > Date.now()
-          ? prior.places
-          : (await discoveryRequest<{ places: Place[] }>("geocode", { query })).places;
-      cache.current.set(key, { places: result, until: Date.now() + 300000 });
-      if (cache.current.size > 20) cache.current.delete(cache.current.keys().next().value!);
-      setPlaces(result);
-      if (!result.length)
-        setMessage("No places found. A rural or unnamed location can be placed manually.");
-    } catch (error) {
-      setPlaces([]);
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "Address search failed. Use a town or manual point.",
-      );
-    } finally {
-      setBusy(false);
-    }
   }
   function manual() {
     const point = pointSchema.safeParse({
@@ -150,47 +121,7 @@ export function LocationControls({
         </label>
       )}
       {options.geocoding && (
-        <div className="geocode-controls">
-          <label>
-            Town or address search
-            <input value={query} maxLength={160} onChange={(e) => setQuery(e.target.value)} />
-          </label>
-          <p>
-            Search sends this text to {options.local ? "the isolated test provider" : "MapTiler"}.
-            Results stay in this page’s memory for up to five minutes.
-          </p>
-          <button
-            type="button"
-            className="button button-secondary"
-            disabled={busy || query.trim().length < 3}
-            onClick={() => void findPlaces()}
-          >
-            Search places
-          </button>
-          <ul>
-            {places.map((p, n) => (
-              <li key={n}>
-                <button
-                  type="button"
-                  className="text-link"
-                  onClick={() => {
-                    choosePoint(p.point);
-                    setPlaces([]);
-                    setMessage("Place selected. Apply filters to search.");
-                  }}
-                >
-                  {p.label}
-                </button>
-              </li>
-            ))}
-          </ul>
-          {!options.local && (
-            <p>
-              <a href="https://www.maptiler.com/copyright/">© MapTiler</a> ·{" "}
-              <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>
-            </p>
-          )}
-        </div>
+        <GeocodeSearch testProvider={options.geocoderTest} onPoint={choosePoint} />
       )}
       <details>
         <summary>Enter a point manually</summary>

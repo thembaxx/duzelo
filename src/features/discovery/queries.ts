@@ -36,6 +36,7 @@ export async function discoveryOptions(): Promise<DiscoveryOptions> {
     local: config.mode === "local",
     map: config.map,
     geocoding: config.geocoding,
+    geocoderTest: config.geocodeOrigin !== "https://api.maptiler.com",
   };
 }
 async function resolveLocation(

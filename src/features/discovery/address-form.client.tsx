@@ -1,6 +1,7 @@
 "use client";
 import { useState, type FormEvent } from "react";
 import { discoveryRequest, useDiscoveryReady } from "./client-api";
+import { provinces } from "./schema";
 import type { DiscoveryOptions } from "./types";
 export function AddressForm({
   onSaved,
@@ -21,6 +22,7 @@ export function AddressForm({
         label: String(data.get("label")),
         street: String(data.get("street")),
         town: String(data.get("town")),
+        province: String(data.get("province")),
         point: { latitude: Number(data.get("latitude")), longitude: Number(data.get("longitude")) },
         consent: data.get("consent") === "on",
       });
@@ -53,6 +55,17 @@ export function AddressForm({
         <label>
           Address town
           <input name="town" required minLength={2} maxLength={80} />
+        </label>
+        <label>
+          Address province
+          <select name="province" aria-label="Address province" defaultValue="" required>
+            <option value="">Choose a province</option>
+            {provinces.map((province) => (
+              <option key={province} value={province}>
+                {province}
+              </option>
+            ))}
+          </select>
         </label>
         <label>
           Private address latitude

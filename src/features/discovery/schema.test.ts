@@ -36,6 +36,7 @@ it("requires explicit consent and no authority fields for saved private addresse
     label: "Fictional home",
     street: "Fictional rural directions",
     town: "Fictional town",
+    province: "Mpumalanga",
     point: { latitude: -27, longitude: 30 },
     consent: true,
   };

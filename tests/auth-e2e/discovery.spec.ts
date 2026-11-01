@@ -14,6 +14,9 @@ const baseline = {
   cursor: null,
 };
 test.afterAll(async () => sql.end());
+test.afterEach(async () => {
+  await sql`delete from public.worker_cards where public_name like 'Fictional discovery %'`;
+});
 test("coarse discovery, real map, fallback, theme, pagination and saved-address privacy", async ({
   page,
   browser,
@@ -43,6 +46,8 @@ test("coarse discovery, real map, fallback, theme, pagination and saved-address 
   const publicText = JSON.stringify(first) + (await (await page.request.get("/explore")).text());
   for (const hidden of ["-27.123456", "30.654321", "base_point", "storage_path"])
     expect(publicText).not.toContain(hidden);
+  const available = await (await post("search", { ...baseline, available: true })).json();
+  expect(available.workers).toHaveLength(11);
   const next = await (await post("search", { ...baseline, cursor: first.nextCursor })).json();
   expect(next.workers).toHaveLength(1);
   expect(first.workers.map((w: { slug: string }) => w.slug)).not.toContain(next.workers[0].slug);
@@ -159,11 +164,54 @@ test("coarse discovery, real map, fallback, theme, pagination and saved-address 
   await page.screenshot({
     path: `docs/evidence/screenshots/discovery-list-${info.project.name}.png`,
   });
+  // Valid style, unavailable raster tiles: the list remains usable.
+  await page.route("**/test-style-light", (route) =>
+    route.fulfill({
+      json: {
+        version: 8,
+        sources: {
+          broken: {
+            type: "raster",
+            tiles: [origin + "/api/v1/discovery/unavailable-tile?z={z}&x={x}&y={y}"],
+            tileSize: 256,
+            attribution: "Synthetic tile-failure fixture · CC0",
+          },
+        },
+        layers: [{ id: "broken", type: "raster", source: "broken" }],
+      },
+    }),
+  );
+  await page.getByRole("button", { name: "Map view", exact: true }).click();
+  if (info.project.name === "mobile") await page.getByRole("button", { name: "Open menu" }).click();
+  await page.getByRole("button", { name: "Light theme" }).first().click();
+  if (info.project.name === "mobile")
+    await page.getByRole("button", { name: "Close menu" }).click();
+  await expect(
+    page.getByText("Map content could not load. The worker list remains available."),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "List view", exact: true }).click();
+  await page.unroute("**/test-style-light");
   await page.getByLabel("Town or address search").fill("Unavailable provider");
   await page.getByRole("button", { name: "Search places", exact: true }).click();
   await expect(
     page.getByText("Address search is unavailable. Choose a town or place a point manually."),
   ).toBeVisible();
+  for (let attempt = 0; attempt < 20; attempt++)
+    await post("geocode", { query: "No matching fixture" });
+  const limited = await post("geocode", { query: "No matching fixture" });
+  expect(limited.status()).toBe(429);
+  expect(limited.headers()["retry-after"]).toBe("60");
+  const cached = await page.evaluate(async () => {
+    const paths = (
+      await Promise.all(
+        (await caches.keys()).map(async (key) =>
+          (await (await caches.open(key)).keys()).map((r) => new URL(r.url).pathname),
+        ),
+      )
+    ).flat();
+    return paths.filter((p) => p === "/explore" || p.startsWith("/api/v1/discovery"));
+  });
+  expect(cached).toEqual([]);
   await page.context().setOffline(true);
   await page.getByRole("button", { name: "Apply filters" }).click();
   await expect(page.getByRole("alert").filter({ hasText: "Connection unavailable" })).toBeVisible();
@@ -203,6 +251,9 @@ test("coarse discovery, real map, fallback, theme, pagination and saved-address 
   await page.getByLabel("Address label", { exact: true }).fill("Fictional saved farm");
   await page.getByLabel("Private street or rural directions").fill("PRIVATE-RURAL-DIRECTIONS-42");
   await page.getByLabel("Address town", { exact: true }).fill("Fictional town");
+  await page
+    .getByRole("combobox", { name: "Address province", exact: true })
+    .selectOption("Mpumalanga");
   await page.getByLabel("Private address latitude").fill("-27.001234");
   await page.getByLabel("Private address longitude").fill("30.001234");
   await page

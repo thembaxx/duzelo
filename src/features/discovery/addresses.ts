@@ -31,7 +31,7 @@ export async function saveAddress(input: unknown, key: string | null) {
       await sql`select count(*)::int as count from private.client_addresses where owner_id=${actor.id}::uuid`;
     if (count[0]!.count >= 10) throw new Error("ADDRESS_LIMIT");
     const added =
-      await sql`insert into private.client_addresses(owner_id,label,street_address,town,point) values (${actor.id}::uuid,${data.label},${data.street},${data.town},extensions.st_setsrid(extensions.st_makepoint(${data.point.longitude},${data.point.latitude}),4326)::extensions.geography) returning id,label,town`;
+      await sql`insert into private.client_addresses(owner_id,label,street_address,town,province,point) values (${actor.id}::uuid,${data.label},${data.street},${data.town},${data.province},extensions.st_setsrid(extensions.st_makepoint(${data.point.longitude},${data.point.latitude}),4326)::extensions.geography) returning id,label,town`;
     const result = {
       id: String(added[0]!.id),
       label: String(added[0]!.label),

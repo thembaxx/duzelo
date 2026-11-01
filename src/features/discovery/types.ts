@@ -7,6 +7,7 @@ export interface DiscoveryOptions {
   local: boolean;
   map: { light: string | null; dark: string | null; fixture: boolean };
   geocoding: boolean;
+  geocoderTest: boolean;
 }
 export interface DiscoveryCard {
   slug: string;
