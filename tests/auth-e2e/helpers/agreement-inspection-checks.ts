@@ -172,10 +172,16 @@ export async function inspectionChecks({
   await expect(page).toHaveURL(/app\/client\/bookings\/[a-f0-9-]{36}$/);
   const bookingId = page.url().split("/").at(-1)!;
   await expect(
-    page.getByRole("heading", { name: "Appointment status: pending_worker", exact: true }),
+    page.getByRole("heading", {
+      name: "Appointment status: awaiting worker confirmation",
+      exact: true,
+    }),
   ).toBeVisible();
   await page
-    .getByRole("heading", { name: "Appointment status: pending_worker", exact: true })
+    .getByRole("heading", {
+      name: "Appointment status: awaiting worker confirmation",
+      exact: true,
+    })
     .scrollIntoViewIfNeeded();
   await page.screenshot({ path: "docs/evidence/screenshots/booking-pending-" + tag + ".png" });
   noPrecise(await page.content());

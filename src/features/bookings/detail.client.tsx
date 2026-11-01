@@ -7,6 +7,7 @@ import type { BookingView } from "@/features/quotes/types";
 import { useAgreementMutation } from "@/features/quotes/client-api";
 import { jobTime } from "@/features/jobs/format";
 import { LocationReveal } from "./location.client";
+import { appointmentStatus } from "./status";
 export function BookingDetail({ booking: b }: { booking: BookingView }) {
   const router = useRouter(),
     mutation = useAgreementMutation(),
@@ -33,7 +34,7 @@ export function BookingDetail({ booking: b }: { booking: BookingView }) {
         <p className="eyebrow">
           Appointment #{b.id.slice(0, 8)} · Version {b.version}
         </p>
-        <h2>Appointment status: {b.status}</h2>
+        <h2>Appointment status: {appointmentStatus(b.status)}</h2>
         <p>
           {b.provider} · {b.town}
         </p>
@@ -131,7 +132,8 @@ export function BookingDetail({ booking: b }: { booking: BookingView }) {
             <li key={e.id}>
               <strong>{e.type.replaceAll("_", " ")}</strong>
               <p>
-                {e.from ?? "New request"} → {e.to} · {jobTime(e.at)}
+                {e.from ? appointmentStatus(e.from) : "New request"} →{" "}
+                {e.to ? appointmentStatus(e.to) : "Status unavailable"} · {jobTime(e.at)}
               </p>
               {e.reason && (
                 <p>

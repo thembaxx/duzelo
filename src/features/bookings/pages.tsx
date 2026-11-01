@@ -9,6 +9,7 @@ import { jobTime } from "@/features/jobs/format";
 import { bookingList, bookingDetail } from "./queries";
 import { BookingDetail } from "./detail.client";
 import { AgreementNotices } from "@/features/quotes/notices";
+import { appointmentStatus } from "./status";
 export async function BookingsPage({ worker = false }: { worker?: boolean }) {
   await requireWorkspace(worker ? "worker" : "client");
   if (!quotesConfig()) return <AgreementClosed worker={worker} />;
@@ -27,7 +28,7 @@ export async function BookingsPage({ worker = false }: { worker?: boolean }) {
           {bookings.map((b) => (
             <li key={b.id}>
               <p className="eyebrow">
-                {b.status} · {b.town}
+                {appointmentStatus(b.status)} · {b.town}
               </p>
               <h2>
                 <Link href={"/app/" + (worker ? "worker" : "client") + "/bookings/" + b.id}>
