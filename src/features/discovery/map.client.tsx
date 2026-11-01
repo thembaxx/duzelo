@@ -19,6 +19,7 @@ export default function DiscoveryMap({
   placing,
   visible,
   sheetExpanded,
+  label = "Approximate town markers; equivalent worker list below",
 }: {
   cards: DiscoveryCard[];
   selected: string | null;
@@ -29,6 +30,7 @@ export default function DiscoveryMap({
   placing: boolean;
   visible: boolean;
   sheetExpanded: boolean;
+  label?: string;
 }) {
   const root = useRef<HTMLDivElement>(null),
     map = useRef<LibreMap | null>(null),
@@ -192,7 +194,7 @@ export default function DiscoveryMap({
         ref={root}
         className="discovery-map"
         role="region"
-        aria-label="Approximate town markers; equivalent worker list below"
+        aria-label={label}
         data-ready={ready}
       />
       {!ready && !error && (

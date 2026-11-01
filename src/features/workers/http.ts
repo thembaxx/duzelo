@@ -49,9 +49,12 @@ export function workerError(error: unknown) {
   if (status === 429) response.headers.set("Retry-After", "60");
   return response;
 }
-export async function readImage(request: Request) {
+export async function readImage(
+  request: Request,
+  authorize: () => Promise<{ id: string }> = workerActor,
+) {
   assertMutationOrigin(request);
-  const actor = await workerActor();
+  const actor = await authorize();
   if (!(await allowAuthAttempt("worker-upload", actor.id, 12, 60))) throw new Error("LIMITED");
   if (!request.headers.get("content-type")?.startsWith("multipart/form-data;"))
     throw new Error("INVALID");

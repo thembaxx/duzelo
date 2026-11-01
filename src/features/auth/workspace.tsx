@@ -1,4 +1,5 @@
 import { workerConfig } from "@/features/workers/config";
+import { jobsConfig } from "@/features/jobs/config";
 import Link from "next/link";
 import { requireWorkspace } from "./guard";
 import { PageHeading } from "@/features/auth/page-heading";
@@ -38,7 +39,9 @@ export async function WorkspacePage({ mode }: { mode: "client" | "worker" }) {
       >
         <p>
           {mode === "client"
-            ? "Your account is ready. Job requests and bookings are not open yet."
+            ? jobsConfig()
+              ? "Your account is ready. Save a private request and invite eligible workers. Bookings and payments are not open."
+              : "Your account is ready. Job requests and bookings are not open yet."
             : `Worker profile: ${actor.workerStatus ?? "not started"}. Manual review is required before publication or opportunities.`}
         </p>
       </PageHeading>
@@ -59,6 +62,24 @@ export async function WorkspacePage({ mode }: { mode: "client" | "worker" }) {
           <Link href="/app/settings" className={buttonVariants()}>
             Account settings
           </Link>
+          {jobsConfig() && (
+            <>
+              <Link
+                href={mode === "client" ? "/app/client/jobs" : "/app/worker/opportunities"}
+                className={buttonVariants({ variant: "outline" })}
+              >
+                {mode === "client" ? "My requests" : "Work opportunities"}
+              </Link>
+              {mode === "client" && (
+                <Link
+                  href="/app/client/jobs/new"
+                  className={buttonVariants({ variant: "outline" })}
+                >
+                  Start a job request
+                </Link>
+              )}
+            </>
+          )}
           {!(mode === "client" ? actor.profile?.worker_enabled : actor.profile?.client_enabled) && (
             <Link href="/onboarding" className={buttonVariants({ variant: "outline" })}>
               Add {mode === "client" ? "worker" : "client"} mode

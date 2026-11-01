@@ -1,0 +1,30 @@
+##[group]Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+##[group]Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+##[group]Run npm ci
+##[group]Run npm run auth:start > /tmp/auth-start.log 2>&1 || (tail -40 /tmp/auth-start.log; exit 1)
+##[group]Run npm run auth:env
+##[group]Run npx --no-install playwright install --with-deps chromium
+##[group]Run npm run test:auth
+✓ Compiled successfully in 7.9s
+  Finished TypeScript in 1985ms ...
+Secret leakage scan passed: 320 repository files; 37 browser assets; canary checked. Pattern scan is not a complete security audit.
+Secret leakage scan passed: 320 repository files; 37 browser assets; canary checked. Pattern scan is not a complete security audit.
+Secret leakage scan passed: 320 repository files; 37 browser assets; canary checked. Pattern scan is not a complete security audit.
+Running 10 tests using 1 worker
+  ✓   1 [desktop] › tests/auth-e2e/auth.spec.ts:53:1 › real local OTP, both modes, persistent settings, MFA and revoked sessions (6.3s)
+  ✓   2 [desktop] › tests/auth-e2e/auth.spec.ts:253:1 › cross-origin requests, bounded verification, no signup authority escalation (1.2s)
+  ✓   3 [desktop] › tests/auth-e2e/discovery.spec.ts:21:1 › coarse discovery, real map, fallback, theme, pagination and saved-address privacy (15.5s)
+  ✓   4 [desktop] › tests/auth-e2e/jobs.spec.ts:20:1 › persistent request, real private photo, bounded matching and coarsened worker opportunities (15.6s)
+  ✓   5 [desktop] › tests/auth-e2e/workers.spec.ts:25:1 › worker evidence, MFA review, publication, category denials and retention are real (16.3s)
+  ✓   6 [mobile] › tests/auth-e2e/auth.spec.ts:53:1 › real local OTP, both modes, persistent settings, MFA and revoked sessions (5.1s)
+  ✓   7 [mobile] › tests/auth-e2e/auth.spec.ts:253:1 › cross-origin requests, bounded verification, no signup authority escalation (812ms)
+  ✓   8 [mobile] › tests/auth-e2e/discovery.spec.ts:21:1 › coarse discovery, real map, fallback, theme, pagination and saved-address privacy (13.1s)
+  ✓   9 [mobile] › tests/auth-e2e/jobs.spec.ts:20:1 › persistent request, real private photo, bounded matching and coarsened worker opportunities (13.5s)
+  ✓  10 [mobile] › tests/auth-e2e/workers.spec.ts:25:1 › worker evidence, MFA review, publication, category denials and retention are real (18.2s)
+  10 passed (1.8m)
+##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+ LibClamAV Warning: ***  The virus database is older than 7 days!  ***
+ Sun Nov  1 17:18:06 2026 -> instream(172.18.0.1@43914): Eicar-Test-Signature FOUND
+ Sun Nov  1 17:18:22 2026 -> instream(172.18.0.1@40698): Eicar-Test-Signature FOUND
+ Sun Nov  1 17:18:56 2026 -> instream(172.18.0.1@45156): Eicar-Test-Signature FOUND
+ Sun Nov  1 17:19:14 2026 -> instream(172.18.0.1@34250): Eicar-Test-Signature FOUND

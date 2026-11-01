@@ -1,0 +1,33 @@
+##[group]Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+##[group]Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+##[group]Run npm ci
+found 0 vulnerabilities
+##[group]Run npm run db:start
+##[group]Run npm run db:reset
+##[group]Run npm run db:test
+/home/runner/work/duzelo/duzelo/supabase/tests/01_authorization.test.sql .......... ok
+/home/runner/work/duzelo/duzelo/supabase/tests/02_integrity.test.sql .............. ok
+/home/runner/work/duzelo/duzelo/supabase/tests/03_geospatial_and_expiry.test.sql .. ok
+/home/runner/work/duzelo/duzelo/supabase/tests/04_auth_boundary.test.sql .......... ok
+/home/runner/work/duzelo/duzelo/supabase/tests/05_worker_evidence.test.sql ........ ok
+/home/runner/work/duzelo/duzelo/supabase/tests/06_discovery.test.sql .............. ok
+/home/runner/work/duzelo/duzelo/supabase/tests/07_jobs.test.sql ................... ok
+All tests successful.
+Files=7, Tests=174,  1 wallclock secs ( 0.04 usr  0.01 sys +  0.05 cusr  0.03 csys =  0.13 CPU)
+Result: PASS
+##[group]Run npm run db:concurrency
+PASS: publication waits for revocation and rejects stale eligibility.
+PASS: revocation waits for publication, then removes the committed card.
+##[group]Run npm run db:advisors
+##[group]Run npm run db:lint
+No schema errors found
+##[group]Run npm run db:explain
+ Index Scan using worker_coverage_base_gist_idx on worker_coverage c  (cost=0.27..58.29 rows=1 width=16) (actual time=8.604..8.616 rows=4 loops=1)
+   Index Cond: (base_point && _st_expand('0101000020E61000008D976E1283003E408D976E1283003BC0'::geography, '150000'::double precision))
+ Execution Time: 8.725 ms
+ Index Scan using worker_coverage_base_gist_idx on worker_coverage c  (cost=0.27..33.28 rows=1 width=16) (actual time=0.038..0.042 rows=4 loops=1)
+   Index Cond: (base_point && _st_expand('0101000020E61000008D976E1283003E408D976E1283003BC0'::geography, '150000'::double precision))
+ Execution Time: 0.068 ms
+ Index Scan using worker_cards_approx_gist_idx on worker_cards c  (cost=0.27..33.29 rows=1 width=16) (actual time=0.033..0.034 rows=1 loops=1)
+   Index Cond: (approx_marker && _st_expand('0101000020E61000000000000000003E400000000000003BC0'::geography, '30000'::double precision))
+ Execution Time: 0.053 ms
