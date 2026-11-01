@@ -178,8 +178,15 @@ test("coarse discovery, real map, fallback, theme, pagination and saved-address 
   await page.screenshot({
     path: `docs/evidence/screenshots/discovery-list-${info.project.name}.png`,
   });
-  // Valid style, unavailable raster tiles: the list remains usable.
-  await page.route("**/test-style-light", (route) =>
+  // Isolate the tile outage from service-worker interception. A 404 can be a
+  // legitimate empty tile; 503 is an actual provider failure.
+  const outageContext = await browser.newContext({
+    baseURL: origin,
+    viewport: info.project.use.viewport,
+    colorScheme: "light",
+    serviceWorkers: "block",
+  });
+  await outageContext.route("**/test-style-light", (route) =>
     route.fulfill({
       json: {
         version: 8,
@@ -195,16 +202,28 @@ test("coarse discovery, real map, fallback, theme, pagination and saved-address 
       },
     }),
   );
-  await page.getByRole("button", { name: "Map view", exact: true }).click();
-  if (info.project.name === "mobile") await page.getByRole("button", { name: "Open menu" }).click();
-  await page.getByRole("button", { name: "Light theme" }).first().click();
-  if (info.project.name === "mobile")
-    await page.getByRole("button", { name: "Close menu" }).click();
+  await outageContext.route("**/unavailable-tile?*", (route) =>
+    route.fulfill({ status: 503, body: "Synthetic unavailable tile" }),
+  );
+  const outage = await outageContext.newPage();
+  await outage.goto("/explore");
+  const tileFailure = outage.waitForResponse(
+    (response) => response.url().includes("/unavailable-tile?") && response.status() === 503,
+  );
+  await outage.getByRole("button", { name: "Map view", exact: true }).click();
+  await tileFailure;
   await expect(
-    page.getByText("Map content could not load. The worker list remains available."),
+    outage.getByText("Map content could not load. The worker list remains available."),
   ).toBeVisible();
-  await page.getByRole("button", { name: "List view", exact: true }).click();
-  await page.unroute("**/test-style-light");
+  await outage.locator(".discovery-layout").scrollIntoViewIfNeeded();
+  await outage.screenshot({
+    path: `docs/evidence/screenshots/discovery-fallback-${info.project.name}.png`,
+  });
+  await outage.getByRole("button", { name: "List view", exact: true }).click();
+  await expect(
+    outage.getByRole("heading", { name: "20 reviewed profiles on this page", exact: true }),
+  ).toBeVisible();
+  await outageContext.close();
   await page.getByLabel("Town or address search").fill("Unavailable provider");
   await page.getByRole("button", { name: "Search places", exact: true }).click();
   await expect(

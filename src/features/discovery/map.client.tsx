@@ -4,7 +4,8 @@ import { useTheme } from "next-themes";
 import { Map as LibreMap, Marker, NavigationControl, setWorkerUrl } from "maplibre-gl";
 import { applyMapStyle } from "./map-style";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { workerMarkers } from "./map-markers";
+import { clusterPoints } from "./clusters";
+import { workerMarkers, highlightMarkers } from "./map-markers";
 import { coarsePoint, pointSchema, type Point } from "./schema";
 import type { DiscoveryCard, DiscoveryOptions } from "./types";
 setWorkerUrl(new URL("maplibre-gl/dist/maplibre-gl-worker.mjs", import.meta.url).toString());
@@ -33,8 +34,8 @@ export default function DiscoveryMap({
     map = useRef<LibreMap | null>(null),
     markers = useRef<Marker[]>([]),
     pin = useRef<Marker | null>(null);
-  const callbacks = useRef({ onSelect, onPoint, placing });
-  callbacks.current = { onSelect, onPoint, placing };
+  const callbacks = useRef({ onSelect, onPoint, placing, selected });
+  callbacks.current = { onSelect, onPoint, placing, selected };
   const { resolvedTheme } = useTheme(),
     [error, setError] = useState(""),
     [ready, setReady] = useState(false);
@@ -114,16 +115,28 @@ export default function DiscoveryMap({
   useEffect(() => {
     const instance = map.current;
     if (!instance || !ready) return;
-    markers.current.forEach((marker) => marker.remove());
-    markers.current = workerMarkers(instance, cards, (slug) => callbacks.current.onSelect(slug));
+    let signature = "";
+    function refresh() {
+      const groups = clusterPoints(cards, (point) =>
+        instance!.project([point.longitude, point.latitude]),
+      );
+      const next = JSON.stringify(groups.map((g) => g.map((c) => c.slug)));
+      if (next === signature) return;
+      signature = next;
+      markers.current.forEach((marker) => marker.remove());
+      markers.current = workerMarkers(instance!, groups, (slug) =>
+        callbacks.current.onSelect(slug),
+      );
+      highlightMarkers(markers.current, callbacks.current.selected);
+    }
+    refresh();
+    instance.on("zoomend", refresh);
+    return () => {
+      instance.off("zoomend", refresh);
+    };
   }, [cards, ready]);
   useEffect(() => {
-    for (const marker of markers.current) {
-      const element = marker.getElement(),
-        active = (element.dataset.slugs ?? "").split(",").includes(selected ?? "");
-      element.classList.toggle("selected", active);
-      element.setAttribute("aria-pressed", String(active));
-    }
+    highlightMarkers(markers.current, selected);
     const card = cards.find((c) => c.slug === selected),
       instance = map.current;
     if (
