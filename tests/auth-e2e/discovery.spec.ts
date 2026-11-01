@@ -180,6 +180,24 @@ test("coarse discovery, real map, fallback, theme, pagination and saved-address 
   await page.screenshot({
     path: `docs/evidence/screenshots/discovery-list-${info.project.name}.png`,
   });
+  if (info.project.name === "mobile") {
+    await page.getByRole("button", { name: "Map view", exact: true }).click();
+    const handle = page.locator(".discovery-sheet-handle");
+    await expect(handle).toHaveAttribute("aria-expanded", "true");
+    await handle.click();
+    await expect(handle).toHaveAttribute("aria-expanded", "false");
+    await handle.press("Enter");
+    await expect(handle).toHaveAttribute("aria-expanded", "true");
+    await handle.click();
+    const bounds = await handle.boundingBox();
+    const x = bounds!.x + bounds!.width / 2,
+      y = bounds!.y + bounds!.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x, y - 80, { steps: 8 });
+    await page.mouse.up();
+    await expect(handle).toHaveAttribute("aria-expanded", "true");
+  }
   const priorPoint = await page.getByText(/^Selected search point:/).innerText();
   await page.getByRole("button", { name: "Place a point on the map", exact: true }).click();
   const mapBox = await page.locator(".discovery-map").boundingBox();

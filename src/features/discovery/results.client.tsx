@@ -15,7 +15,7 @@ export function DiscoveryResults({
   setExpanded: (value: boolean | ((current: boolean) => boolean)) => void;
   onSelect: (slug: string) => void;
 }) {
-  const gesture = useRef<number | null>(null);
+  const gesture = useRef({ start: null as number | null, dragged: false });
   return (
     <section
       id="worker-results"
@@ -29,15 +29,24 @@ export function DiscoveryResults({
           type="button"
           className="discovery-sheet-handle"
           aria-expanded={expanded}
-          onClick={() => setExpanded((n) => !n)}
+          onClick={(event) => {
+            if (!gesture.current.dragged || event.detail === 0) setExpanded((n) => !n);
+            gesture.current.dragged = false;
+          }}
           onPointerDown={(event) => {
-            gesture.current = event.clientY;
+            gesture.current = { start: event.clientY, dragged: false };
             event.currentTarget.setPointerCapture(event.pointerId);
           }}
           onPointerUp={(event) => {
-            if (gesture.current !== null && Math.abs(gesture.current - event.clientY) > 40)
-              setExpanded(gesture.current > event.clientY);
-            gesture.current = null;
+            const start = gesture.current.start;
+            if (start !== null && Math.abs(start - event.clientY) > 40) {
+              gesture.current.dragged = true;
+              setExpanded(start > event.clientY);
+            }
+            gesture.current.start = null;
+          }}
+          onPointerCancel={() => {
+            gesture.current = { start: null, dragged: false };
           }}
         >
           {expanded ? "Collapse worker list" : "Expand worker list"}
