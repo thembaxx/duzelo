@@ -53,7 +53,7 @@ begin
  else
   base:=subtotal+q.travel_fee_cents;
   tax:=case q.tax_mode when 'vat_15_exclusive' then round(base::numeric*15/100)::bigint when 'vat_15_inclusive' then round(base::numeric*15/115)::bigint else 0 end;
-  if n<1 or n>20 or subtotal<>q.subtotal_cents or q.tax_cents<>tax or q.total_cents<>base+case when q.tax_mode='vat_15_exclusive' then tax else 0 end or q.total_cents>100000000 then raise exception 'Quote totals must match server-calculated lines and tax'; end if;
+  if n<1 or n>20 or subtotal<>q.subtotal_cents or q.tax_cents<>tax or q.total_cents<>base+(case when q.tax_mode='vat_15_exclusive' then tax else 0 end) or q.total_cents>100000000 then raise exception 'Quote totals must match server-calculated lines and tax'; end if;
  end if;
  return null;
 end $$;
