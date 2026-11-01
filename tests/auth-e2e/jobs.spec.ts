@@ -223,7 +223,9 @@ test("persistent request, real private photo, bounded matching and coarsened wor
     })
     .check();
   await page.getByRole("button", { name: "Submit request", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Invitations sent", exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Invitations created", exact: true }),
+  ).toBeVisible();
   const submitted = await (await page.request.get("/api/v1/jobs/" + jobId)).json();
   expect(submitted.invited).toBe(5);
   expect(submitted.waves).toBe(1);

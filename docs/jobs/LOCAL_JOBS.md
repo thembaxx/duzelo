@@ -21,7 +21,7 @@ node scripts/discovery-fixture-server.mjs
 node --env-file=.env.auth-test node_modules/next/dist/bin/next dev --hostname 127.0.0.1
 ```
 
-Sign in at http://127.0.0.1:3000/sign-in using a configured local phone fixture (`0820000001`–`0820000006`, code `123456`, no SMS). Complete onboarding with client/worker capabilities as needed. Use **My requests** in the client workspace, save a draft and resume it from the list. A published reviewed profile's **Request this worker** action enters the same wizard with one selected recipient. A directory without reviewed inventory remains empty.
+Sign in at http://127.0.0.1:3000/auth/sign-in using a configured local phone fixture (`0820000001`–`0820000006`, code `123456`, no SMS). Complete onboarding with client/worker capabilities as needed. Use **My requests** in the client workspace, save a draft and resume it from the list. A published reviewed profile's **Start a direct service request** action enters the same wizard with one selected recipient. A directory without reviewed inventory remains empty.
 
 The six steps collect category, supplied details/optional photos, urgency/windows, optional budget, a private location and review consent. Save before leaving to recover the latest persisted version. Browser storage never holds the private draft. GPS is explicit and optional; manual point, owned saved address or clearly approximate town-only fallback remain available. Location confirmation is private to its owner. Worker opportunity previews disclose only the town, never the supplied street/access notes/point.
 
