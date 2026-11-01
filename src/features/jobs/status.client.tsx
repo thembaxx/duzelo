@@ -13,6 +13,7 @@ export function JobStatus({ job, options }: { job: OwnerJob; options: JobOptions
     [message, setMessage] = useState("");
   const active = ["open", "matching"].includes(job.status);
   async function act(action: string, data: unknown) {
+    setMessage("");
     try {
       const result = await mutation.run(action, data);
       setMessage(String(result.message ?? "Request updated."));

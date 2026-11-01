@@ -12,6 +12,7 @@ export function OpportunityDetail({ opportunity: o }: { opportunity: Opportunity
     ready = useJobsReady(),
     [message, setMessage] = useState("");
   async function act(action: string) {
+    setMessage("");
     try {
       const result = await mutation.run(action, {
         matchId: o.matchId,

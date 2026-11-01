@@ -142,7 +142,16 @@ export async function jobPolicyChecks({
   await worker
     .getByRole("combobox", { name: "Maximum invitations per day", exact: true })
     .selectOption("12");
-  await worker.getByRole("button", { name: "Save opportunity preferences", exact: true }).click();
+  const [preferenceResponse] = await Promise.all([
+    worker.waitForResponse(
+      (response) =>
+        response.url().endsWith("/api/v1/jobs/preferences") &&
+        response.request().method() === "POST",
+    ),
+    worker.getByRole("button", { name: "Save opportunity preferences", exact: true }).click(),
+  ]);
+  expect(preferenceResponse.request().postDataJSON().urgentReady).toBe(true);
+  expect(preferenceResponse.status()).toBe(200);
   await expect(worker.getByText("Preferences saved.", { exact: true })).toBeVisible();
   expect(
     (

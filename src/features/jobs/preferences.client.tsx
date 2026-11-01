@@ -15,6 +15,7 @@ export function MatchPreferencesForm({ initial }: { initial: MatchPreferences })
     ready = useJobsReady(),
     [message, setMessage] = useState("");
   async function run(action: string, data: unknown) {
+    setMessage("");
     try {
       await mutation.run(action, data);
       setMessage("Preferences saved.");
