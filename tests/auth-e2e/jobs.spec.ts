@@ -209,11 +209,13 @@ test("persistent request, real private photo, bounded matching and coarsened wor
   expect(owner.data.location.point).toEqual(privateJobPoint);
   await page.context().setOffline(true);
   await page.getByRole("button", { name: "Save draft", exact: true }).click();
-  await expect(page.getByRole("alert")).toContainText("Connection interrupted");
+  await expect(page.locator(".job-wizard").getByRole("alert")).toContainText(
+    "Connection interrupted",
+  );
   await expect(page.getByText("JOB-PRIVATE-RURAL-42", { exact: true })).toBeVisible();
   await page.context().setOffline(false);
   await page.getByRole("button", { name: "Save draft", exact: true }).click();
-  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(page.locator(".job-wizard").getByRole("alert")).toHaveCount(0);
   await page
     .getByRole("checkbox", {
       name: "I choose to submit this request and send the bounded invitations described above.",

@@ -15,8 +15,8 @@ update private.worker_verifications set status='approved',reviewed_by='10000000-
 select private.publish_worker_card('30000000-0000-0000-0000-000000000002','40000000-0000-0000-0000-000000000001','Synthetic discovery worker','Synthetic discovery scope');
 
 -- Synthetic read-model evidence above is not a real native Storage upload.
-update public.user_profiles set client_enabled=true where user_id='10000000-0000-0000-0000-000000000001';
-update public.user_profiles set worker_enabled=true,client_enabled=true where user_id='10000000-0000-0000-0000-000000000002';
+update public.user_profiles set client_enabled=true,onboarding_completed_at=now() where user_id='10000000-0000-0000-0000-000000000001';
+update public.user_profiles set worker_enabled=true,client_enabled=true,onboarding_completed_at=now() where user_id='10000000-0000-0000-0000-000000000002';
 insert into public.job_requests(id,client_id,title,description,public_town,urgency) values
  ('51000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000001','','','','flexible');
 select is((select category_id from public.job_requests where id='51000000-0000-0000-0000-000000000002'),null::uuid,'a recoverable partial draft has no invented category');
@@ -28,6 +28,12 @@ insert into private.job_dispatch(job_id,area_id,submitted_at,expires_at) values
 insert into private.job_locations(job_id,exact_point,service_address_snapshot,access_notes) values
  ('51000000-0000-0000-0000-000000000001',extensions.st_setsrid(extensions.st_makepoint(30.001,-27.001),4326)::extensions.geography,'{"street":"M05-PRIVATE-STREET","province":"Mpumalanga","consent":true,"townOnly":false}','M05-PRIVATE-NOTES');
 select is((select count(*)::int from private.job_candidates('51000000-0000-0000-0000-000000000001')),1,'only a currently reviewed retained category is eligible');
+update public.user_profiles set onboarding_completed_at=null where user_id='10000000-0000-0000-0000-000000000001';
+select is((select count(*)::int from private.job_candidates('51000000-0000-0000-0000-000000000001')),0,'client must have completed consent onboarding');
+update public.user_profiles set onboarding_completed_at=now() where user_id='10000000-0000-0000-0000-000000000001';
+update public.user_profiles set onboarding_completed_at=null where user_id='10000000-0000-0000-0000-000000000002';
+select is((select count(*)::int from private.job_candidates('51000000-0000-0000-0000-000000000001')),0,'worker must have completed consent onboarding');
+update public.user_profiles set onboarding_completed_at=now() where user_id='10000000-0000-0000-0000-000000000002';
 select is((select score from private.job_candidates('51000000-0000-0000-0000-000000000001')),87,'score uses actual relevance proximity neutral reliability availability and trade evidence');
 select ok((select row_to_json(c)::text not like '%M05-PRIVATE%' and row_to_json(c)::text not like '%base_point%' from private.job_candidates('51000000-0000-0000-0000-000000000001')c),'candidate rows contain no precise point or private directions');
 update private.job_locations set exact_point=extensions.st_setsrid(extensions.st_makepoint(32,-24),4326)::extensions.geography where job_id='51000000-0000-0000-0000-000000000001';

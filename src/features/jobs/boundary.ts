@@ -10,6 +10,7 @@ export async function jobActor(worker = false) {
   const actor = await getVerifiedIdentity();
   if (!actor) throw new Error("UNAUTHORIZED");
   if (
+    !actor.profile?.onboarding_completed_at ||
     actor.profile?.is_suspended ||
     !(worker ? actor.profile?.worker_enabled : actor.profile?.client_enabled)
   )
@@ -24,9 +25,10 @@ export async function lockActor(sql: TransactionSql, actor: Identity, worker = f
     await sql`select id from auth.sessions where id=${actor.sessionId}::uuid and user_id=${actor.id}::uuid and (not_after is null or not_after>now()) for share`;
   if (!session.length) throw new Error("UNAUTHORIZED");
   const [account] =
-    await sql`select client_enabled,worker_enabled,is_suspended from public.user_profiles where user_id=${actor.id}::uuid`;
+    await sql`select client_enabled,worker_enabled,is_suspended,onboarding_completed_at from public.user_profiles where user_id=${actor.id}::uuid`;
   if (
     !account ||
+    !account.onboarding_completed_at ||
     account.is_suspended ||
     !(worker ? account.worker_enabled : account.client_enabled)
   )

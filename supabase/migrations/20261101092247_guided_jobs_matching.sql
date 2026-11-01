@@ -110,9 +110,9 @@ with recursive category_tree as (
  from public.job_requests j
  join private.job_dispatch dispatch on dispatch.job_id=j.id and dispatch.expires_at>now()
  join private.job_locations l on l.job_id=j.id
- join public.user_profiles client on client.user_id=j.client_id and not client.is_suspended and client.client_enabled
+ join public.user_profiles client on client.user_id=j.client_id and not client.is_suspended and client.client_enabled and client.onboarding_completed_at is not null
  join public.worker_profiles w on w.user_id<>j.client_id and w.status='approved' and w.is_available
- join public.user_profiles owner on owner.user_id=w.user_id and not owner.is_suspended and owner.worker_enabled
+ join public.user_profiles owner on owner.user_id=w.user_id and not owner.is_suspended and owner.worker_enabled and owner.onboarding_completed_at is not null
  join private.worker_applications app on app.worker_id=w.id and app.state='reviewed'
  join public.worker_cards card on card.worker_id=w.id and card.safe_until>now()
  join private.worker_coverage cov on cov.worker_id=w.id

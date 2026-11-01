@@ -17,6 +17,7 @@ export async function prepareJobWorkers(
 ) {
   const ids = await discoveryFixtures(sql, "M05 " + tag);
   for (const id of ids.slice(0, 21)) {
+    await sql`update public.user_profiles set onboarding_completed_at=now() where user_id=(select user_id from public.worker_profiles where id=${id}::uuid)`;
     await sql`update public.worker_profiles set is_available=true where id=${id}::uuid`;
     await sql`update private.worker_coverage set radius_km=1 where worker_id=${id}::uuid`;
     const [worker] =

@@ -42,7 +42,7 @@ export async function jobPolicyChecks({
   expect((await jobPost(page, "dispatch", { jobId: mainJobId, force: true })).status()).toBe(422);
   expect((await jobPost(page, "dispatch", { jobId: mainJobId })).status()).toBe(409);
   await page.getByRole("button", { name: "Check next invitation wave", exact: true }).click();
-  await expect(page.getByRole("alert")).toContainText("not due");
+  await expect(page.locator(".job-status").getByRole("alert")).toContainText("not due");
   for (const wave of [2, 3]) {
     await sql`update private.job_dispatch set next_wave_at=now()-interval '1 second' where job_id=${mainJobId}::uuid`;
     const results = await Promise.all([
