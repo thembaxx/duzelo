@@ -1,0 +1,9 @@
+
+> duzelo@0.1.0 format:check
+> oxfmt --check src tests
+
+Checking formatting...
+
+All matched files use the correct format.
+Finished in 20ms on 123 files using 2 threads.
+No config found, using defaults. Please add a config file or try `oxfmt --init` if needed.
