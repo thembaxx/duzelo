@@ -333,3 +333,8 @@
 .discovery-card p {
   overflow-wrap: anywhere;
 }
+
+.discovery-map .maplibregl-ctrl-group button {
+  width: 44px;
+  height: 44px;
+}

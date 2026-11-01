@@ -28,7 +28,9 @@ export async function signIn(page: Page, phone: string, mode: "client" | "both" 
   expect(response.status(), "Native fixture phone login").toBe(200);
   await expect(page.getByRole("heading", { name: "Make yourself at home." })).toBeVisible();
   await page.getByLabel("Your display name").fill("Fictional account " + phone.slice(-1));
-  await page.getByLabel(mode === "both" ? "Both" : "Find help", { exact: true }).check();
+  await page
+    .getByRole("radio", { name: mode === "both" ? "Both" : "Find help", exact: true })
+    .check();
   await page.getByLabel("I am 18 or older.").check();
   await page.getByLabel(/I have read the preview terms/).check();
   await page.getByRole("button", { name: "Save and continue" }).click();

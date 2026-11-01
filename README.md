@@ -89,4 +89,11 @@ Native local phone OTP, SSR refresh, owner onboarding/preferences, dual client/w
 
 Individual/business drafts, confirmed service categories, fixed/starting/custom prices, private coverage, real scanned/scrubbed private photo uploads, revision-bound submission, independent MFA evidence review and sanitized public profiles are implemented behind **worker approval OFF by default**. Review reasons/history, per-category trade claims, retention expiry, suspension withdrawal and idempotent provider deletion have explicit server boundaries. No real worker, document, hosted Storage or paid scanner was provisioned.
 
-Follow [local review setup](docs/workers/LOCAL_REVIEW.md), [ADR 0004](docs/adr/0004-worker-evidence.md) and [M03 acceptance evidence](docs/evidence/milestone-03.md). The native test suite now requires private Storage plus a healthy local ClamAV scanner. Keep production Auth/worker gates OFF until provider/privacy/retention operations are reviewed. Existing editorial branding, fonts, themes and public PWA are preserved. Stop before Milestone 04.
+Follow [local review setup](docs/workers/LOCAL_REVIEW.md), [ADR 0004](docs/adr/0004-worker-evidence.md) and [M03 acceptance evidence](docs/evidence/milestone-03.md). The native test suite now requires private Storage plus a healthy local ClamAV scanner. Keep production Auth/worker gates OFF until provider/privacy/retention operations are reviewed. Existing editorial branding, fonts, themes and public PWA are preserved. M03 remains the manual-review boundary for discovery.
+
+
+## Milestone 04 — isolated discovery and map/list fallback
+
+MapLibre 6 discovery, accessible list search, public town-marker spatial filtering, scoped badges, availability, signed pagination, explicit GPS/manual location, owned saved addresses and a gated MapTiler geocoder adapter are implemented behind **discovery OFF by default**. The map/list keeps state under theme changes and has tile/WebGL/offline fallbacks; discovery never searches or exposes private worker bases. Existing public category search remains available while hosting is unconfigured.
+
+Follow [local discovery setup](docs/discovery/LOCAL_DISCOVERY.md) and [ADR 0005](docs/adr/0005-coarse-discovery.md). No real tile/geocoder account, dedicated hosted Supabase or live worker inventory was created. The isolated map/provider fixtures are clearly labelled and rejected in hosted mode. Provider/privacy approval, quotas and real-device verification remain prerequisites to activation. Stop before Milestone 05.

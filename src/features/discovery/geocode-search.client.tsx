@@ -51,7 +51,7 @@ export function GeocodeSearch({
       </label>
       <p>
         Search sends this text to {testProvider ? "the isolated test provider" : "MapTiler"}.
-        Results stay in this page’s memory for up to five minutes.
+        Results are reused for up to five minutes and stay only in this page while it is open.
       </p>
       <button
         type="button"

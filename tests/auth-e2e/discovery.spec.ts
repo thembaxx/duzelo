@@ -144,6 +144,8 @@ test("coarse discovery, real map, fallback, theme, pagination and saved-address 
   const marker = page.getByRole("button", { name: /20 reviewed workers in Synthetic test area/ });
   await marker.click();
   await expect(marker).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(marker).toBeFocused();
   await expect(page.locator(".discovery-card.selected")).toHaveCount(1);
   const box = () =>
     page.evaluate(() => {
@@ -178,6 +180,21 @@ test("coarse discovery, real map, fallback, theme, pagination and saved-address 
   await page.screenshot({
     path: `docs/evidence/screenshots/discovery-list-${info.project.name}.png`,
   });
+  const priorPoint = await page.getByText(/^Selected search point:/).innerText();
+  await page.getByRole("button", { name: "Place a point on the map", exact: true }).click();
+  const mapBox = await page.locator(".discovery-map").boundingBox();
+  await page
+    .locator(".discovery-map")
+    .click({ position: { x: mapBox!.width * 0.8, y: mapBox!.height * 0.22 } });
+  await expect(page.getByText(/^Selected search point:/)).not.toHaveText(priorPoint);
+  await page
+    .getByRole("combobox", { name: "Approximate distance", exact: true })
+    .selectOption("150");
+  const [placed] = await Promise.all([
+    page.waitForResponse((r) => r.url().endsWith("/discovery/search")),
+    page.getByRole("button", { name: "Apply filters" }).click(),
+  ]);
+  expect(placed.status()).toBe(200);
   // Isolate the tile outage from service-worker interception. A 404 can be a
   // legitimate empty tile; 503 is an actual provider failure.
   const outageContext = await browser.newContext({
@@ -316,10 +333,43 @@ test("coarse discovery, real map, fallback, theme, pagination and saved-address 
   expect(await (await page.request.get("/explore")).text()).not.toContain(
     "PRIVATE-RURAL-DIRECTIONS-42",
   );
+  const duplicateInput = {
+    label: "Fictional duplicate location",
+    street: "PRIVATE-DUPLICATE-DIRECTIONS",
+    town: "Fictional town",
+    province: "Mpumalanga",
+    point: { latitude: -27.001234, longitude: 30.001234 },
+    consent: true,
+  };
+  const duplicateKey = crypto.randomUUID();
+  const duplicates = await Promise.all([
+    post("address", duplicateInput, duplicateKey),
+    post("address", duplicateInput, duplicateKey),
+  ]);
+  expect(duplicates.map((r) => r.status())).toEqual([200, 200]);
+  const duplicateRows = await Promise.all(duplicates.map((r) => r.json()));
+  expect(duplicateRows[0].id).toBe(duplicateRows[1].id);
+  expect(
+    (
+      await sql`select count(*)::int as count from private.audit_events where action='discovery.address-saved' and resource_id=${duplicateRows[0].id}::uuid`
+    )[0]!.count,
+  ).toBe(1);
+  expect(
+    (await post("address", { ...duplicateInput, ownerId: crypto.randomUUID() })).status(),
+  ).toBe(422);
+  expect(
+    (
+      await page.request.post("/api/v1/discovery/address", {
+        data: duplicateInput,
+        headers: { origin: "https://attacker.invalid", "Idempotency-Key": crypto.randomUUID() },
+      })
+    ).status(),
+  ).toBe(403);
   const [actor] = await sql`select id from auth.users where phone='27820000006'`;
   await sql`update auth.sessions set not_after=now()-interval '1 second' where user_id=${actor!.id}::uuid`;
   expect(
     (await post("search", { ...baseline, location: { kind: "saved", id: address.id } })).status(),
   ).toBe(401);
+  expect((await post("address", duplicateInput, duplicateKey)).status()).toBe(401);
   await sql`delete from public.worker_cards where worker_id=any(${ids}::uuid[])`;
 });
