@@ -9,7 +9,7 @@ alter table public.quotes
  add column scheduled_start timestamptz,
  add column scheduled_end timestamptz,
  add column published_at timestamptz,
- add constraint quote_schedule_pair check ((scheduled_start is null and scheduled_end is null) or (scheduled_start is not null and scheduled_end>scheduled_start));
+ add constraint quote_schedule_pair check ((scheduled_start is null and scheduled_end is null) or (scheduled_start is not null and scheduled_end is not null and scheduled_end>scheduled_start));
 do $$ declare r record; begin
  for r in select conname from pg_constraint where conrelid='public.quotes'::regclass and contype='c' and pg_get_constraintdef(oid) like '%total_cents =%' loop
   execute format('alter table public.quotes drop constraint %I',r.conname);
@@ -108,7 +108,7 @@ $$;
 
 create function private.worker_time_free(p_worker uuid,p_start timestamptz,p_end timestamptz,p_booking uuid default null,p_grant uuid default null)
 returns boolean language sql volatile security invoker set search_path='' as $$
- select p_start is not null and p_end>p_start
+ select p_start is not null and p_end is not null and p_end>p_start
  and not exists(select 1 from private.worker_schedule_blocks b where b.worker_id=p_worker and b.starts_at<p_end and b.ends_at>p_start)
  and not exists(select 1 from public.bookings b where b.worker_id=p_worker and b.id is distinct from p_booking and b.status in('pending_worker','confirmed','in_progress','completion_pending') and b.scheduled_start<p_end and b.scheduled_end>p_start)
  and not exists(select 1 from private.inspection_access_grants g where g.worker_id=p_worker and g.id is distinct from p_grant and g.revoked_at is null and g.expires_at>now() and g.visit_starts_at<p_end and g.visit_ends_at>p_start);
@@ -132,6 +132,16 @@ create trigger inspection_schedule_guard before insert or update on private.insp
 alter table public.bookings add constraint bookings_no_overlapping_active exclude using gist
  (worker_id with =,tstzrange(scheduled_start,scheduled_end,'[)') with &&)
  where (status in ('pending_worker','confirmed','in_progress','completion_pending') and scheduled_start is not null and scheduled_end is not null);
+alter table public.bookings add constraint booking_schedule_pair check((scheduled_start is null and scheduled_end is null) or (scheduled_start is not null and scheduled_end is not null and scheduled_end>scheduled_start));
+
+create or replace function private.check_booking_quote() returns trigger
+language plpgsql security invoker set search_path='' as $$
+begin
+ if not exists(select 1 from public.quotes q where q.id=new.quote_id and q.job_id=new.job_id and q.worker_id=new.worker_id and q.status='accepted' and q.pricing_type<>'inspection_required' and q.total_cents=new.final_total_cents) then raise exception 'Booking requires the accepted priced quote for this job and worker'; end if;
+ if exists(select 1 from public.quotes q where q.id=new.quote_id and q.published_at is not null and (new.scheduled_start is distinct from q.scheduled_start or new.scheduled_end is distinct from q.scheduled_end)) then raise exception 'Accepted appointment window is immutable; use an agreed reschedule'; end if;
+ if tg_op='UPDATE' and (new.job_id,new.quote_id,new.worker_id,new.final_total_cents) is distinct from (old.job_id,old.quote_id,old.worker_id,old.final_total_cents) then raise exception 'Accepted booking quote references and amount are immutable; use a change order'; end if;
+ return new;
+end;$$;
 
 create policy quotes_server_projection on public.quotes as restrictive for select to authenticated using(false);
 create policy quote_lines_server_projection on public.quote_items as restrictive for select to authenticated using(false);

@@ -6,7 +6,13 @@ import { useState } from "react";
 import type { Opportunity } from "./types";
 import { useJobMutation, useJobsReady } from "./client-api";
 import { money, jobTime } from "./format";
-export function OpportunityDetail({ opportunity: o }: { opportunity: Opportunity }) {
+export function OpportunityDetail({
+  opportunity: o,
+  quotesEnabled = false,
+}: {
+  opportunity: Opportunity;
+  quotesEnabled?: boolean;
+}) {
   const router = useRouter(),
     mutation = useJobMutation(),
     ready = useJobsReady(),
@@ -89,7 +95,19 @@ export function OpportunityDetail({ opportunity: o }: { opportunity: Opportunity
           </div>
         </section>
       )}
-      <p>Quotes and bookings are not open yet. Reviewing a request does not accept work.</p>
+      {quotesEnabled ? (
+        <>
+          <p>
+            Reviewing this request does not accept work. Prepare an itemized quote or a separate
+            inspection proposal.
+          </p>
+          <Link className="button button-primary" href={"/app/worker/quotes?job=" + o.jobId}>
+            Prepare a quote
+          </Link>
+        </>
+      ) : (
+        <p>Quotes and bookings are not open yet. Reviewing a request does not accept work.</p>
+      )}
       <div className="job-actions">
         {o.status === "invited" && (
           <button

@@ -50,6 +50,13 @@ export const cancelSchema = bookingSchema
   })
   .strict();
 export const locationSchema = z.object({ jobId: z.guid() }).strict();
+export const closeRequestSchema = z
+  .object({
+    jobId: z.guid(),
+    expectedJobVersion: z.number().int().positive(),
+    consent: z.literal(true),
+  })
+  .strict();
 const rounded = (n: bigint, d: bigint) => (n + d / 2n) / d;
 export function priceQuote(input: QuoteTerms) {
   const t = termsSchema.parse(input);

@@ -55,7 +55,7 @@ export function JobStatus({ job, options }: { job: OwnerJob; options: JobOptions
           appointment.
         </p>
       )}
-      {job.expires && <p>Request deadline: {jobTime(job.expires)}.</p>}
+      {job.expires && <p>Invitation deadline: {jobTime(job.expires)}.</p>}
       {active && job.nextWave && (
         <div className="job-panel">
           <h3>Check the next invitation wave</h3>

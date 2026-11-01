@@ -5,6 +5,7 @@ import {
   acceptSchema,
   inspectionSchema,
   revokeSchema,
+  closeRequestSchema,
   priceQuote,
   validateTiming,
 } from "./schema";
@@ -75,6 +76,7 @@ export async function quotesCommand(action: string, input: unknown, key: string 
       const terms = await storedTerms(sql, q);
       validateTiming(terms);
       priceQuote(terms);
+      await sql`update private.inspection_access_grants set revoked_at=now() where job_id=${job.id}::uuid and worker_id=${q.worker_id}::uuid and revoked_at is null`;
       await freeTime(sql, String(q.worker_id), terms.startsAt, terms.endsAt, null, null);
       await sql`update public.quotes set status='superseded',updated_at=now() where job_id=${job.id}::uuid and worker_id=${q.worker_id}::uuid and status in ('draft','submitted') and id<>${q.id}::uuid`;
       await sql`update private.inspection_access_grants set revoked_at=now() where job_id=${job.id}::uuid and worker_id=${q.worker_id}::uuid and revoked_at is null`;
@@ -197,14 +199,55 @@ export async function quotesCommand(action: string, input: unknown, key: string 
     const data = revokeSchema.parse(input);
     return quoteCommand(action, data, key, false, async (sql, actor) => {
       const [ref] =
-        await sql`select job_id from private.inspection_access_grants where id=${data.grantId}::uuid`;
+        await sql`select g.job_id,w.user_id from private.inspection_access_grants g join public.worker_profiles w on w.id=g.worker_id where g.id=${data.grantId}::uuid`;
       if (!ref) throw new Error("FORBIDDEN");
       const job = await lockJob(sql, String(ref.job_id), actor);
       await sql`update private.inspection_access_grants set revoked_at=now() where id=${data.grantId}::uuid and revoked_at is null`;
       await sql`update public.job_requests set version=version+1,updated_at=now() where id=${job.id}::uuid`;
+      await notify(
+        sql,
+        String(ref.user_id),
+        "inspection-revoked",
+        data.grantId,
+        "/app/worker/quotes?job=" + job.id,
+      );
       return {
         jobId: String(job.id),
         message: "Inspection permission revoked. No payment or work booking was changed.",
+      };
+    });
+  }
+  if (action === "cancel-request") {
+    const data = closeRequestSchema.parse(input);
+    return quoteCommand(action, data, key, false, async (sql, actor) => {
+      const job = await lockJob(sql, data.jobId, actor);
+      if (
+        job.version !== data.expectedJobVersion ||
+        !["open", "matching", "quoted"].includes(job.status) ||
+        (await sql`select id from public.bookings where job_id=${job.id}::uuid`).length
+      )
+        throw new Error("CONFLICT");
+      await sql`update public.quotes set status='rejected',updated_at=now() where job_id=${job.id}::uuid and status in ('draft','submitted')`;
+      await sql`update private.inspection_access_grants set revoked_at=now() where job_id=${job.id}::uuid and revoked_at is null`;
+      const workers =
+        await sql`update public.job_matches set status='expired' where job_id=${job.id}::uuid and status in ('invited','viewed','responded') returning worker_id`;
+      await sql`update public.job_requests set status='cancelled',version=version+1,updated_at=now() where id=${job.id}::uuid`;
+      await sql`update private.job_dispatch set next_wave_at=null where job_id=${job.id}::uuid`;
+      for (const row of workers) {
+        const [w] =
+          await sql`select user_id from public.worker_profiles where id=${row.worker_id}::uuid`;
+        await notify(
+          sql,
+          String(w!.user_id),
+          "request-cancelled",
+          job.id + ":" + row.worker_id,
+          "/app/worker/quotes",
+        );
+      }
+      return {
+        jobId: job.id,
+        message:
+          "Request closed and inspection permissions revoked. No booking, fee or refund was created.",
       };
     });
   }

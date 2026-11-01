@@ -2,6 +2,7 @@ import { z } from "zod";
 import { notFound } from "next/navigation";
 import { requireWorkspace } from "@/features/auth/guard";
 import { jobsConfig } from "@/features/jobs/config";
+import { quotesConfig } from "@/features/quotes/config";
 import { opportunities } from "@/features/jobs/queries";
 import { JobsNavigation, JobsClosed } from "@/features/jobs/navigation";
 import { PageHeading } from "@/features/auth/page-heading";
@@ -23,7 +24,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       >
         <p>The client’s precise location is withheld.</p>
       </PageHeading>
-      <OpportunityDetail opportunity={opportunity} />
+      <OpportunityDetail opportunity={opportunity} quotesEnabled={!!quotesConfig()} />
     </>
   );
 }

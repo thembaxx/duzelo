@@ -1,0 +1,82 @@
+.quotes-page {
+  min-width: 0;
+}
+.quote-card,
+.quote-builder,
+.booking-detail {
+  overflow-wrap: anywhere;
+}
+.quote-card h3 {
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  margin: 0.75rem 0;
+}
+.quote-amount {
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 700;
+  margin: 0.5rem 0 1rem;
+}
+.quote-lines {
+  padding: 0;
+  margin: 1rem 0;
+  list-style: none;
+}
+.quote-lines li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 0;
+}
+.quote-lines small {
+  display: block;
+  color: var(--muted-foreground);
+}
+.quote-lines span {
+  white-space: nowrap;
+}
+.quote-totals {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+  gap: 0.75rem 1rem;
+  margin: 1.25rem 0;
+}
+.quote-totals dt {
+  font-weight: 600;
+}
+.quote-totals dd {
+  margin: 0;
+  min-width: 0;
+}
+.quote-small {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+.quote-actions,
+.quote-line-editor,
+.quote-location {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.quote-actions .button {
+  justify-self: start;
+}
+.quote-location .job-private-review {
+  max-width: 100%;
+}
+@media (max-width: 479px) {
+  .quote-totals {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+  .quote-totals dd {
+    margin-bottom: 0.75rem;
+  }
+  .quote-actions .button {
+    width: 100%;
+    justify-self: stretch;
+  }
+  .quote-lines li {
+    gap: 0.75rem;
+  }
+}

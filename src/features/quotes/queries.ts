@@ -66,17 +66,35 @@ export async function quotesForJob(jobId: string, worker = false, page = 0): Pro
     const historical = rows.filter((q) => !active.includes(q));
     const shown = worker ? historical : historical.slice(page * 20, page * 20 + 20);
     const latest = worker ? (rows[0] ?? null) : null;
+    if (worker && !canQuote && !rows.length && !booking) throw new Error("FORBIDDEN");
     const [offers, history, latestView] = await Promise.all([
       Promise.all(
         active.map((q) =>
-          quoteProjection(sql, q, worker, canQuote, !worker && !booking && !!q.eligible),
+          quoteProjection(
+            sql,
+            q,
+            worker,
+            canQuote && q.id === latest?.id,
+            !worker &&
+              !booking &&
+              !!q.eligible &&
+              ["open", "matching", "quoted"].includes(job.status),
+          ),
         ),
       ),
-      Promise.all(shown.map((q) => quoteProjection(sql, q, worker, canQuote, false))),
+      Promise.all(
+        shown.map((q) => quoteProjection(sql, q, worker, canQuote && q.id === latest?.id, false)),
+      ),
       latest ? quoteProjection(sql, latest, true, canQuote) : null,
     ]);
     const grants =
       await sql`select g.* from private.inspection_access_grants g where g.job_id=${jobId}::uuid and g.quote_id is not null and (not ${worker} or g.worker_id=${job.match?.worker_id ?? null}::uuid) order by g.approved_at desc limit 30`;
+    for (const offer of offers)
+      if (
+        offer.terms.pricingType === "inspection_required" &&
+        grants.some((g) => g.quote_id === offer.id)
+      )
+        offer.canChoose = false;
     const media =
       worker && canQuote
         ? await sql`select id from private.job_assets where job_id=${jobId}::uuid and state='stored' and retain_until>now() order by created_at limit 8`
@@ -85,7 +103,10 @@ export async function quotesForJob(jobId: string, worker = false, page = 0): Pro
       jobId,
       jobVersion: job.version,
       title: job.title,
-      description: job.description,
+      description:
+        worker && !canQuote && !booking
+          ? "Original request details are no longer shared. Your quotation history is retained."
+          : job.description,
       town: job.public_town,
       jobStatus: job.status,
       worker,
@@ -111,4 +132,18 @@ export async function quotesForJob(jobId: string, worker = false, page = 0): Pro
       })),
     };
   }) as Promise<QuotesView>;
+}
+export async function workerQuoteJobs() {
+  const actor = await quoteActor(true);
+  return database().begin(async (sql) => {
+    await lockActor(sql, actor, true);
+    const rows =
+      await sql`select j.id,j.title,j.public_town,j.status from public.job_matches m join public.worker_profiles w on w.id=m.worker_id join public.job_requests j on j.id=m.job_id where w.user_id=${actor.id}::uuid and (exists(select 1 from public.quotes q where q.job_id=j.id and q.worker_id=w.id and q.scheduled_start is not null) or (m.status in ('invited','viewed') and m.expires_at>now() and j.status in ('open','matching','quoted') and private.agreement_worker_eligible(j.id,w.id,true))) order by j.updated_at desc limit 100`;
+    return rows.map((j) => ({
+      id: String(j.id),
+      title: String(j.title),
+      town: String(j.public_town),
+      status: String(j.status),
+    }));
+  });
 }

@@ -6,6 +6,7 @@ import { workerStorage } from "@/features/workers/storage";
 import { scanWorkerImage } from "@/features/workers/antivirus";
 import { sanitizeImage } from "@/features/workers/images";
 import { jobsConfig, JOB_BUCKET } from "./config";
+import { quotesConfig } from "@/features/quotes/config";
 import { jobActor, lockActor, ownerJob, jobCommand } from "./boundary";
 import { assetSchema, removeSchema } from "./schema";
 export async function uploadJobImage(input: unknown, file: File, key: string | null) {
@@ -126,7 +127,12 @@ export async function jobImage(id: string) {
     if (asset.owner_id !== actor.id) {
       const [allowed] =
         await sql`select m.id from public.job_matches m join public.worker_profiles w on w.id=m.worker_id join lateral private.job_candidates(m.job_id,w.id,true) candidate on candidate.worker_id=w.id where m.job_id=${asset.job_id}::uuid and w.user_id=${actor.id}::uuid and m.status in ('invited','viewed') and m.expires_at>now()`;
-      if (!allowed) throw new Error("FORBIDDEN");
+      if (!allowed) {
+        const continued = quotesConfig()
+          ? await sql`select m.id from public.job_matches m join public.worker_profiles w on w.id=m.worker_id join public.job_requests j on j.id=m.job_id where m.job_id=${asset.job_id}::uuid and w.user_id=${actor.id}::uuid and m.status='responded' and j.status in ('quoted','booked') and private.agreement_worker_eligible(j.id,w.id,false) and not exists(select 1 from public.bookings b where b.job_id=j.id and (b.worker_id<>w.id or b.status not in ('pending_worker','confirmed')))`
+          : [];
+        if (!continued.length) throw new Error("FORBIDDEN");
+      }
     }
     return String(asset.storage_path);
   });
