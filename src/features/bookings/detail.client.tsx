@@ -47,6 +47,12 @@ export function BookingDetail({ booking: b }: { booking: BookingView }) {
               ? "The selected worker confirmed this appointment. Payment and work completion are separate."
               : "This appointment is closed. No new provider is invited automatically."}
         </p>
+        {b.status === "pending_worker" && Date.parse(b.startsAt) <= Date.now() && (
+          <p className="job-notice">
+            The proposed start has passed. Confirmation is unavailable; decline or cancel this
+            appointment and agree to a new request.
+          </p>
+        )}
         {b.conflict && b.status === "pending_worker" && (
           <p className="job-notice">
             A private schedule conflict currently prevents confirmation. Do not travel without
