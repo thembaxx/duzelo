@@ -213,7 +213,8 @@ begin
  if ltrim(coalesce(event->'user'->>'phone',''),'+') not in ('27820000001','27820000002','27820000003','27820000004','27820000005','27820000006','27820000007','27820000008','27820000009') then raise exception 'Local SMS adapter rejects non-fixture numbers'; end if;
  return '{}'::jsonb;
 end;$$;
-create function private.current_inspection_access(p_job uuid,p_worker uuid,p_at timestamptz default now())
+-- Wall-clock time is required: a transaction may wait on a lock across expiry.
+create function private.current_inspection_access(p_job uuid,p_worker uuid,p_at timestamptz default clock_timestamp())
 returns table(id uuid,expires_at timestamptz) language sql volatile security invoker set search_path='' as $$
  select g.id,g.expires_at from private.inspection_access_grants g
  join public.quotes q on q.id=g.quote_id and q.pricing_type='inspection_required' and q.status='submitted'

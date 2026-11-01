@@ -70,6 +70,18 @@ select throws_ok($$insert into public.bookings(job_id,quote_id,worker_id,schedul
 update public.quotes set status='accepted' where id='76000000-0000-0000-0000-000000000003';
 select throws_ok($$insert into public.bookings(job_id,quote_id,worker_id,final_total_cents) values ('56000000-0000-0000-0000-000000000001','76000000-0000-0000-0000-000000000003','30000000-0000-0000-0000-000000000002',15000)$$,'P0001',null,'inspection consent and fees cannot create a work booking');
 
+-- A transaction-start clock must not keep an inspection alive across real expiry.
+-- Restore a short-lived synthetic proposal; no immutable grant is edited.
+insert into public.quotes(id,job_id,worker_id,version,pricing_type,scope,valid_until,scheduled_start,scheduled_end) values
+ ('76000000-0000-0000-0000-000000000006','56000000-0000-0000-0000-000000000002','30000000-0000-0000-0000-000000000002',2,'inspection_required','Synthetic held-transaction expiry proposal.',now()+interval '5 milliseconds',now()+interval '10 milliseconds',clock_timestamp()+interval '1 second');
+update public.quotes set status='submitted',published_at=now() where id='76000000-0000-0000-0000-000000000006';
+insert into private.inspection_access_grants(job_id,worker_id,granted_by_client_id,reason,expires_at,quote_id,visit_starts_at,visit_ends_at,access_from,fee_cents)
+ select job_id,worker_id,'10000000-0000-0000-0000-000000000001','Synthetic permission spanning this held transaction.',scheduled_end,id,scheduled_start,scheduled_end,now(),0 from public.quotes where id='76000000-0000-0000-0000-000000000006';
+select is((select count(*)::integer from private.current_inspection_access('56000000-0000-0000-0000-000000000002','30000000-0000-0000-0000-000000000002')),1,'wall-clock default permits an inspection before its real expiry');
+select pg_sleep(1.1);
+select is((select count(*)::integer from private.current_inspection_access('56000000-0000-0000-0000-000000000002','30000000-0000-0000-0000-000000000002',now())),1,'transaction-start time is demonstrably stale after the real permission ends');
+select is((select count(*)::integer from private.current_inspection_access('56000000-0000-0000-0000-000000000002','30000000-0000-0000-0000-000000000002')),0,'default permission clock denies expiry even inside the same held transaction');
+
 set local role authenticated;
 select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000001',true);
 select is((select count(*)::integer from public.quotes),0,'client cannot bypass current-party server projection');

@@ -41,5 +41,7 @@ export async function exactLocation(input: unknown, key: string | null) {
       };
     },
   );
-  return result!;
+  // A slow transaction/commit must not return a view whose permission already ended.
+  if (!result || Date.parse(result.until) <= Date.now()) throw new Error("FORBIDDEN");
+  return result;
 }
