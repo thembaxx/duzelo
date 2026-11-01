@@ -1,0 +1,340 @@
+.discovery-page {
+  padding-top: 3rem;
+}
+.discovery-page .inner-heading {
+  font-size: clamp(2.25rem, 5vw, 4.5rem);
+  max-width: 20ch;
+}
+.discovery-filters,
+.discovery-save {
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+}
+.discovery-filters label,
+.discovery-save label {
+  display: grid;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+.discovery-filters select,
+.discovery-filters input:not([type="checkbox"]),
+.discovery-save input:not([type="checkbox"]),
+.discovery-save select {
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--background);
+  color: var(--foreground);
+  width: 100%;
+  min-height: 44px;
+  min-width: 0;
+}
+.discovery-filter-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+.discovery-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+.discovery-checks .choice,
+.discovery-save .choice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+}
+.discovery-location {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 1rem 0;
+  padding: 1rem 0;
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+.discovery-location legend {
+  font-weight: 700;
+  padding-right: 1rem;
+}
+.discovery-location p {
+  max-width: 85ch;
+  color: var(--muted-foreground);
+}
+.discovery-location details {
+  display: grid;
+  gap: 1rem;
+}
+.discovery-location summary,
+.discovery-save summary {
+  cursor: pointer;
+  min-height: 44px;
+  font-weight: 600;
+  padding: 0.5rem 0;
+}
+.discovery-location details label {
+  margin: 0.75rem 0;
+}
+.discovery-location button {
+  justify-self: start;
+}
+.geocode-controls ul {
+  padding-left: 1rem;
+}
+.geocode-controls li button {
+  min-height: 44px;
+  text-align: left;
+}
+.discovery-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  margin: 1rem 0;
+}
+.discovery-toolbar [role="group"] {
+  display: flex;
+  gap: 0.5rem;
+}
+.discovery-toolbar button[aria-pressed="true"] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+.discovery-layout.with-map {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: 1rem;
+  position: relative;
+}
+.discovery-map-pane {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+}
+.discovery-map-pane[hidden] {
+  display: none;
+}
+.discovery-map-shell {
+  height: clamp(28rem, 70vh, 45rem);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface-raised);
+}
+.discovery-map {
+  height: 100%;
+  width: 100%;
+}
+.discovery-results {
+  min-width: 0;
+  scroll-margin-top: 6rem;
+}
+.with-map .discovery-results {
+  grid-column: 1;
+  grid-row: 1;
+  max-height: clamp(28rem, 70vh, 45rem);
+  overflow: auto;
+  padding: 0.5rem;
+}
+.discovery-results h2 {
+  font-size: 1.25rem;
+}
+.discovery-results > p {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+.discovery-card-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+.discovery-card {
+  border: 1px solid var(--border);
+  padding: 1.25rem;
+  border-radius: 1rem;
+  background: var(--surface);
+}
+.discovery-card.selected {
+  border: 2px solid var(--primary);
+  padding: calc(1.25rem - 1px);
+}
+.discovery-card h3 {
+  font-size: 1.25rem;
+}
+.discovery-card p {
+  margin-bottom: 0.75rem;
+}
+.discovery-card .eyebrow {
+  font-size: 0.7rem;
+}
+.discovery-card .text-link {
+  display: inline-block;
+  margin: 0.5rem;
+}
+.discovery-categories {
+  padding-left: 1.25rem;
+  margin-bottom: 1rem;
+}
+.discovery-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+.discovery-marker {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  min-height: 44px;
+  min-width: 44px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.discovery-marker.selected {
+  outline: 3px solid var(--ring);
+  outline-offset: 3px;
+}
+.discovery-search-pin {
+  width: 24px;
+  height: 24px;
+  border: 4px solid var(--surface);
+  background: var(--foreground);
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--foreground);
+}
+.map-status {
+  position: absolute;
+  inset: 4rem 1rem auto;
+  z-index: 3;
+  background: var(--surface);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  padding: 1rem;
+  border-radius: 0.75rem;
+}
+.map-credit {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  color: var(--foreground);
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  margin: 0;
+  z-index: 2;
+}
+.map-credit a {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: underline;
+}
+.map-theme-notice {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 3.5rem;
+  background: var(--surface);
+  padding: 0.5rem;
+  margin: 0;
+  font-size: 0.75rem;
+}
+.discovery-sheet-handle {
+  display: none;
+}
+.discovery-page .maplibregl-ctrl-attrib {
+  margin-bottom: 2.5rem;
+  background: var(--surface);
+  color: var(--foreground);
+}
+.discovery-page .maplibregl-ctrl-attrib a {
+  color: inherit;
+}
+@media (max-width: 767px) {
+  .discovery-filters,
+  .discovery-save {
+    padding: 1rem;
+  }
+  .discovery-filter-row {
+    grid-template-columns: 1fr;
+  }
+  .discovery-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .discovery-layout.with-map {
+    display: block;
+  }
+  .discovery-map-shell {
+    height: calc(100dvh - 8rem);
+    min-height: 30rem;
+    max-height: 45rem;
+  }
+  .with-map .discovery-results {
+    position: absolute;
+    left: 0.5rem;
+    right: 0.5rem;
+    bottom: 0.5rem;
+    max-height: 34%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 0.75rem;
+    z-index: 3;
+  }
+  .with-map .discovery-results.expanded {
+    max-height: 70%;
+  }
+  .discovery-sheet-handle {
+    display: block;
+    min-height: 44px;
+    width: 100%;
+    background: var(--surface-raised);
+    color: var(--foreground);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    touch-action: none;
+    margin-bottom: 0.75rem;
+  }
+  .discovery-marker {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .discovery-layout .map-credit {
+    bottom: 35%;
+  }
+  .discovery-results h2 {
+    font-size: 1.125rem;
+  }
+}
+
+/* Attribution stays above every mobile sheet state. */
+.discovery-map-shell .map-credit {
+  top: 0;
+  bottom: auto;
+  right: 3.5rem;
+}
+.discovery-map-shell .map-theme-notice {
+  top: 2.5rem;
+}
+
+.discovery-card h3,
+.discovery-card p {
+  overflow-wrap: anywhere;
+}
+
+.discovery-map .maplibregl-ctrl-group button {
+  width: 44px;
+  height: 44px;
+}

@@ -1,0 +1,14 @@
+2026-11-01T08:26:28.3096578Z found 0 vulnerabilities
+2026-11-01T08:27:58.1098346Z ✓ Compiled successfully in 8.1s
+2026-11-01T08:28:02.3460724Z Secret leakage scan passed: 260 repository files; 30 browser assets; canary checked. Pattern scan is not a complete security audit.
+2026-11-01T08:28:02.4243889Z Secret leakage scan passed: 260 repository files; 30 browser assets; canary checked. Pattern scan is not a complete security audit.
+2026-11-01T08:28:02.5035291Z Secret leakage scan passed: 260 repository files; 30 browser assets; canary checked. Pattern scan is not a complete security audit.
+2026-11-01T08:28:12.4451878Z   ✓  1 [desktop] › tests/auth-e2e/auth.spec.ts:53:1 › real local OTP, both modes, persistent settings, MFA and revoked sessions (7.5s)
+2026-11-01T08:28:13.7552045Z   ✓  2 [desktop] › tests/auth-e2e/auth.spec.ts:253:1 › cross-origin requests, bounded verification, no signup authority escalation (1.2s)
+2026-11-01T08:28:30.3677607Z   ✓  3 [desktop] › tests/auth-e2e/discovery.spec.ts:21:1 › coarse discovery, real map, fallback, theme, pagination and saved-address privacy (16.5s)
+2026-11-01T08:28:46.2745531Z   ✓  4 [desktop] › tests/auth-e2e/workers.spec.ts:25:1 › worker evidence, MFA review, publication, category denials and retention are real (15.8s)
+2026-11-01T08:28:52.5977374Z   ✓  5 [mobile] › tests/auth-e2e/auth.spec.ts:53:1 › real local OTP, both modes, persistent settings, MFA and revoked sessions (5.7s)
+2026-11-01T08:28:53.4888573Z   ✓  6 [mobile] › tests/auth-e2e/auth.spec.ts:253:1 › cross-origin requests, bounded verification, no signup authority escalation (849ms)
+2026-11-01T08:29:06.7389651Z   ✓  7 [mobile] › tests/auth-e2e/discovery.spec.ts:21:1 › coarse discovery, real map, fallback, theme, pagination and saved-address privacy (13.2s)
+2026-11-01T08:29:25.8061077Z   ✓  8 [mobile] › tests/auth-e2e/workers.spec.ts:25:1 › worker evidence, MFA review, publication, category denials and retention are real (19.0s)
+2026-11-01T08:29:25.9109135Z   8 passed (1.4m)

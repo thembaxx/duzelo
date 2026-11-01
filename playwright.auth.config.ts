@@ -8,6 +8,7 @@ export default defineConfig({
   use: {
     baseURL: "http://127.0.0.1:3000",
     browserName: "chromium",
+    launchOptions:{args:["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftshader"]},
     trace: "off",
     screenshot: "off",
     video: "off",

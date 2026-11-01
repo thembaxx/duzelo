@@ -18,19 +18,25 @@ export async function authPost(page: Page, action: string, data: unknown) {
 }
 export async function signIn(page: Page, phone: string, mode: "client" | "both" = "both") {
   await page.goto("/auth/sign-in");
-  await page.getByLabel("South African mobile number").fill(phone);
+  await page.getByRole("textbox", { name: "South African mobile number", exact: true }).fill(phone);
   await page.getByRole("button", { name: "Send verification code" }).click();
-  await page.getByLabel("Six-digit verification code").fill("123456");
+  await page
+    .getByRole("textbox", { name: "Six-digit verification code", exact: true })
+    .fill("123456");
   const [response] = await Promise.all([
     page.waitForResponse((r) => r.url().endsWith("/api/v1/auth/verify")),
     page.getByRole("button", { name: "Verify and continue" }).click(),
   ]);
   expect(response.status(), "Native fixture phone login").toBe(200);
   await expect(page.getByRole("heading", { name: "Make yourself at home." })).toBeVisible();
-  await page.getByLabel("Your display name").fill("Fictional account " + phone.slice(-1));
-  await page.getByLabel(mode === "both" ? "Both" : "Find help", { exact: true }).check();
-  await page.getByLabel("I am 18 or older.").check();
-  await page.getByLabel(/I have read the preview terms/).check();
+  await page
+    .getByRole("textbox", { name: "Your display name", exact: true })
+    .fill("Fictional account " + phone.slice(-1));
+  await page
+    .getByRole("radio", { name: mode === "both" ? "Both" : "Find help", exact: true })
+    .check();
+  await page.getByRole("checkbox", { name: "I am 18 or older.", exact: true }).check();
+  await page.getByRole("checkbox", { name: /I have read the preview terms/ }).check();
   await page.getByRole("button", { name: "Save and continue" }).click();
   await expect(page).toHaveURL(/app\/client/);
 }

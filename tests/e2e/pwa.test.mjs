@@ -10,7 +10,25 @@ test(
   async () => {
     const browser = await chromium.launch({ headless: true });
     try {
-      const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      // Managed workspaces may require their HTTPS proxy for Node HTTP clients.
+      // Loopback test servers always remain direct; certificate verification stays on.
+      const transport =
+        process.env.HTTPS_PROXY &&
+        !["localhost", "127.0.0.1", "[::1]"].includes(new URL(baseURL).hostname)
+          ? new URL(process.env.HTTPS_PROXY)
+          : null;
+      const context = await browser.newContext({
+        viewport: { width: 390, height: 844 },
+        ...(transport
+          ? {
+              proxy: {
+                server: transport.protocol + "//" + transport.host,
+                username: decodeURIComponent(transport.username),
+                password: decodeURIComponent(transport.password),
+              },
+            }
+          : {}),
+      });
       const page = await context.newPage();
       const manifestResponse = await page.request.get(baseURL + "/manifest.webmanifest");
       assert.equal(manifestResponse.status(), 200);
@@ -35,6 +53,7 @@ test(
           });
       });
       await page.goto(baseURL + "/auth/sign-in", { waitUntil: "domcontentloaded" });
+      await page.goto(baseURL + "/explore", { waitUntil: "domcontentloaded" });
       const cachedPrivateRoutes = await page.evaluate(async () => {
         const names = await caches.keys();
         const urls = (
@@ -45,7 +64,9 @@ test(
             }),
           )
         ).flat();
-        return urls.filter((path) => /^\/(?:auth|app|admin|onboarding|api)(?:\/|$)/.test(path));
+        return urls.filter((path) =>
+          /^\/(?:auth|app|admin|onboarding|api|workers|explore)(?:\/|$)/.test(path),
+        );
       });
       assert.deepEqual(cachedPrivateRoutes, [], "No private route may enter public CacheStorage");
 

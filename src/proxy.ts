@@ -52,5 +52,6 @@ export const config = {
     "/onboarding",
     "/api/v1/:path*",
     "/workers/:path*",
+    "/explore",
   ],
 };

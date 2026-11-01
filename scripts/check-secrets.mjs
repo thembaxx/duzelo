@@ -41,7 +41,7 @@ function walk(dir) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const path = resolve(dir, entry.name);
     if (entry.isDirectory()) walk(path);
-    else if (/\.(?:js|map|json)$/.test(path)) {
+    else if (/\.(?:[cm]?js|map|json)$/.test(path)) {
       scan(path, true);
       assets++;
     }
