@@ -21,7 +21,12 @@ export function workerMarkers(
       `${group.length} reviewed ${group.length === 1 ? "worker" : "workers"} in ${card.town}. Show in list.`,
     );
     button.dataset.slugs = group.map((c) => c.slug).join(",");
-    button.addEventListener("click", () => onSelect(card.slug));
+    button.addEventListener("pointerdown", (event) => event.stopPropagation());
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      button.focus({ preventScroll: true });
+      onSelect(card.slug);
+    });
     return new Marker({ element: button })
       .setLngLat([card.point.longitude, card.point.latitude])
       .addTo(map);

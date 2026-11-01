@@ -1,3 +1,10 @@
+// Refuse fixture writes and cleanup against any non-loopback database.
+if (
+  process.env.AUTH_MODE !== "local" ||
+  !process.env.DATABASE_URL ||
+  !["127.0.0.1", "localhost"].includes(new URL(process.env.DATABASE_URL).hostname)
+)
+  throw new Error("Discovery fixtures require isolated loopback Auth and database settings.");
 import type postgres from "postgres";
 import { area, cleaning } from "./worker-fixtures";
 export async function discoveryFixtures(sql: ReturnType<typeof postgres>, tag: string) {
