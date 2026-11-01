@@ -9,7 +9,7 @@ import { jobTime } from "@/features/jobs/format";
 export const dynamic = "force-dynamic";
 export default async function Page() {
   const actor = await requireWorkspace("worker");
-  if (!jobsConfig()) return <JobsClosed />;
+  if (!jobsConfig()) return <JobsClosed worker />;
   const [items, settings, notifications] = await Promise.all([
     opportunities(),
     matchSettings(),

@@ -159,7 +159,7 @@ export async function jobPolicyChecks({
     )[0]!.urgent_ready,
   ).toBe(true);
   const remote = crypto.randomUUID();
-  await sql`insert into public.service_areas(id,label,centroid,active) values (${remote}::uuid,${"Fictional M05 remote " + remote.slice(0, 6)},extensions.st_setsrid(extensions.st_makepoint(32,-24),4326)::extensions.geography,true)`;
+  await sql`insert into public.service_areas(id,slug,label,centroid,active) values (${remote}::uuid,${"m05-remote-" + remote},${"Fictional M05 remote " + remote.slice(0, 6)},extensions.st_setsrid(extensions.st_makepoint(32,-24),4326)::extensions.geography,true)`;
   const approximate = await createSavedJob(page, {
     ...jobData,
     title: "Fictional M05 unknown rural address",
@@ -285,9 +285,11 @@ export async function jobPolicyChecks({
     )[0]!.count,
   ).toBe(0);
   await page.goto("/app/client/jobs/" + mainJobId);
-  await expect(page.getByRole("heading", { name: "Invitations sent", exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Invitations created", exact: true }),
+  ).toBeVisible();
   await page
-    .getByRole("heading", { name: "Invitations sent", exact: true })
+    .getByRole("heading", { name: "Invitations created", exact: true })
     .scrollIntoViewIfNeeded();
   const mobile = (await page.viewportSize())!.width < 768;
   await page.screenshot({

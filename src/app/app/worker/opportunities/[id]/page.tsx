@@ -9,7 +9,7 @@ import { OpportunityDetail } from "@/features/jobs/opportunity.client";
 export const dynamic = "force-dynamic";
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   await requireWorkspace("worker");
-  if (!jobsConfig()) return <JobsClosed />;
+  if (!jobsConfig()) return <JobsClosed worker />;
   const { id } = await params;
   if (!z.guid().safeParse(id).success) notFound();
   const [opportunity] = await opportunities(id);

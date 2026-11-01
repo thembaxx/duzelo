@@ -34,7 +34,7 @@ export function JobStatus({ job, options }: { job: OwnerJob; options: JobOptions
           : job.status === "expired"
             ? "Request expired"
             : job.invited
-              ? "Invitations sent"
+              ? "Invitations created"
               : "No eligible workers found"}
       </h2>
       <p>

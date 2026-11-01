@@ -16,12 +16,12 @@ export function JobsNavigation({ worker = false }: { worker?: boolean }) {
     </nav>
   );
 }
-export function JobsClosed() {
+export function JobsClosed({ worker = false }: { worker?: boolean }) {
   return (
     <section className="empty-panel">
       <h2>Job requests are not open yet.</h2>
       <p>This capability is awaiting release configuration.</p>
-      <Link href="/app/client" className="text-link">
+      <Link href={worker ? "/app/worker" : "/app/client"} className="text-link">
         Back to your account
       </Link>
     </section>
