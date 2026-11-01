@@ -125,8 +125,22 @@ test("coarse discovery, real map, fallback, theme, pagination and saved-address 
   await expect(
     page.getByRole("heading", { name: "20 reviewed profiles on this page", exact: true }),
   ).toBeVisible();
+  let mapException = "";
+  const captureMapError = (error: Error) => {
+    mapException =
+      error.name + ": " + error.message.replace(/https?:\/\/\S+/g, "[URL]").slice(0, 240);
+  };
+  page.on("pageerror", captureMapError);
   await page.getByRole("button", { name: "Map view", exact: true }).click();
-  await expect(page.locator(".discovery-map")).toHaveAttribute("data-ready", "true");
+  try {
+    await expect(page.locator(".discovery-map")).toHaveAttribute("data-ready", "true");
+  } catch (error) {
+    console.info("Initial map exception (URLs redacted):", mapException);
+    throw error;
+  } finally {
+    page.off("pageerror", captureMapError);
+  }
+
   const marker = page.getByRole("button", { name: /20 reviewed workers in Synthetic test area/ });
   await marker.click();
   await expect(marker).toBeFocused();

@@ -141,7 +141,9 @@ export default function DiscoveryMap({
       const element = document.createElement("span");
       element.className = "discovery-search-pin";
       element.setAttribute("aria-hidden", "true");
-      pin.current = new Marker({ element, draggable: true }).addTo(instance);
+      pin.current = new Marker({ element, draggable: true })
+        .setLngLat([center.longitude, center.latitude])
+        .addTo(instance);
       pin.current.on("dragend", () => {
         const position = pin.current!.getLngLat(),
           point = pointSchema.safeParse({ longitude: position.lng, latitude: position.lat });
