@@ -10,6 +10,7 @@ import { disputeCommand } from "@/features/workflow/disputes";
 import { workflowView } from "@/features/workflow/queries";
 import { auditQueue, openAudit, auditView, triageDispute } from "@/features/workflow/admin";
 import { uploadEvidence } from "@/features/collaboration/files";
+import { removeEvidence } from "@/features/collaboration/remove";
 import { mediaAccess } from "@/features/collaboration/media";
 export const runtime = "nodejs";
 export async function POST(request: Request, { params }: { params: Promise<{ action: string }> }) {
@@ -22,6 +23,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ act
       return json(await uploadEvidence(input, file, key));
     }
     const input = await readMutation(request, 32768);
+    if (action === "remove-photo") return json(await removeEvidence(input, key));
     if (action === "media-access") return json(await mediaAccess(input, key));
     if (action === "audit") return json(await openAudit(input, key));
     if (action === "triage") return json(await triageDispute(input, key));

@@ -101,6 +101,7 @@ export function EvidenceUpload({
   value: string[];
   onChange: (ids: string[]) => void;
 }) {
+  const removal = useCollaboration();
   const [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     retry = useRef<{ file: File; key: string } | null>(null);
@@ -154,6 +155,23 @@ export function EvidenceUpload({
           ? "Checking photo…"
           : value.length + " photos ready to attach. Unsent photos expire with retention."}
       </p>
+      {value.map((id, i) => (
+        <button
+          key={id}
+          type="button"
+          className="text-link"
+          disabled={busy || removal.busy}
+          onClick={() =>
+            void removal
+              .run("remove-photo", { assetId: id })
+              .then(() => onChange(value.filter((v) => v !== id)))
+              .catch(() => {})
+          }
+        >
+          Remove unsent photo {i + 1}
+        </button>
+      ))}
+      {removal.error && <p role="alert">{removal.error}</p>}
       {error && (
         <>
           <p role="alert">{error}</p>

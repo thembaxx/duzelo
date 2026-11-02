@@ -50,6 +50,7 @@ test("job conversations, agreed changes, completion evidence and support audit p
     [reviewer] = await sql`select id from auth.users where phone='27820000002'`;
   await sql`insert into private.admin_members(user_id,admin_role) values(${reviewer!.id}::uuid,'owner') on conflict(user_id) do update set active=true,admin_role='owner'`;
   await sql`delete from auth.mfa_factors where user_id=${reviewer!.id}::uuid`;
+  await sql`update auth.users set email='fictional-m07-admin@example.invalid',email_confirmed_at=now() where id=${reviewer!.id}::uuid`;
   const workers = await agreementWorkers(sql, info.project.name),
     w = workers[0]!;
   const made = await createSavedJob(client, {
@@ -331,7 +332,7 @@ test("job conversations, agreed changes, completion evidence and support audit p
   ).toBe(403);
   await sql`update public.bookings set status='cancelled' where id=${b.id}::uuid`;
   await sql`update public.job_requests set status='cancelled' where id=${made.jobId}::uuid`;
-  await lifecycleChecks(sql, client, worker!, other!, String(owner!.id), w.id);
+  const completed = await lifecycleChecks(sql, client, worker!, other!, String(owner!.id), w.id);
   await caseChecks(
     sql,
     client,
@@ -342,7 +343,7 @@ test("job conversations, agreed changes, completion evidence and support audit p
     w.id,
     info.project.name,
   );
-  await maintenanceChecks(sql, client, String(owner!.id), w.id);
+  await maintenanceChecks(sql, client, String(owner!.id), w.id, completed.assetId);
   const [delivery] =
     await sql`select count(n.id)::int as linked,count(*) filter(where n.id is null)::int as missing from private.notification_outbox o left join public.notifications n on n.source_outbox_id=o.id and n.user_id=o.user_id where o.status='sent' and (o.template='message-received' or o.template like 'workflow-%' or o.template='case-support-update')`;
   expect(delivery!.linked).toBeGreaterThan(10);

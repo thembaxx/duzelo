@@ -24,7 +24,9 @@ export async function mediaAccess(input: unknown, key: string | null) {
     actor: Awaited<ReturnType<typeof collaborationActor>>,
   ) => {
     const a = await assetPermission(sql, data.assetId, actor, data.grantId);
+    await sql`insert into private.audit_events(actor_id,actor_type,action,resource_kind,resource_id,metadata_redacted) values(${actor.id}::uuid,${data.grantId ? "admin" : "user"},'workflow.evidence-view','job_request',${a.jobId}::uuid,${sql.json({ assetId: data.assetId, grantId: data.grantId ?? null })})`;
     return {
+      jobId: a.jobId,
       assetId: data.assetId,
       expires: Math.min(a.expires, Date.now() + config.ticketSeconds * 1000),
     };
@@ -40,7 +42,8 @@ export async function mediaAccess(input: unknown, key: string | null) {
   return {
     ticket: signTicket(
       {
-        ...grant,
+        assetId: grant.assetId,
+        expires: grant.expires,
         actorId: actor.id,
         sessionId: actor.sessionId,
         ...(data.grantId ? { grantId: data.grantId } : {}),

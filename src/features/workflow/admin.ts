@@ -43,8 +43,8 @@ export async function auditView(id: string) {
   return database().begin(async (sql) => {
     const g = await auditGrant(sql, id, actor);
     let workflow = null;
-    if (g.booking_id) {
-      // Use a verified party solely to build the shared, explicitly staff-authorized projection.
+    if (g.booking_id && g.resource_kind !== "conversation") {
+      // Build only the minimal workflow projection after the staff grant check.
       const [b] =
         await sql`select b.id,b.job_id,b.worker_id,b.status,b.version,b.scheduled_start,b.scheduled_end,b.final_total_cents,j.client_id,w.user_id from public.bookings b join public.job_requests j on j.id=b.job_id join public.worker_profiles w on w.id=b.worker_id where b.id=${g.booking_id}::uuid`;
       if (b?.scheduled_start && b.scheduled_end)
@@ -78,8 +78,10 @@ export async function auditView(id: string) {
     const reports = g.conversation_id
       ? await sql`select s.id,s.reason,s.status from private.conversation_reports r join public.safety_reports s on s.id=r.report_id where r.conversation_id=${g.conversation_id}::uuid order by s.created_at desc limit 50`
       : [];
+    await auditGrant(sql, id, actor);
     return {
       grantId: id,
+      expiresAt: g.expiresAt,
       workflow,
       messages: messages.map((m) => ({
         id: String(m.id),

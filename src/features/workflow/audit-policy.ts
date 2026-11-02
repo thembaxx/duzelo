@@ -27,8 +27,13 @@ export async function auditResource(
 export async function auditGrant(sql: TransactionSql, id: string, actor: Identity) {
   await lockStaff(sql, actor);
   const [g] =
-    await sql`select resource_kind,resource_id from private.workflow_access_grants where id=${id}::uuid and actor_id=${actor.id}::uuid and session_id=${actor.sessionId}::uuid and expires_at>clock_timestamp()`;
+    await sql`select resource_kind,resource_id,expires_at from private.workflow_access_grants where id=${id}::uuid and actor_id=${actor.id}::uuid and session_id=${actor.sessionId}::uuid and expires_at>clock_timestamp()`;
   if (!g) throw new Error("FORBIDDEN");
   const r = await auditResource(sql, String(g.resource_kind), String(g.resource_id), actor);
-  return { ...r, resource_kind: String(g.resource_kind), resource_id: String(g.resource_id) };
+  return {
+    ...r,
+    resource_kind: String(g.resource_kind),
+    resource_id: String(g.resource_id),
+    expiresAt: new Date(g.expires_at).getTime(),
+  };
 }

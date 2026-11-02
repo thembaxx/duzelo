@@ -44,6 +44,7 @@ export interface WorkflowView {
   dispute: { id: string; status: string; version: number; reason: string | null } | null;
 }
 export interface AuditView {
+  expiresAt: number;
   grantId: string;
   workflow: WorkflowView | null;
   messages: { id: string; sequence: number; body: string; at: string }[];

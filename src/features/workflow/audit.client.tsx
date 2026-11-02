@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCollaboration } from "@/features/collaboration/client-api";
 import { Evidence } from "@/features/collaboration/evidence.client";
 import { WorkflowPanel } from "./panel";
@@ -16,6 +16,16 @@ export function AuditWorkspace({
     [view, setView] = useState<AuditView | null>(null),
     [note, setNote] = useState(""),
     [status, setStatus] = useState("investigating");
+  useEffect(() => {
+    if (!view) return;
+    const clear = () => setView(null),
+      timer = setTimeout(clear, Math.max(0, view.expiresAt - Date.now()));
+    window.addEventListener("pagehide", clear);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("pagehide", clear);
+    };
+  }, [view]);
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setView(null);

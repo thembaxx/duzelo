@@ -42,7 +42,9 @@ export async function assetPermission(
     const g = await auditGrant(sql, grantId, actor);
     if (
       !(
-        (g.resource_kind === "booking" && g.resource_id === a.booking_id) ||
+        (g.resource_kind === "booking" &&
+          (g.resource_id === a.booking_id ||
+            (g.conversation_id !== null && g.conversation_id === a.conversation_id))) ||
         (g.resource_kind === "conversation" && g.resource_id === a.conversation_id) ||
         (g.resource_kind === "dispute" &&
           (g.resource_id === a.dispute_id ||
@@ -69,5 +71,9 @@ export async function assetPermission(
     }
     if (!a.attached && a.owner_id !== actor.id) throw new Error("FORBIDDEN");
   }
-  return { path: String(a.storage_path), expires: new Date(a.retain_until).getTime() };
+  return {
+    jobId: String(a.job_id),
+    path: String(a.storage_path),
+    expires: new Date(a.retain_until).getTime(),
+  };
 }

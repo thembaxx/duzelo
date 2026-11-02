@@ -1,4 +1,5 @@
 import { expect, type Page } from "@playwright/test";
+import { createClient } from "@supabase/supabase-js";
 import type postgres from "postgres";
 import { pastBookingFixture } from "./agreement-fixtures";
 import { workView } from "./workflow-actions";
@@ -7,6 +8,7 @@ export async function maintenanceChecks(
   client: Page,
   owner: string,
   workerId: string,
+  expiredAssetId: string,
 ) {
   const b = await pastBookingFixture(sql, owner, workerId);
   await sql`update public.bookings set status='in_progress' where id=${b.bookingId}::uuid`;
@@ -40,8 +42,22 @@ export async function maintenanceChecks(
   // Native cleanup removes actual expired bytes, while case-held objects remain stored.
   const [held] =
     await sql`select id,state from private.collaboration_assets where owner_id in(select id from auth.users where phone='27820000008') and held and state='stored' limit 1`;
+  const [expired] =
+    await sql`select storage_path from private.collaboration_assets where id=${expiredAssetId}::uuid and state='stored' and not held`;
+  expect(expired).toBeDefined();
+  const storage = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SECRET_KEY!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  }).storage.from("chat-attachments");
+  expect((await storage.download(String(expired!.storage_path))).error).toBeNull();
+  // Restore a retention-expired fixture; never add a controllable server clock.
+  await sql`update private.collaboration_assets set retain_until=clock_timestamp()-interval '1 second' where id=${expiredAssetId}::uuid`;
   const cleaned = await client.request.post("/api/internal/workflow/cleanup?limit=50", { headers });
   expect(cleaned.status(), await cleaned.text()).toBe(200);
+  expect(
+    (await sql`select state from private.collaboration_assets where id=${expiredAssetId}::uuid`)[0]!
+      .state,
+  ).toBe("purged");
+  expect((await storage.download(String(expired!.storage_path))).error).not.toBeNull();
   if (held)
     expect(
       (await sql`select state from private.collaboration_assets where id=${held.id}::uuid`)[0]!
