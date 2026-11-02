@@ -76,6 +76,7 @@ export async function caseChecks(
   owner: string,
   workerId: string,
   tag: string,
+  conversationId: string,
 ) {
   const b = await pastBookingFixture(sql, owner, workerId);
   let v = await workView(worker, b.bookingId);
@@ -146,6 +147,22 @@ export async function caseChecks(
   expect(
     (await other.request.get("/api/v1/collaboration/audit?id=" + grant.grantId)).status(),
   ).toBe(403);
+  const conversationGrant = await workOk(admin, "audit", {
+    kind: "conversation",
+    id: conversationId,
+    reason: "Review the fictional reported conversation history.",
+  });
+  const pageOne = await admin.request.get(
+      "/api/v1/collaboration/audit?id=" + conversationGrant.grantId,
+    ),
+    auditPage = await pageOne.json();
+  expect(pageOne.status()).toBe(200);
+  expect(auditPage.hasMore).toBe(true);
+  const pageTwo = await admin.request.get(
+    "/api/v1/collaboration/audit?id=" + conversationGrant.grantId + "&before=" + auditPage.next,
+  );
+  expect(pageTwo.status()).toBe(200);
+  expect((await pageTwo.json()).messages.length).toBeGreaterThan(0);
   const ticket = await workOk(admin, "media-access", { assetId, grantId: grant.grantId });
   expect(
     (

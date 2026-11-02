@@ -74,3 +74,12 @@
   padding-block: 0.5rem;
   font-weight: 600;
 }
+
+.conversation h1 {
+  font-size: clamp(1.7rem, 4vw, 2.3rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+  overflow-wrap: anywhere;
+  margin-block: 0.65rem 1rem;
+}

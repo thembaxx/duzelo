@@ -37,6 +37,8 @@ it("requires hosted policy, retention and private signing secret", () => {
   expect(() => workflowConfig()).toThrow();
   vi.stubEnv("WORKFLOW_POLICY_APPROVED", "true");
   vi.stubEnv("WORKFLOW_MEDIA_RETENTION_DAYS", "30");
+  expect(() => workflowConfig()).toThrow();
+  vi.stubEnv("WORKFLOW_SCHEDULER_SECRET", "unit_scheduler_secret_that_is_long_enough_42");
   expect(workflowConfig()?.retentionDays).toBe(30);
   vi.stubEnv("WORKFLOW_SIGNING_SECRET", "");
   expect(() => workflowConfig()).toThrow();

@@ -81,7 +81,7 @@ function PrivateImage({
         </>
       ) : (
         <button
-          className="button button-secondary"
+          className="button button-outline"
           disabled={!asset.available || api.busy}
           onClick={() => void open()}
         >

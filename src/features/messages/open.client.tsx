@@ -12,7 +12,7 @@ export function OpenConversation({ quoteId }: { quoteId: string }) {
   }
   return (
     <div>
-      <button className="button button-secondary" disabled={api.busy} onClick={() => void open()}>
+      <button className="button button-outline" disabled={api.busy} onClick={() => void open()}>
         Open job conversation
       </button>
       {api.error && <p role="alert">{api.error}</p>}

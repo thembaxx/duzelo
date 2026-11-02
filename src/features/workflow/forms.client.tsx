@@ -133,7 +133,7 @@ export function ProgressForm({ view: b }: { view: WorkflowView }) {
         />
       </label>
       <p>This is your report. No continuous location is collected.</p>
-      <button className="button button-secondary" disabled={api.busy}>
+      <button className="button button-outline" disabled={api.busy}>
         Save progress update
       </button>
       {api.error && <p role="alert">{api.error}</p>}

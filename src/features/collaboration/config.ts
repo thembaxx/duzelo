@@ -28,7 +28,7 @@ export function workflowConfig() {
     !Number.isInteger(ticketSeconds) ||
     ticketSeconds < 1 ||
     ticketSeconds > 60 ||
-    (base.mode !== "local" && process.env.WORKFLOW_POLICY_APPROVED !== "true")
+    (base.mode !== "local" && (!schedulerSecret || process.env.WORKFLOW_POLICY_APPROVED !== "true"))
   )
     throw new Error(
       "Collaboration requires approved policy, retention and signing configuration; values redacted.",

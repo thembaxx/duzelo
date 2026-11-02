@@ -37,7 +37,7 @@ export async function openAudit(input: unknown, key: string | null) {
     },
   );
 }
-export async function auditView(id: string) {
+export async function auditView(id: string, before = 0) {
   z.guid().parse(id);
   const actor = await staffActor();
   return database().begin(async (sql) => {
@@ -70,7 +70,7 @@ export async function auditView(id: string) {
         );
     }
     const messages = g.conversation_id
-      ? await sql`select m.id,m.sequence,m.body,m.deleted_at,m.sent_at from public.messages m where conversation_id=${g.conversation_id}::uuid order by sequence desc limit 100`
+      ? await sql`select m.id,m.sequence,m.body,m.deleted_at,m.sent_at from public.messages m where conversation_id=${g.conversation_id}::uuid and (${before}::bigint=0 or sequence<${before}::bigint) order by sequence desc limit 31`
       : [];
     const assets = g.conversation_id
       ? await sql`select a.id,a.state='stored' and a.retain_until>clock_timestamp() as available from private.collaboration_assets a where a.conversation_id=${g.conversation_id}::uuid and a.attached`
@@ -83,12 +83,17 @@ export async function auditView(id: string) {
       grantId: id,
       expiresAt: g.expiresAt,
       workflow,
-      messages: messages.map((m) => ({
-        id: String(m.id),
-        sequence: Number(m.sequence),
-        body: m.deleted_at ? "Removed message" : String(m.body),
-        at: new Date(m.sent_at).toISOString(),
-      })),
+      hasMore: messages.length > 30,
+      next: messages.length ? Number(messages[Math.min(messages.length, 30) - 1]!.sequence) : 0,
+      messages: messages
+        .slice(0, 30)
+        .reverse()
+        .map((m) => ({
+          id: String(m.id),
+          sequence: Number(m.sequence),
+          body: m.deleted_at ? "Removed message" : String(m.body),
+          at: new Date(m.sent_at).toISOString(),
+        })),
       assets: assets.map((a) => ({ id: String(a.id), available: !!a.available })),
       reports: reports.map((r) => ({
         id: String(r.id),

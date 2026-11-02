@@ -73,7 +73,7 @@ export function ProposalPanel({ view: b }: { view: WorkflowView }) {
                   </button>
                 )}
                 <button
-                  className="button button-secondary"
+                  className="button button-outline"
                   disabled={api.busy}
                   onClick={() => void decide(p, p.own ? "withdraw" : "reject")}
                 >
@@ -158,7 +158,7 @@ export function ProposalPanel({ view: b }: { view: WorkflowView }) {
             />
             I propose these terms for the other party’s explicit agreement.
           </label>
-          <button className="button button-secondary" disabled={api.busy || !consent}>
+          <button className="button button-outline" disabled={api.busy || !consent}>
             Send change proposal
           </button>
         </form>

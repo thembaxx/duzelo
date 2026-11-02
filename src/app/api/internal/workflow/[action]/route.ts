@@ -11,7 +11,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ act
   try {
     schedulerAuthorization(request.headers.get("authorization"));
     // No JSON input: bounded batches are controlled by the operator URL.
-    if (request.body) throw new Error("INVALID");
+    const reader = request.body?.getReader();
+    if (reader)
+      for (;;) {
+        const chunk = await reader.read();
+        if (chunk.done) break;
+        if (chunk.value.byteLength) {
+          await reader.cancel();
+          throw new Error("INVALID");
+        }
+      }
     const limit = z.coerce
       .number()
       .int()

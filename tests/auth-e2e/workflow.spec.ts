@@ -143,6 +143,16 @@ test("job conversations, agreed changes, completion evidence and support audit p
     old = await earlier.json();
   expect(old.page.messages.length).toBeGreaterThan(0);
   expect(old.page.messages.at(-1).sequence).toBeLessThan(lv.page.messages[0].sequence);
+  const concurrent = await Promise.all(
+    [0, 1].map((i) =>
+      workOk(client, "thread-send", {
+        conversationId: cid,
+        body: "Concurrent ordered message " + i,
+        assetIds: [],
+      }),
+    ),
+  );
+  expect(Math.abs(concurrent[0]!.sequence - concurrent[1]!.sequence)).toBe(1);
   const bytes = await sharp({
     create: { width: 80, height: 80, channels: 3, background: "#8fa483" },
   })
@@ -285,6 +295,37 @@ test("job conversations, agreed changes, completion evidence and support audit p
   });
   b = await workView(client, b.id);
   expect(b.totalCents).toBe(b.baseCents + 2500);
+  proposal = await workOk(worker!, "proposal-scope", {
+    ...bookingData(b),
+    scope: "A fictional proposal that becomes stale.",
+    deltaCents: 100,
+    expiresAt: expiry,
+  });
+  b = await workView(worker!, b.id);
+  await workOk(worker!, "work-progress", {
+    bookingId: b.id,
+    expectedVersion: b.version,
+    kind: "on_my_way",
+    body: "A participant progress report changes the saved version.",
+  });
+  b = await workView(client, b.id);
+  expect(
+    (
+      await workPost(client, "proposal-decide", {
+        ...bookingData(b),
+        proposalId: proposal.proposalId,
+        kind: "scope",
+        decision: "accept",
+      })
+    ).status(),
+  ).toBe(409);
+  await workOk(client, "proposal-decide", {
+    ...bookingData(b),
+    proposalId: proposal.proposalId,
+    kind: "scope",
+    decision: "reject",
+  });
+  b = await workView(client, b.id);
   await client.goto("/app/client/bookings/" + b.id);
   expect(
     (await new AxeBuilder({ page: client }).include(".work-panel").analyze()).violations,
@@ -342,6 +383,7 @@ test("job conversations, agreed changes, completion evidence and support audit p
     String(owner!.id),
     w.id,
     info.project.name,
+    cid,
   );
   await maintenanceChecks(sql, client, String(owner!.id), w.id, completed.assetId);
   const [delivery] =

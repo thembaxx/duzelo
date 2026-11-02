@@ -44,7 +44,7 @@ export function SafetyForm({
       </p>
       {t.ownBlocked && (
         <button
-          className="button button-secondary"
+          className="button button-outline"
           disabled={api.busy}
           onClick={() => void unblock()}
         >
@@ -75,7 +75,7 @@ export function SafetyForm({
           />
           Save this concern for authorized support review.
         </label>
-        <button className="button button-secondary" disabled={api.busy || !consent}>
+        <button className="button button-outline" disabled={api.busy || !consent}>
           Submit safety report
         </button>
       </form>

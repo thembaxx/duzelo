@@ -47,7 +47,18 @@ export async function GET(request: Request, { params }: { params: Promise<{ acti
     if (action === "queue") return json(await auditQueue());
     const id = z.guid().parse(url.searchParams.get("id"));
     if (action === "workflow") return json(await workflowView(id));
-    if (action === "audit") return json(await auditView(id));
+    if (action === "audit")
+      return json(
+        await auditView(
+          id,
+          z.coerce
+            .number()
+            .int()
+            .min(0)
+            .max(Number.MAX_SAFE_INTEGER)
+            .parse(url.searchParams.get("before") ?? 0),
+        ),
+      );
     if (action === "thread") {
       const cursor = z.coerce.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
       const before = cursor.parse(url.searchParams.get("before") ?? 0),

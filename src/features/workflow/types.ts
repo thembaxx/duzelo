@@ -45,6 +45,8 @@ export interface WorkflowView {
 }
 export interface AuditView {
   expiresAt: number;
+  hasMore: boolean;
+  next: number;
   grantId: string;
   workflow: WorkflowView | null;
   messages: { id: string; sequence: number; body: string; at: string }[];

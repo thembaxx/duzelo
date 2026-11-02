@@ -41,6 +41,30 @@ export function AuditWorkspace({
       if (e instanceof Error) api.setError(e.message);
     }
   }
+  async function earlier() {
+    if (!view) return;
+    try {
+      const response = await fetch(
+          "/api/v1/collaboration/audit?id=" + view.grantId + "&before=" + view.next,
+          { cache: "no-store" },
+        ),
+        data = await response.json();
+      if (!response.ok) {
+        setView(null);
+        throw new Error(data.error?.message ?? "Audit access ended.");
+      }
+      setView((current) => {
+        if (!current || current.grantId !== data.grantId) return current;
+        const messages = new Map([...data.messages, ...current.messages].map((m) => [m.id, m]));
+        return {
+          ...data,
+          messages: [...messages.values()].sort((a, b) => a.sequence - b.sequence),
+        };
+      });
+    } catch (e) {
+      api.setError(e instanceof Error ? e.message : "Earlier evidence unavailable.");
+    }
+  }
   async function triage(e: React.FormEvent) {
     e.preventDefault();
     const d = view?.workflow?.dispute;
@@ -122,6 +146,11 @@ export function AuditWorkspace({
           {view.workflow && <WorkflowPanel view={view.workflow} grantId={view.grantId} />}
           <section className="job-panel">
             <h2>Conversation evidence</h2>
+            {view.hasMore && (
+              <button className="button button-outline" onClick={() => void earlier()}>
+                Load earlier conversation evidence
+              </button>
+            )}
             <ol className="job-record-list">
               {view.messages.map((m) => (
                 <li key={m.id}>
@@ -161,7 +190,7 @@ export function AuditWorkspace({
               <p>
                 Uses your recorded access reason. This does not resolve fault, refund or payment.
               </p>
-              <button className="button button-secondary" disabled={api.busy}>
+              <button className="button button-outline" disabled={api.busy}>
                 Save support review update
               </button>
             </form>

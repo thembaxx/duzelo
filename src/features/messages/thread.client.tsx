@@ -152,7 +152,7 @@ export function Conversation({ initial }: { initial: ThreadView }) {
       </p>
       {older && (
         <button
-          className="button button-secondary"
+          className="button button-outline"
           disabled={loading}
           onClick={() => void olderPage()}
         >
