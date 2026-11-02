@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import postgres from "postgres";
 import sharp from "sharp";
-import { signIn, origin, area } from "./helpers/worker-fixtures";
+import { authPost, signIn, origin, area } from "./helpers/worker-fixtures";
 import { jobPost, createSavedJob, setTheme } from "./helpers/job-actions";
 import {
   agreementPost,
@@ -374,7 +374,7 @@ test("job conversations, agreed changes, completion evidence and support audit p
   await sql`update public.bookings set status='cancelled' where id=${b.id}::uuid`;
   await sql`update public.job_requests set status='cancelled' where id=${made.jobId}::uuid`;
   const completed = await lifecycleChecks(sql, client, worker!, other!, String(owner!.id), w.id);
-  await caseChecks(
+  const serviceCase = await caseChecks(
     sql,
     client,
     worker!,
@@ -395,6 +395,36 @@ test("job conversations, agreed changes, completion evidence and support audit p
       await sql`select count(*)::int as n from private.payment_intents where booking_id in(select id from public.bookings where job_id=${made.jobId}::uuid)`
     )[0]!.n,
   ).toBe(0);
+  const [grantRecord] =
+    await sql`select session_id from private.workflow_access_grants where id=${serviceCase.grantId}::uuid`;
+  const oldTicket = await workOk(admin!, "media-access", {
+    assetId: serviceCase.assetId,
+    grantId: serviceCase.grantId,
+  });
+  const oldCookies = await admin!.context().cookies();
+  const signedOut = await authPost(admin!, "sign-out", {});
+  expect(signedOut.status(), await signedOut.text()).toBe(200);
+  expect(
+    (
+      await sql`select count(*)::int as n from auth.sessions where id=${grantRecord!.session_id}::uuid`
+    )[0]!.n,
+  ).toBe(0);
+  expect(
+    (
+      await sql`select count(*)::int as n from private.workflow_access_grants where id=${serviceCase.grantId}::uuid`
+    )[0]!.n,
+  ).toBe(1);
+  await admin!.context().addCookies(oldCookies);
+  expect(
+    (await admin!.request.get("/api/v1/collaboration/audit?id=" + serviceCase.grantId)).status(),
+  ).toBe(401);
+  expect(
+    (
+      await admin!.request.get("/api/v1/collaboration/media/" + serviceCase.assetId, {
+        headers: { "X-Duzelo-Asset-Ticket": oldTicket.ticket },
+      })
+    ).status(),
+  ).toBe(401);
   await sql`update public.user_profiles set client_enabled=true where user_id=${w.userId}::uuid`;
   for (const c of contexts) await c.close();
 });

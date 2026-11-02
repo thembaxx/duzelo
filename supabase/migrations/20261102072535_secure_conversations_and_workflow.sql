@@ -138,8 +138,10 @@ create index collaboration_assets_context on private.collaboration_assets(job_id
 create table private.message_assets (message_id uuid not null references public.messages(id), asset_id uuid not null unique references private.collaboration_assets(id), primary key(message_id,asset_id));
 create table private.completion_assets (completion_id uuid not null references private.completion_submissions(id), asset_id uuid not null unique references private.collaboration_assets(id), primary key(completion_id,asset_id));
 create table private.entry_assets (entry_id uuid not null references private.work_entries(id), asset_id uuid not null unique references private.collaboration_assets(id), primary key(entry_id,asset_id));
+-- Retain the session identifier without an FK to ephemeral auth.sessions: native
+-- logout/session cleanup must remain able to delete sessions while audit records stay.
 create table private.workflow_access_grants (
- id uuid primary key default gen_random_uuid(), actor_id uuid not null references auth.users(id), session_id uuid not null references auth.sessions(id),
+ id uuid primary key default gen_random_uuid(), actor_id uuid not null references auth.users(id), session_id uuid not null,
  resource_kind text not null check(resource_kind in('booking','conversation','dispute')),
  resource_id uuid not null, reason text not null check(length(reason) between 10 and 500),
  expires_at timestamptz not null, created_at timestamptz not null default clock_timestamp()

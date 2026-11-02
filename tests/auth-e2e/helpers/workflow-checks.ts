@@ -205,5 +205,5 @@ export async function caseChecks(
   expect(privateView.entries.some((e) => e.body.includes("CASE-PRIVATE-42"))).toBe(true);
   expect((await workPost(worker, "media-access", { assetId })).status()).toBe(200);
   await sql`update public.worker_profiles set status='approved' where id=${workerId}::uuid`;
-  return { booking: b, assetId };
+  return { booking: b, assetId, grantId: grant.grantId as string };
 }
