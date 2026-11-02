@@ -113,3 +113,7 @@ Quote comparison, worker quotation workspace, appointment history, cancellation 
 See [local quotation setup](docs/quotes/LOCAL_QUOTES.md), [ADR 0007](docs/adr/0007-quotes-and-appointments.md) and [M06 acceptance evidence](docs/evidence/milestone-06.md). Dedicated hosting, migration/restore review, approved quotation/inspection/consumer/tax policy and existing privacy/retention/scanner/monitoring operations remain activation prerequisites. Stop before Milestone 07 conversations, rescheduling, work progress and completion. Payments remain Milestone 08.
 
 Milestone 07 adds private job conversations, two-party work changes, completion/correction and scoped support evidence review. See [local workflow setup](docs/workflow/LOCAL_WORKFLOW.md), [ADR 0008](docs/adr/0008-conversations-and-workflow.md) and [verification evidence](docs/evidence/milestone-07/README.md). Production messaging/workflow remain OFF pending approved hosted infrastructure and policy. Stop before M08 payments.
+
+### Populated production demo
+
+Try [/demo](https://duzelo.vercel.app/demo) for photo-led sample listings, an interactive Mkhondo map and a six-month sample booking workspace. Save providers, create/reschedule/cancel a demo booking, simulate job progress and leave a sample review. All providers, ratings, prices and activity are explicitly fictional; actions stay in the browser and never contact real providers or payment services. [Architecture, sources and limits](docs/demo/PRODUCTION_DEMO.md) · [Verification](docs/evidence/production-demo/README.md).

@@ -22,6 +22,27 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
   useEffect(() => setOpen(false), [pathname]);
 
+  if (pathname.startsWith("/demo"))
+    return (
+      <header className="site-header demo-site-header">
+        <div className="site-header-inner shell">
+          <Link href="/" className="brand-lockup" aria-label="Duzelo home">
+            <BrandMark size={34} className="brand-logo" />
+            <span>
+              Duzelo<span className="brand-period">.</span>
+            </span>
+          </Link>
+          <span className="demo-header-tagline">Good help, close to home.</span>
+          <div className="header-actions">
+            <AppearanceControl compact />
+            <Link href="/" className="demo-exit">
+              Exit demo <ArrowUpRight size={15} aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
+      </header>
+    );
+
   return (
     <header className="site-header">
       <div className="site-header-inner shell">
@@ -32,6 +53,9 @@ export function SiteHeader() {
           </span>
         </Link>
         <nav className="desktop-navigation" aria-label="Main navigation">
+          <Link href="/demo" className="navigation-link">
+            Try the demo
+          </Link>
           {links.map((link) => (
             <Link
               key={link.href}
@@ -72,6 +96,7 @@ export function SiteHeader() {
       </div>
       <div id="mobile-menu" className={"mobile-menu" + (open ? " is-open" : "")} inert={!open}>
         <nav className="shell mobile-menu-inner" aria-label="Mobile navigation">
+          <Link href="/demo">Try the interactive demo</Link>
           {links.map((link) => (
             <Link
               key={link.href}

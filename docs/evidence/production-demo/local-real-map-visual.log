@@ -1,0 +1,181 @@
+{
+  "checkedAt": "2026-11-02T13:21:35.705Z",
+  "base": "http://127.0.0.1:3001",
+  "checks": [
+    {
+      "width": 1440,
+      "height": 900,
+      "path": "/",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "path": "/demo",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "path": "/demo/providers/demo-lindi-home-care",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "path": "/demo/bookings",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "path": "/demo/bookings/demo-booking-1003",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "map": "real OpenFreeMap",
+      "pins": 8,
+      "clipped": 0,
+      "themes": [
+        "light",
+        "dark"
+      ]
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "path": "/",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "path": "/demo",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "path": "/demo/providers/demo-lindi-home-care",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "path": "/demo/bookings",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "path": "/demo/bookings/demo-booking-1003",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "map": "real OpenFreeMap",
+      "pins": 8,
+      "clipped": 0,
+      "themes": [
+        "light",
+        "dark"
+      ]
+    },
+    {
+      "width": 768,
+      "height": 900,
+      "path": "/",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "height": 900,
+      "path": "/demo",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "height": 900,
+      "path": "/demo/providers/demo-lindi-home-care",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "height": 900,
+      "path": "/demo/bookings",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "height": 900,
+      "path": "/demo/bookings/demo-booking-1003",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "height": 900,
+      "path": "/",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "height": 900,
+      "path": "/demo",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "height": 900,
+      "path": "/demo/providers/demo-lindi-home-care",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "height": 900,
+      "path": "/demo/bookings",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "height": 900,
+      "path": "/demo/bookings/demo-booking-1003",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "height": 740,
+      "path": "/",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "height": 740,
+      "path": "/demo",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "height": 740,
+      "path": "/demo/providers/demo-lindi-home-care",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "height": 740,
+      "path": "/demo/bookings",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "height": 740,
+      "path": "/demo/bookings/demo-booking-1003",
+      "overflow": false
+    }
+  ],
+  "browserErrors": 0,
+  "realMapRequests": 42,
+  "failedMapRequests": 0
+}

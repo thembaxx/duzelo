@@ -5,9 +5,8 @@ import {
   ArrowUpRight,
   MapPinLine,
   ShieldCheck,
-  Sparkle,
-  Wrench,
 } from "@phosphor-icons/react/dist/ssr";
+import { HomeDemoPreview } from "@/components/home-demo-preview";
 import { HeroIntro } from "@/components/hero-intro";
 import { ServiceSearch } from "@/components/service-search";
 import { CategoryCard } from "@/components/category-card";
@@ -36,20 +35,23 @@ export default function HomePage() {
               for real life, right where you live.
             </p>
             <div className="hero-search-wrap" data-intro>
-              <ServiceSearch />
+              <ServiceSearch demo />
             </div>
             <div className="hero-quick-links" data-intro>
               <span>Popular searches</span>
-              <Link href="/explore?q=plumbing">
+              <Link href="/demo?q=plumbing">
                 Plumbing <ArrowUpRight size={13} aria-hidden="true" />
               </Link>
-              <Link href="/explore?q=cleaning">
+              <Link href="/demo?q=cleaning">
                 Cleaning <ArrowUpRight size={13} aria-hidden="true" />
               </Link>
-              <Link href="/explore?q=gardening">
+              <Link href="/demo?q=gardening">
                 Gardening <ArrowUpRight size={13} aria-hidden="true" />
               </Link>
             </div>
+            <Link href="/demo" className="home-demo-cta" data-intro>
+              Try the full marketplace demo <ArrowRight size={18} aria-hidden="true" />
+            </Link>
             <div className="hero-launch-note" data-intro>
               <span className="launch-note-symbol">
                 <ShieldCheck size={18} aria-hidden="true" />
@@ -60,48 +62,7 @@ export default function HomePage() {
               </span>
             </div>
           </HeroIntro>
-          <div className="hero-editorial-panel" aria-label="Illustrative service request preview">
-            <div className="hero-panel-top">
-              <span>
-                <Sparkle size={16} aria-hidden="true" /> A clearer way to get it done
-              </span>
-              <span>DEMO / 01</span>
-            </div>
-            <div className="hero-panel-canvas">
-              <div className="orbital-line orbital-one" />
-              <div className="orbital-line orbital-two" />
-              <div className="floating-icon floating-icon-a">
-                <Wrench size={32} weight="duotone" aria-hidden="true" />
-              </div>
-              <div className="floating-icon floating-icon-b">
-                <MapPinLine size={30} weight="duotone" aria-hidden="true" />
-              </div>
-              <div className="floating-project">
-                <div className="project-smalltop">
-                  <span className="preview-dot" /> EXAMPLE REQUEST <span>01 / 03</span>
-                </div>
-                <h2>
-                  Fix a leaky
-                  <br />
-                  <em>kitchen tap.</em>
-                </h2>
-                <p>Plumbing · Flexible timing</p>
-                <div className="project-progress" aria-hidden="true">
-                  <span />
-                  <span />
-                  <span />
-                </div>
-                <div className="preview-privacy">
-                  <ShieldCheck size={16} aria-hidden="true" /> Address kept private
-                </div>
-              </div>
-            </div>
-            <div className="hero-panel-bottom">
-              <BrandMark size={22} />
-              <span>Thoughtful help starts with a clearer request.</span>
-              <span>DUZELO / PREVIEW</span>
-            </div>
-          </div>
+          <HomeDemoPreview />
         </div>
         <div className="shell editorial-bottom-strip">
           <span>
@@ -154,8 +115,9 @@ export default function HomePage() {
               </h2>
             </div>
             <p>
-              These are <strong>fictional preview scenarios</strong>, showing how real requests
-              could be described. Budgets are illustrative, not quotes or offers.
+              Start with these <strong>fictional preview scenarios</strong>, then explore a
+              populated neighbourhood, map and booking history in the interactive demo. Budgets are
+              illustrative.
             </p>
           </div>
           <div className="demo-strip-label">
@@ -186,8 +148,9 @@ export default function HomePage() {
             </h2>
             <p>
               Private addresses, genuine verification and clearer job details are at the centre of
-              what we're building. No made-up ratings, invented tradespeople or payments dressed up
-              as escrow.
+              what we're building. Real provider profiles will require review. Our interactive demo
+              uses clearly labelled fictional providers and sample bookings so you can try the
+              experience today.
             </p>
             <Link href="/trust" className="button button-light">
               Our approach to trust <ArrowRight size={18} aria-hidden="true" />
@@ -236,8 +199,8 @@ export default function HomePage() {
             Good things get done <em>together.</em>
           </h2>
         </div>
-        <Link href="/how-it-works" className="button button-primary">
-          Discover the plan <ArrowRight size={19} aria-hidden="true" />
+        <Link href="/demo" className="button button-primary">
+          Try the interactive demo <ArrowRight size={19} aria-hidden="true" />
         </Link>
       </section>
     </>
