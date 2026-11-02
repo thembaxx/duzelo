@@ -14,9 +14,10 @@ async function guard() {
     !(a.profile.client_enabled || a.profile.worker_enabled)
   )
     redirect("/onboarding");
+  return a;
 }
 export async function InboxPage() {
-  await guard();
+  const actor = await guard();
   if (!workflowConfig()) return <Closed />;
   const threads = await inbox();
   return (
@@ -27,7 +28,10 @@ export async function InboxPage() {
           this tab is online and visible.
         </p>
       </PageHeading>
-      <Link className="text-link" href="/app/client">
+      <Link
+        className="text-link"
+        href={actor.profile?.client_enabled ? "/app/client" : "/app/worker"}
+      >
         Account workspace
       </Link>
       <ul className="job-record-list">

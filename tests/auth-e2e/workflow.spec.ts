@@ -104,6 +104,12 @@ test("job conversations, agreed changes, completion evidence and support audit p
   ).toBe(422);
   await sql`update public.user_profiles set client_enabled=false where user_id=${w.userId}::uuid`;
   expect((await worker!.request.get("/api/v1/collaboration/inbox")).status()).toBe(200);
+  await worker!.goto("/app/inbox");
+  await expect(
+    worker!.getByRole("link", { name: "Account workspace", exact: true }),
+  ).toHaveAttribute("href", "/app/worker");
+  await worker!.getByRole("link", { name: "Account workspace", exact: true }).click();
+  await expect(worker!).toHaveURL(/app\/worker$/);
   await workOk(worker!, "thread-send", {
     conversationId: cid,
     body: "Hello from the invited provider.",
