@@ -44,8 +44,10 @@ test("desktop navigation, category search and colour preference persistence", as
     );
     await page.getByRole("searchbox", { name: "Search for a service" }).fill("plumbing");
     await page.getByRole("button", { name: /Find a service/ }).click();
-    await page.waitForURL(/explore\?q=plumbing/);
-    assert.ok(await page.getByRole("link", { name: /Plumbing/ }).count());
+    await page.waitForURL(/demo\?q=plumbing/);
+    await page
+      .getByRole("link", { name: "Steady Flow Plumbing", exact: true })
+      .waitFor({ state: "visible" });
     await page.screenshot({ path: "test-results/duzelo-desktop-dark.png", fullPage: true });
   } finally {
     await browser.close();

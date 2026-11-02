@@ -54,6 +54,7 @@ test(
       });
       await page.goto(baseURL + "/auth/sign-in", { waitUntil: "domcontentloaded" });
       await page.goto(baseURL + "/explore", { waitUntil: "domcontentloaded" });
+      await page.goto(baseURL + "/demo/bookings", { waitUntil: "domcontentloaded" });
       const cachedPrivateRoutes = await page.evaluate(async () => {
         const names = await caches.keys();
         const urls = (
@@ -65,7 +66,7 @@ test(
           )
         ).flat();
         return urls.filter((path) =>
-          /^\/(?:auth|app|admin|onboarding|api|workers|explore)(?:\/|$)/.test(path),
+          /^\/(?:auth|app|admin|onboarding|api|workers|explore|demo)(?:\/|$)/.test(path),
         );
       });
       assert.deepEqual(cachedPrivateRoutes, [], "No private route may enter public CacheStorage");

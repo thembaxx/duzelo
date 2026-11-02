@@ -1,0 +1,26 @@
+
+> duzelo@0.1.0 test:public
+> node scripts/test-public.mjs
+
+✔ editorial demo is clearly labelled and navigation reaches real category pages (1600.411705ms)
+✔ 320px mobile, dark mode and reduced motion avoid overflow and illegible content (1080.970858ms)
+✔ core demo screens meet contrast and accessibility checks in both themes and sizes (20678.238921ms)
+✔ populated demo booking journey persists without real mutations at 1440px (11146.130385ms)
+✔ populated demo booking journey persists without real mutations at 390px (13194.494295ms)
+✔ map pins retain keyboard focus, selection and filters through theme changes; fallback at 1440px (3585.365304ms)
+✔ map pins retain keyboard focus, selection and filters through theme changes; fallback at 390px (4958.060706ms)
+✔ narrow reduced-motion demo recovers corrupt and unavailable browser storage (2847.929413ms)
+✔ service category tabs filter real taxonomy and work with arrow keys (936.304759ms)
+✔ reduced-motion users never have pending-hidden cards (825.496887ms)
+✔ manifest and offline-safe service worker never save private routes (1259.427553ms)
+✔ explicit dark and light themes sync the browser UI (953.859876ms)
+✔ desktop navigation, category search and colour preference persistence (3325.972257ms)
+✔ mobile menu, system preference and protected-route fallback (1257.32824ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 69569.598071

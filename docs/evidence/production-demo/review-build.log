@@ -1,0 +1,96 @@
+
+> duzelo@0.1.0 build
+> next build
+
+▲ Next.js 16.4.3 (Turbopack)
+✓ Running next.config.ts took 23ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 820ms
+  Running TypeScript ...
+  Finished TypeScript in 1272ms ...
+  Collecting page data using 2 workers ...
+  Generating static pages using 2 workers (0/34) ...
+  Generating static pages using 2 workers (8/34)
+  Generating static pages using 2 workers (16/34)
+  Generating static pages using 2 workers (25/34)
+✓ Generating static pages using 2 workers (34/34) in 736ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /admin
+├ ƒ /admin/verifications
+├ ƒ /admin/verifications/[id]
+├ ƒ /admin/workflow
+├ ƒ /api/internal/workflow/[action]
+├ ƒ /api/v1/agreements/[action]
+├ ƒ /api/v1/auth/[action]
+├ ƒ /api/v1/collaboration/[action]
+├ ƒ /api/v1/collaboration/media/[id]
+├ ƒ /api/v1/discovery/[action]
+├ ƒ /api/v1/jobs/[action]
+├ ƒ /api/v1/jobs/media/[id]
+├ ƒ /api/v1/workers/[action]
+├ ƒ /api/v1/workers/media/[id]
+├ ƒ /app/client
+├ ƒ /app/client/bookings
+├ ƒ /app/client/bookings/[id]
+├ ƒ /app/client/jobs
+├ ƒ /app/client/jobs/[id]
+├ ƒ /app/client/jobs/[id]/quotes
+├ ƒ /app/client/jobs/new
+├ ƒ /app/inbox
+├ ƒ /app/inbox/[id]
+├ ƒ /app/settings
+├ ƒ /app/worker
+├ ƒ /app/worker/bookings
+├ ƒ /app/worker/bookings/[id]
+├ ƒ /app/worker/onboarding
+├ ƒ /app/worker/opportunities
+├ ƒ /app/worker/opportunities/[id]
+├ ƒ /app/worker/quotes
+├ ○ /app/worker/services
+├ ƒ /app/worker/verification
+├ ƒ /auth/admin-mfa
+├ ○ /auth/forbidden
+├ ƒ /auth/sign-in
+├ ƒ /auth/suspended
+├ ○ /demo
+├ ○ /demo/about
+├ ○ /demo/bookings
+├ ƒ /demo/bookings/[id]
+├   /demo/providers/[slug]
+│ ├ ● /demo/providers/demo-lindi-home-care
+│ ├ ● /demo/providers/demo-green-corner
+│ ├ ● /demo/providers/demo-steady-flow
+│ └ ● [+5 more paths]
+├ ○ /demo/saved
+├ ƒ /explore
+├ ○ /how-it-works
+├ ○ /icon.svg
+├ ○ /legal/privacy
+├ ○ /legal/terms
+├ ○ /offline
+├ ƒ /onboarding
+├ ○ /opengraph-image
+├ ○ /robots.txt
+├ ○ /services
+├   /services/[slug]
+│ ├ ● /services/home-repairs
+│ ├ ● /services/plumbing
+│ ├ ● /services/electrical
+│ └ ● [+3 more paths]
+├ ○ /settings
+├ ○ /sitemap.xml
+├ ○ /trust
+├ ƒ /workers
+└ ƒ /workers/[slug]
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand

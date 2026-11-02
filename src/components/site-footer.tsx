@@ -19,6 +19,7 @@ export function SiteFooter() {
           </p>
         </div>
         <nav aria-label="Footer navigation">
+          <Link href="/demo">Interactive demo</Link>
           <Link href="/services">Services</Link>
           <Link href="/explore">Explore</Link>
           <Link href="/workers">Worker profiles</Link>
