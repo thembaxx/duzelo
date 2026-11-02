@@ -25,11 +25,9 @@ export async function lifecycleChecks(
     .withExif({ IFD0: { ImageDescription: "EXIF-PRIVATE-42" } })
     .toBuffer();
   await worker.goto("/app/worker/bookings/" + b.bookingId);
-  const form = worker
-    .locator("form")
-    .filter({
-      has: worker.getByRole("heading", { name: "Submit completion for review", exact: true }),
-    });
+  const form = worker.locator("form").filter({
+    has: worker.getByRole("heading", { name: "Submit completion for review", exact: true }),
+  });
   const summary = form.getByLabel("Completion summary or explanation");
   await expect(summary).toHaveAttribute("minlength", "30");
   await expect(summary).toHaveAttribute("maxlength", "4000");

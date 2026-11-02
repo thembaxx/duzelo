@@ -33,3 +33,11 @@ Downloaded successful native artifact **13127162818**, run **41414562976**, and 
 | Ordered private conversation | [390×844](../screenshots/chat-thread-mobile.png) | [1440×900](../screenshots/chat-thread-desktop.png) |
 | Agreed price and appointment | [390×844](../screenshots/workflow-agreement-mobile.png) | [1440×900](../screenshots/workflow-agreement-desktop.png) |
 | MFA support queue | [390×844](../screenshots/audit-workflow-mobile.png) | [1440×900](../screenshots/audit-workflow-desktop.png) |
+
+## Reviewed implementation snapshot
+
+The review corrections in [REVIEW.md](REVIEW.md) were exercised on source `ef9730cea1262150c0401e89e11c54a6508b38b5`. [Application run 41421678990](https://github.com/thembaxx/duzelo/actions/runs/41421678990) passed database checks and all **14 native cases in 3.8 minutes**, including the new UI retry, photo-backed completion, cross-booking denial, removed-message updates, delayed audit selection and pagination regressions. Its five real server-secret canary scans passed against 46 browser assets. Separate database integration and visual checks passed. The verification job correctly failed formatting for one test-helper method chain that required a second formatter pass; that layout-only correction subsequently passed local `npm run format:check` and is included with this evidence. This failed verification attempt is not represented as a green final head.
+
+Local review checks passed: **286 unit assertions across 32 files**, lint, strict TypeScript, static SQL contracts, production build, 8 public browser cases, import boundaries, dependency audit (zero vulnerabilities) and secret scan (482 repository files, 46 browser assets; no local canary). Final head CI and deployment results remain in the PR release record.
+
+The six current PNGs in the table above supersede the earlier `9b4b5e4` images: they were downloaded from successful native artifact **13130841063**, run **41421678990**, source **ef9730c**, and all six were visually inspected at their original 390×844 or 1440×900 size. The thread captures now include a persisted moderation tombstone. Earlier captures remain in Git history; no images from previous milestones were replaced.

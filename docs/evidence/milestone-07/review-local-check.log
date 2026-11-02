@@ -1,0 +1,121 @@
+
+> duzelo@0.1.0 check
+> npm run lint && npm run typecheck && npm test && npm run test:db:static && npm run build
+
+
+> duzelo@0.1.0 lint
+> oxlint src
+
+
+> duzelo@0.1.0 typecheck
+> next typegen && tsc --noEmit
+
+Generating route types...
+✓ Types generated successfully
+
+> duzelo@0.1.0 test
+> vitest run
+
+
+ RUN  v5.0.5 /workspace/duzelo
+
+
+ Test Files  32 passed (32)
+      Tests  286 passed (286)
+   Start at  09:30:35
+   Duration  4.84s (import 70%, tests 16%, worker 7%, transform 6%)
+
+    Isolate  32 workers spawned · ~91ms startup each (spawn + environment, per file)
+             at least ~2.83s faster with isolate: false — reuses workers across files instead of one per file
+
+
+> duzelo@0.1.0 test:db:static
+> node scripts/verify-db-baseline.mjs
+
+Static migration contract checks passed. These do NOT replace Supabase PostgreSQL/pgTAP tests.
+
+> duzelo@0.1.0 build
+> next build
+
+▲ Next.js 16.4.3 (Turbopack)
+✓ Running next.config.ts took 24ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 2.9s
+  Running TypeScript ...
+  Finished TypeScript in 2.4s ...
+  Collecting page data using 2 workers ...
+  Generating static pages using 2 workers (0/22) ...
+  Generating static pages using 2 workers (5/22)
+  Generating static pages using 2 workers (10/22)
+  Generating static pages using 2 workers (16/22)
+✓ Generating static pages using 2 workers (22/22) in 540ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /admin
+├ ƒ /admin/verifications
+├ ƒ /admin/verifications/[id]
+├ ƒ /admin/workflow
+├ ƒ /api/internal/workflow/[action]
+├ ƒ /api/v1/agreements/[action]
+├ ƒ /api/v1/auth/[action]
+├ ƒ /api/v1/collaboration/[action]
+├ ƒ /api/v1/collaboration/media/[id]
+├ ƒ /api/v1/discovery/[action]
+├ ƒ /api/v1/jobs/[action]
+├ ƒ /api/v1/jobs/media/[id]
+├ ƒ /api/v1/workers/[action]
+├ ƒ /api/v1/workers/media/[id]
+├ ƒ /app/client
+├ ƒ /app/client/bookings
+├ ƒ /app/client/bookings/[id]
+├ ƒ /app/client/jobs
+├ ƒ /app/client/jobs/[id]
+├ ƒ /app/client/jobs/[id]/quotes
+├ ƒ /app/client/jobs/new
+├ ƒ /app/inbox
+├ ƒ /app/inbox/[id]
+├ ƒ /app/settings
+├ ƒ /app/worker
+├ ƒ /app/worker/bookings
+├ ƒ /app/worker/bookings/[id]
+├ ƒ /app/worker/onboarding
+├ ƒ /app/worker/opportunities
+├ ƒ /app/worker/opportunities/[id]
+├ ƒ /app/worker/quotes
+├ ○ /app/worker/services
+├ ƒ /app/worker/verification
+├ ƒ /auth/admin-mfa
+├ ○ /auth/forbidden
+├ ƒ /auth/sign-in
+├ ƒ /auth/suspended
+├ ƒ /explore
+├ ○ /how-it-works
+├ ○ /icon.svg
+├ ○ /legal/privacy
+├ ○ /legal/terms
+├ ○ /offline
+├ ƒ /onboarding
+├ ○ /opengraph-image
+├ ○ /robots.txt
+├ ○ /services
+├   /services/[slug]
+│ ├ ● /services/home-repairs
+│ ├ ● /services/plumbing
+│ ├ ● /services/electrical
+│ └ ● [+3 more paths]
+├ ○ /settings
+├ ○ /sitemap.xml
+├ ○ /trust
+├ ƒ /workers
+└ ƒ /workers/[slug]
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
