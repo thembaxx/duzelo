@@ -5,24 +5,31 @@ import { database } from "@/lib/db/server";
 import { getVerifiedIdentity, type Identity } from "@/features/auth/service";
 import { jobsConfig } from "./config";
 import { allowAuthAttempt } from "@/features/auth/rate-limit";
-export async function jobActor(worker = false) {
+type ActorMode = boolean | "either";
+const hasCapability = (profile: Identity["profile"], mode: ActorMode) =>
+  mode === "either"
+    ? profile?.client_enabled || profile?.worker_enabled
+    : mode
+      ? profile?.worker_enabled
+      : profile?.client_enabled;
+export async function jobActor(worker: ActorMode = false) {
   if (!jobsConfig()) throw new Error("UNAVAILABLE");
   const actor = await getVerifiedIdentity();
   if (!actor) throw new Error("UNAUTHORIZED");
   if (
     !actor.profile?.onboarding_completed_at ||
     actor.profile?.is_suspended ||
-    !(worker ? actor.profile?.worker_enabled : actor.profile?.client_enabled)
+    !hasCapability(actor.profile, worker)
   )
     throw new Error("FORBIDDEN");
   return actor;
 }
-export async function lockActor(sql: TransactionSql, actor: Identity, worker = false) {
+export async function lockActor(sql: TransactionSql, actor: Identity, worker: ActorMode = false) {
   // M02 suspension updates the account before taking the publication lock.
   // Avoid account row locks here so that lock order cannot deadlock.
   await sql`select pg_advisory_xact_lock(hashtextextended('duzelo.worker-publication',0))`;
   const session =
-    await sql`select id from auth.sessions where id=${actor.sessionId}::uuid and user_id=${actor.id}::uuid and (not_after is null or not_after>now()) for share`;
+    await sql`select id from auth.sessions where id=${actor.sessionId}::uuid and user_id=${actor.id}::uuid and (not_after is null or not_after>clock_timestamp()) for share`;
   if (!session.length) throw new Error("UNAUTHORIZED");
   const [account] =
     await sql`select client_enabled,worker_enabled,is_suspended,onboarding_completed_at from public.user_profiles where user_id=${actor.id}::uuid`;
@@ -30,7 +37,7 @@ export async function lockActor(sql: TransactionSql, actor: Identity, worker = f
     !account ||
     !account.onboarding_completed_at ||
     account.is_suspended ||
-    !(worker ? account.worker_enabled : account.client_enabled)
+    !hasCapability(account as Identity["profile"], worker)
   )
     throw new Error("FORBIDDEN");
 }
@@ -38,7 +45,7 @@ export async function jobCommand<T extends Record<string, unknown>>(
   action: string,
   input: unknown,
   key: string | null,
-  worker: boolean,
+  worker: ActorMode,
   run: (sql: TransactionSql, actor: Identity) => Promise<T>,
   beforeReplay?: (sql: TransactionSql, actor: Identity) => Promise<void>,
 ): Promise<T> {

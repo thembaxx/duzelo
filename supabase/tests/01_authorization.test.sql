@@ -27,7 +27,7 @@ select is((select count(*)::integer from public.user_profiles),1,'client sees on
 select is((select count(*)::integer from public.job_requests),3,'client sees own jobs including draft');
 select is((select count(*)::integer from public.bookings),0,'client uses current-party server booking projection');
 select is((select count(*)::integer from public.quotes),0,'client uses current-party server quote projection');
-select is((select count(*)::integer from public.messages),1,'client sees job-bound messages');
+select is((select count(*)::integer from public.messages),0,'client uses current-party server messages');
 select throws_ok('select * from private.job_locations','42501',null,'client exact location requires authorized server DTO');
 select throws_ok('update public.worker_profiles set status=''approved''','42501',null,'client cannot set worker approval');
 select throws_ok('insert into public.job_requests default values','42501',null,'client direct API job writes denied');
@@ -39,7 +39,7 @@ select is((select count(*)::integer from public.worker_profiles),1,'worker owner
 select is((select count(*)::integer from public.job_matches),0,'worker uses current-eligibility DTO rather than reading internal match rows');
 select is((select count(*)::integer from public.job_requests),0,'worker cannot bypass current eligibility through full job rows');
 select is((select count(*)::integer from public.quotes),0,'worker uses current-party server quote projection');
-select is((select count(*)::integer from public.messages),1,'worker reads member-only message');
+select is((select count(*)::integer from public.messages),0,'worker uses current-party server messages');
 select throws_ok('select * from private.job_locations','42501',null,'matched worker cannot read exact address');
 select throws_ok('select * from private.verification_documents','42501',null,'worker cannot read another private evidence table');
 select throws_ok('select private.publish_worker_card(null,null,null,null)','42501',null,'worker cannot call publication function');

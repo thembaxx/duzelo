@@ -129,7 +129,7 @@ export async function jobImage(id: string) {
         await sql`select m.id from public.job_matches m join public.worker_profiles w on w.id=m.worker_id join lateral private.job_candidates(m.job_id,w.id,true) candidate on candidate.worker_id=w.id where m.job_id=${asset.job_id}::uuid and w.user_id=${actor.id}::uuid and m.status in ('invited','viewed') and m.expires_at>now()`;
       if (!allowed) {
         const continued = quotesConfig()
-          ? await sql`select m.id from public.job_matches m join public.worker_profiles w on w.id=m.worker_id join public.job_requests j on j.id=m.job_id where m.job_id=${asset.job_id}::uuid and w.user_id=${actor.id}::uuid and m.status='responded' and j.status in ('quoted','booked') and private.agreement_worker_eligible(j.id,w.id,false) and not exists(select 1 from public.bookings b where b.job_id=j.id and (b.worker_id<>w.id or b.status not in ('pending_worker','confirmed')))`
+          ? await sql`select m.id from public.job_matches m join public.worker_profiles w on w.id=m.worker_id join public.job_requests j on j.id=m.job_id where m.job_id=${asset.job_id}::uuid and w.user_id=${actor.id}::uuid and m.status='responded' and j.status in ('quoted','booked','in_progress','completion_pending','disputed') and private.agreement_worker_eligible(j.id,w.id,false) and not exists(select 1 from public.bookings b where b.job_id=j.id and (b.worker_id<>w.id or b.status not in ('pending_worker','confirmed','in_progress','completion_pending','disputed')))`
           : [];
         if (!continued.length) throw new Error("FORBIDDEN");
       }

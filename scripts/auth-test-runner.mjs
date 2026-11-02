@@ -35,6 +35,10 @@ const storageScan=spawnSync('node',['scripts/check-secrets.mjs'],{env:{...env,SE
 if(storageScan.status)process.exit(storageScan.status);
 const geocoderScan=spawnSync('node',['scripts/check-secrets.mjs'],{env:{...env,SECURITY_SCAN_CANARY:env.MAPTILER_GEOCODING_KEY},stdio:'inherit'});
 if(geocoderScan.status)process.exit(geocoderScan.status);
+for(const secret of [env.WORKFLOW_SIGNING_SECRET,env.WORKFLOW_SCHEDULER_SECRET]){
+ const check=spawnSync('node',['scripts/check-secrets.mjs'],{env:{...env,SECURITY_SCAN_CANARY:secret},stdio:'inherit'});
+ if(check.status)process.exit(check.status);
+}
 const result = spawnSync(
   "node_modules/.bin/playwright",
   ["test", "--config", "playwright.auth.config.ts"],

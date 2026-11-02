@@ -1,3 +1,4 @@
+import { workflowConfig } from "@/features/collaboration/config";
 import Link from "next/link";
 import { workerConfig } from "@/features/workers/config";
 import { requireWorkspace } from "@/features/auth/guard";
@@ -18,6 +19,13 @@ export default async function Admin() {
         <p>
           <Link className="button button-primary" href="/admin/verifications">
             Review worker applications
+          </Link>
+        </p>
+      )}
+      {workflowConfig() && ["owner", "support"].includes(actor.adminRole ?? "") && (
+        <p>
+          <Link className="button button-secondary" href="/admin/workflow">
+            Review work evidence
           </Link>
         </p>
       )}

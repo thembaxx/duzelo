@@ -1,0 +1,20 @@
+
+> duzelo@0.1.0 test:public
+> node scripts/test-public.mjs
+
+✔ editorial demo is clearly labelled and navigation reaches real category pages (1456.158414ms)
+✔ 320px mobile, dark mode and reduced motion avoid overflow and illegible content (1048.961622ms)
+✔ service category tabs filter real taxonomy and work with arrow keys (913.575514ms)
+✔ reduced-motion users never have pending-hidden cards (818.853724ms)
+✔ manifest and offline-safe service worker never save private routes (1266.7234ms)
+✔ explicit dark and light themes sync the browser UI (977.654636ms)
+✔ desktop navigation, category search and colour preference persistence (2465.41403ms)
+✔ mobile menu, system preference and protected-route fallback (2072.06133ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 12340.670936

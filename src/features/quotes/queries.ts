@@ -61,7 +61,9 @@ export async function quotesForJob(jobId: string, worker = false, page = 0): Pro
         canQuote ||
         (!!check?.read_allowed &&
           !!selectedBooking &&
-          ["pending_worker", "confirmed"].includes(String(selectedBooking.status)));
+          ["pending_worker", "confirmed", "in_progress", "completion_pending", "disputed"].includes(
+            String(selectedBooking.status),
+          ));
       eligibilityMessage = canQuote
         ? "Current approval, category and coverage checks pass. The schedule is checked again when sending and confirming."
         : "New quotes are unavailable: check approval, category, coverage, invitation expiry, blocks or the existing appointment.";
@@ -146,7 +148,7 @@ export async function workerQuoteJobs() {
     await lockActor(sql, actor, true);
     const rows = await sql`select j.id,j.title,j.public_town,j.status,
         (private.agreement_worker_eligible(j.id,w.id,false) and (
-          exists(select 1 from public.bookings b where b.job_id=j.id and b.worker_id=w.id and b.status in ('pending_worker','confirmed'))
+          exists(select 1 from public.bookings b where b.job_id=j.id and b.worker_id=w.id and b.status in ('pending_worker','confirmed','in_progress','completion_pending','disputed'))
           or (private.agreement_worker_eligible(j.id,w.id,true) and j.status in ('open','matching','quoted')
             and not exists(select 1 from public.bookings b where b.job_id=j.id)
             and ((m.status in ('invited','viewed') and m.expires_at>now() and d.expires_at>now())
