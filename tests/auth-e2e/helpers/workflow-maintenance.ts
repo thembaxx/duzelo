@@ -41,7 +41,8 @@ export async function maintenanceChecks(
   await sql`update public.bookings set status='cancelled' where id=${b.bookingId}::uuid`;
   // Native cleanup removes actual expired bytes, while case-held objects remain stored.
   const [held] =
-    await sql`select id,state from private.collaboration_assets where owner_id in(select id from auth.users where phone='27820000008') and held and state='stored' limit 1`;
+    await sql`select id,state,storage_path from private.collaboration_assets where owner_id in(select id from auth.users where phone='27820000008') and held and state='stored' limit 1`;
+  expect(held).toBeDefined();
   const [expired] =
     await sql`select storage_path from private.collaboration_assets where id=${expiredAssetId}::uuid and state='stored' and not held`;
   expect(expired).toBeDefined();
@@ -58,6 +59,7 @@ export async function maintenanceChecks(
       .state,
   ).toBe("purged");
   expect((await storage.download(String(expired!.storage_path))).error).not.toBeNull();
+  expect((await storage.download(String(held!.storage_path))).error).toBeNull();
   if (held)
     expect(
       (await sql`select state from private.collaboration_assets where id=${held.id}::uuid`)[0]!

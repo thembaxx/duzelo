@@ -17,8 +17,10 @@ export function useCollaboration() {
           body: JSON.stringify(input),
         }),
         data = await response.json();
-      if (!response.ok)
+      if (!response.ok) {
+        if (data.error?.code === "EXPIRED_AUDIT") keys.current.delete(signature);
         throw new Error(data.error?.message ?? "The action could not be confirmed.");
+      }
       keys.current.delete(signature);
       return data as T;
     } catch (e) {

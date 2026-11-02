@@ -96,10 +96,14 @@ export function EvidenceUpload({
   target,
   value,
   onChange,
+  onBusyChange,
+  disabled = false,
 }: {
   target: UploadTarget;
   value: string[];
   onChange: (ids: string[]) => void;
+  onBusyChange: (busy: boolean) => void;
+  disabled?: boolean;
 }) {
   const removal = useCollaboration();
   const [busy, setBusy] = useState(false),
@@ -107,6 +111,7 @@ export function EvidenceUpload({
     retry = useRef<{ file: File; key: string } | null>(null);
   async function upload(file: File) {
     setBusy(true);
+    onBusyChange(true);
     setError("");
     const key = retry.current?.file === file ? retry.current.key : crypto.randomUUID();
     retry.current = { file, key };
@@ -133,6 +138,17 @@ export function EvidenceUpload({
       );
     } finally {
       setBusy(false);
+      onBusyChange(false);
+    }
+  }
+  async function remove(id: string) {
+    onBusyChange(true);
+    try {
+      await removal.run("remove-photo", { assetId: id });
+      onChange(value.filter((v) => v !== id));
+    } catch {
+    } finally {
+      onBusyChange(false);
     }
   }
   return (
@@ -142,7 +158,7 @@ export function EvidenceUpload({
         <input
           type="file"
           accept="image/jpeg,image/png"
-          disabled={busy || value.length >= 4}
+          disabled={disabled || busy || removal.busy || value.length >= 4}
           onChange={(e) => {
             const f = e.target.files?.[0];
             if (f) void upload(f);
@@ -160,13 +176,8 @@ export function EvidenceUpload({
           key={id}
           type="button"
           className="text-link"
-          disabled={busy || removal.busy}
-          onClick={() =>
-            void removal
-              .run("remove-photo", { assetId: id })
-              .then(() => onChange(value.filter((v) => v !== id)))
-              .catch(() => {})
-          }
+          disabled={disabled || busy || removal.busy}
+          onClick={() => void remove(id)}
         >
           Remove unsent photo {i + 1}
         </button>
@@ -176,7 +187,8 @@ export function EvidenceUpload({
         <>
           <p role="alert">{error}</p>
           <button
-            disabled={busy}
+            disabled={disabled || busy || removal.busy}
+            type="button"
             className="text-link"
             onClick={() => retry.current && void upload(retry.current.file)}
           >

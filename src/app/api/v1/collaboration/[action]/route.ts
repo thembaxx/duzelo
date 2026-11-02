@@ -43,10 +43,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ acti
     requireWorkflow();
     const { action } = await params,
       url = new URL(request.url);
-    if (action === "inbox") return json(await inbox());
-    if (action === "queue") return json(await auditQueue());
+    if (action === "inbox") return json(await inbox(url.searchParams.get("cursor") ?? undefined));
+    if (action === "queue")
+      return json(await auditQueue(url.searchParams.get("cursor") ?? undefined));
     const id = z.guid().parse(url.searchParams.get("id"));
-    if (action === "workflow") return json(await workflowView(id));
+    if (action === "workflow")
+      return json(await workflowView(id, url.searchParams.get("entryCursor") ?? undefined));
     if (action === "audit")
       return json(
         await auditView(
@@ -57,6 +59,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ acti
             .min(0)
             .max(Number.MAX_SAFE_INTEGER)
             .parse(url.searchParams.get("before") ?? 0),
+          url.searchParams.get("reportCursor") ?? undefined,
+          url.searchParams.get("entryCursor") ?? undefined,
         ),
       );
     if (action === "thread") {
@@ -64,7 +68,15 @@ export async function GET(request: Request, { params }: { params: Promise<{ acti
       const before = cursor.parse(url.searchParams.get("before") ?? 0),
         after = cursor.parse(url.searchParams.get("after") ?? 0);
       if (before && after) throw new Error("INVALID");
-      return json(await threadView(id, before, after));
+      return json(
+        await threadView(
+          id,
+          before,
+          after,
+          cursor.parse(url.searchParams.get("floor") ?? 1),
+          cursor.parse(url.searchParams.get("removedAfter") ?? 0),
+        ),
+      );
     }
     throw new Error("INVALID");
   } catch (error) {

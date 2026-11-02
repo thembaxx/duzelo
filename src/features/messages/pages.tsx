@@ -16,10 +16,11 @@ async function guard() {
     redirect("/onboarding");
   return a;
 }
-export async function InboxPage() {
+export async function InboxPage({ searchParams }: { searchParams: Promise<{ cursor?: string }> }) {
   const actor = await guard();
   if (!workflowConfig()) return <Closed />;
-  const threads = await inbox();
+  const cursor = (await searchParams).cursor;
+  const { threads, nextCursor } = await inbox(cursor);
   return (
     <>
       <PageHeading eyebrow="Private job conversations" title="Keep the details together.">
@@ -46,6 +47,19 @@ export async function InboxPage() {
           </li>
         ))}
       </ul>
+      {nextCursor && (
+        <Link
+          className="button button-outline"
+          href={"/app/inbox?cursor=" + encodeURIComponent(nextCursor)}
+        >
+          Older conversations
+        </Link>
+      )}
+      {cursor && (
+        <Link className="text-link" href="/app/inbox">
+          Latest conversations
+        </Link>
+      )}
       {!threads.length && (
         <section className="empty-panel">
           <h2>No job conversations yet.</h2>

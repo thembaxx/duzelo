@@ -84,7 +84,14 @@ export async function BookingPage({ id, worker = false }: { id: string; worker?:
       <BookingDetail key={booking.id + ":" + booking.version} booking={booking} workflow={!!work} />
       {work && (
         <>
-          <OpenConversation quoteId={booking.quote.id} />
+          {[
+            "pending_worker",
+            "confirmed",
+            "in_progress",
+            "completion_pending",
+            "disputed",
+            "completed",
+          ].includes(booking.status) && <OpenConversation quoteId={booking.quote.id} />}
           <WorkflowPanel key={work.version} view={work} />
         </>
       )}

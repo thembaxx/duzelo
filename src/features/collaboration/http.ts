@@ -30,6 +30,7 @@ export function collaborationError(error: unknown) {
       409,
       "This record changed or a proposal is still pending. Refresh the saved record before trying again.",
     ],
+    EXPIRED_AUDIT: [409, "This audit request expired. Open a new audit request with a reason."],
     TIMING: [
       422,
       "Choose a future valid time. Work can only start at or after the agreed appointment start.",

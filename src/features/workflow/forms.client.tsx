@@ -23,9 +23,12 @@ export function WorkForm({
     [body, setBody] = useState(""),
     [consent, setConsent] = useState(false),
     [assets, setAssets] = useState<string[]>([]),
+    [uploading, setUploading] = useState(false),
     [notice, setNotice] = useState("");
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (uploading) return;
+    setNotice("");
     const completion = b.completions.find((c) => c.status === "pending");
     const base =
       action === "case-respond"
@@ -63,14 +66,22 @@ export function WorkForm({
               : "Your explanation"}
           <textarea
             required
-            minLength={action === "work-complete" ? 30 : 15}
-            maxLength={2000}
+            minLength={action === "work-complete" && assets.length === 0 ? 30 : 15}
+            maxLength={field === "summary" || field === "body" ? 4000 : 2000}
             value={body}
             onChange={(e) => setBody(e.target.value)}
           />
         </label>
       )}
-      {target && <EvidenceUpload target={target} value={assets} onChange={setAssets} />}
+      {target && (
+        <EvidenceUpload
+          target={target}
+          value={assets}
+          onChange={setAssets}
+          onBusyChange={setUploading}
+          disabled={api.busy}
+        />
+      )}
       <label className="choice">
         <input
           type="checkbox"
@@ -82,7 +93,7 @@ export function WorkForm({
           ? "I explicitly confirm the submitted work is complete. This does not decide payment or waive dispute rights."
           : "Save this as my explicit report or request. This does not collect or release payment."}
       </label>
-      <button className="button button-primary" disabled={api.busy || !consent}>
+      <button className="button button-primary" disabled={api.busy || uploading || !consent}>
         {api.busy ? "Saving…" : title}
       </button>
       {api.error && (

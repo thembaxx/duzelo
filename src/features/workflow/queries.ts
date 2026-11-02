@@ -1,4 +1,5 @@
 import "server-only";
+import { readCursor, writeCursor } from "@/features/collaboration/cursor";
 import type { WorkflowView } from "./types";
 import type { TransactionSql } from "postgres";
 import type { Identity } from "@/features/auth/service";
@@ -13,6 +14,7 @@ export async function workProjection(
   b: WorkContext,
   actor: Identity,
   staff = false,
+  entryCursor?: string,
 ) {
   const [access] =
     await sql`select private.agreement_worker_eligible(${b.jobId}::uuid,${b.workerId}::uuid,false) and exists(select 1 from public.worker_cards where worker_id=${b.workerId}::uuid and safe_until>clock_timestamp()) as eligible`;
@@ -50,8 +52,9 @@ export async function workProjection(
         p.base_version === b.version &&
         p.author !== actor.id,
     }));
+  const entryPosition = readCursor(entryCursor);
   const entries =
-    await sql`select id,actor_id,kind,body,created_at from private.work_entries where booking_id=${b.id}::uuid and (${staff} or actor_id=${actor.id}::uuid or (${readable} and public_to_parties)) order by created_at,id limit 200`;
+    await sql`select id,actor_id,kind,body,created_at,created_at::text as cursor_at from private.work_entries where booking_id=${b.id}::uuid and (${staff} or actor_id=${actor.id}::uuid or (${readable} and public_to_parties)) and (${entryPosition?.at ?? null}::timestamptz is null or (created_at,id)<(${entryPosition?.at ?? null}::timestamptz,${entryPosition?.id ?? null}::uuid)) order by created_at desc,id desc limit 201`;
   const completions = readable
     ? await sql`select id,round,summary,status,review_due_at,support_due_at from private.completion_submissions where booking_id=${b.id}::uuid order by round`
     : [];
@@ -101,15 +104,22 @@ export async function workProjection(
         assets: await attachments("completion", String(c.id)),
       })),
     ),
+    nextEntries:
+      entries.length > 200
+        ? writeCursor(String(entries[199]!.cursor_at), String(entries[199]!.id))
+        : null,
     entries: await Promise.all(
-      entries.map(async (e) => ({
-        id: String(e.id),
-        kind: String(e.kind),
-        body: String(e.body),
-        at: iso(e.created_at),
-        own: e.actor_id === actor.id,
-        assets: await attachments("entry", String(e.id)),
-      })),
+      entries
+        .slice(0, 200)
+        .reverse()
+        .map(async (e) => ({
+          id: String(e.id),
+          kind: String(e.kind),
+          body: String(e.body),
+          at: iso(e.created_at),
+          own: e.actor_id === actor.id,
+          assets: await attachments("entry", String(e.id)),
+        })),
     ),
     dispute: dispute
       ? {
@@ -121,10 +131,10 @@ export async function workProjection(
       : null,
   };
 }
-export async function workflowView(id: string): Promise<WorkflowView> {
+export async function workflowView(id: string, entryCursor?: string): Promise<WorkflowView> {
   const actor = await collaborationActor();
   return database().begin(async (sql) => {
     await lockActor(sql, actor, "either");
-    return workProjection(sql, await workContext(sql, id, actor), actor);
+    return workProjection(sql, await workContext(sql, id, actor), actor, false, entryCursor);
   });
 }

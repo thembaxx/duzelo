@@ -24,14 +24,31 @@ export async function lifecycleChecks(
     .jpeg()
     .withExif({ IFD0: { ImageDescription: "EXIF-PRIVATE-42" } })
     .toBuffer();
-  const upload = await workUpload(worker, { purpose: "completion", bookingId: b.bookingId }, bytes);
+  await worker.goto("/app/worker/bookings/" + b.bookingId);
+  const form = worker
+    .locator("form")
+    .filter({
+      has: worker.getByRole("heading", { name: "Submit completion for review", exact: true }),
+    });
+  const summary = form.getByLabel("Completion summary or explanation");
+  await expect(summary).toHaveAttribute("minlength", "30");
+  await expect(summary).toHaveAttribute("maxlength", "4000");
+  await summary.fill("Photo-backed result.");
+  const [upload] = await Promise.all([
+    worker.waitForResponse((r) => r.url().endsWith("/api/v1/collaboration/upload")),
+    form
+      .getByLabel(/Private evidence photo/)
+      .setInputFiles({ name: "completion.jpg", mimeType: "image/jpeg", buffer: bytes }),
+  ]);
   expect(upload.status(), await upload.text()).toBe(200);
   const a = await upload.json();
-  await workOk(worker, "work-complete", {
-    ...bookingData(v),
-    summary: "Fictional work finished; the photo records the test result.",
-    assetIds: [a.assetId],
-  });
+  await expect(summary).toHaveAttribute("minlength", "15");
+  await form.getByRole("checkbox").check();
+  const [completed] = await Promise.all([
+    worker.waitForResponse((r) => r.url().endsWith("/api/v1/collaboration/work-complete")),
+    form.getByRole("button", { name: "Submit completion for review", exact: true }).click(),
+  ]);
+  expect(completed.status(), await completed.text()).toBe(200);
   v = await workView(client, b.bookingId);
   expect(v.status).toBe("completion_pending");
   expect(v.completions).toHaveLength(1);

@@ -1,3 +1,4 @@
+import { paginationChecks } from "./helpers/workflow-pagination";
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import postgres from "postgres";
@@ -18,6 +19,12 @@ import {
   pastBookingFixture,
 } from "./helpers/agreement-fixtures";
 import { workPost, workOk, workView, bookingData, workUpload } from "./helpers/workflow-actions";
+import {
+  uploadRetryChecks,
+  auditSelectionChecks,
+  auditReplayChecks,
+  historyChecks,
+} from "./helpers/workflow-review-checks";
 import { maintenanceChecks } from "./helpers/workflow-maintenance";
 import { lifecycleChecks, caseChecks } from "./helpers/workflow-checks";
 const sql = postgres(process.env.DATABASE_URL!, { max: 1, prepare: false });
@@ -165,6 +172,7 @@ test("job conversations, agreed changes, completion evidence and support audit p
     .jpeg()
     .withExif({ IFD0: { ImageDescription: "EXIF-PRIVATE-42" } })
     .toBuffer();
+  await uploadRetryChecks(client, bytes);
   const unsafe = await workUpload(
     client,
     { purpose: "message", conversationId: cid },
@@ -178,12 +186,13 @@ test("job conversations, agreed changes, completion evidence and support audit p
   const up = await workUpload(client, { purpose: "message", conversationId: cid }, bytes);
   expect(up.status(), await up.text()).toBe(200);
   const assetId = (await up.json()).assetId;
-  await workOk(client, "thread-send", {
+  const photoMessage = await workOk(client, "thread-send", {
     conversationId: cid,
     body: "A scanned fictional work photo.",
     assetIds: [assetId],
   });
-  const grant = await workOk(worker!, "media-access", { assetId });
+  const mediaKey = crypto.randomUUID();
+  const grant = await workOk(worker!, "media-access", { assetId }, mediaKey);
   const media = await worker!.request.get("/api/v1/collaboration/media/" + assetId, {
     headers: { "X-Duzelo-Asset-Ticket": grant.ticket },
   });
@@ -205,9 +214,32 @@ test("job conversations, agreed changes, completion evidence and support audit p
       })
     ).status(),
   ).toBe(403);
+  const refreshed = await workOk(worker!, "media-access", { assetId }, mediaKey);
+  expect(
+    (
+      await worker!.request.get("/api/v1/collaboration/media/" + assetId, {
+        headers: { "X-Duzelo-Asset-Ticket": refreshed.ticket },
+      })
+    ).status(),
+  ).toBe(200);
   await client.reload();
   await client.getByRole("button", { name: "Load earlier messages", exact: true }).click();
   await expect(client.getByText("Hello from the invited provider.", { exact: true })).toBeVisible();
+  const [firstMessage] =
+    await sql`select id from public.messages where conversation_id=${cid}::uuid and sequence=1`;
+  const beforeRemoval = await workOk(worker!, "media-access", { assetId });
+  await sql`update public.messages set deleted_at=clock_timestamp() where id in(${firstMessage!.id}::uuid,${photoMessage.messageId}::uuid)`;
+  expect((await workPost(worker!, "media-access", { assetId })).status()).toBe(403);
+  expect(
+    (
+      await worker!.request.get("/api/v1/collaboration/media/" + assetId, {
+        headers: { "X-Duzelo-Asset-Ticket": beforeRemoval.ticket },
+      })
+    ).status(),
+  ).toBe(403);
+  await expect(
+    client.getByText("Hello from the invited provider.", { exact: true }),
+  ).not.toBeVisible({ timeout: 15000 });
   await setTheme(client, info.project.name === "mobile", "Dark");
   expect(
     (await new AxeBuilder({ page: client }).include(".conversation").analyze()).violations,
@@ -343,7 +375,9 @@ test("job conversations, agreed changes, completion evidence and support audit p
   await client.screenshot({
     path: "docs/evidence/screenshots/workflow-agreement-" + info.project.name + ".png",
   });
-  const ticket = await workOk(worker!, "media-access", { assetId });
+  const [blockAsset] =
+    await sql`select a.id from private.collaboration_assets a join private.message_assets x on x.asset_id=a.id join public.messages m on m.id=x.message_id where a.conversation_id=${cid}::uuid and m.deleted_at is null and a.state='stored' limit 1`;
+  const ticket = await workOk(worker!, "media-access", { assetId: String(blockAsset!.id) });
   await workOk(client, "thread-report", {
     conversationId: cid,
     reason: "A fictional conversation concern for support review.",
@@ -362,7 +396,7 @@ test("job conversations, agreed changes, completion evidence and support audit p
   ).toBe(403);
   expect(
     (
-      await worker!.request.get("/api/v1/collaboration/media/" + assetId, {
+      await worker!.request.get("/api/v1/collaboration/media/" + blockAsset!.id, {
         headers: { "X-Duzelo-Asset-Ticket": ticket.ticket },
       })
     ).status(),
@@ -391,7 +425,27 @@ test("job conversations, agreed changes, completion evidence and support audit p
     info.project.name,
     cid,
   );
+  await auditReplayChecks(
+    sql,
+    admin!,
+    serviceCase.grantId,
+    String((await workView(client, serviceCase.booking.bookingId)).dispute!.id),
+    serviceCase.booking.jobId,
+    completed.assetId,
+  );
+  await auditSelectionChecks(
+    admin!,
+    String((await workView(client, serviceCase.booking.bookingId)).dispute!.id),
+    completed.booking.bookingId,
+  );
+  await historyChecks(sql, client, serviceCase.booking.bookingId, w.userId);
+  await paginationChecks(sql, client, admin!, String(owner!.id), w.userId, w.id, cid);
   await maintenanceChecks(sql, client, String(owner!.id), w.id, completed.assetId);
+  expect(
+    (
+      await sql`select count(*)::int as n from private.payment_intents where booking_id=any(${[completed.booking.bookingId, serviceCase.booking.bookingId]}::uuid[])`
+    )[0]!.n,
+  ).toBe(0);
   const [delivery] =
     await sql`select count(n.id)::int as linked,count(*) filter(where n.id is null)::int as missing from private.notification_outbox o left join public.notifications n on n.source_outbox_id=o.id and n.user_id=o.user_id where o.status='sent' and (o.template='message-received' or o.template like 'workflow-%' or o.template='case-support-update')`;
   expect(delivery!.linked).toBeGreaterThan(10);

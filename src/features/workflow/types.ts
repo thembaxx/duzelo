@@ -33,6 +33,7 @@ export interface WorkflowView {
     supportDue: string | null;
     assets: Attachment[];
   }[];
+  nextEntries: string | null;
   entries: {
     id: string;
     kind: string;
@@ -46,10 +47,16 @@ export interface WorkflowView {
 export interface AuditView {
   expiresAt: number;
   hasMore: boolean;
+  nextReports: string | null;
   next: number;
   grantId: string;
   workflow: WorkflowView | null;
   messages: { id: string; sequence: number; body: string; at: string }[];
   assets: Attachment[];
   reports: { id: string; reason: string; status: string }[];
+}
+
+export interface AuditQueuePage {
+  items: { id: string; kind: string; status: string; at: string }[];
+  nextCursor: string | null;
 }

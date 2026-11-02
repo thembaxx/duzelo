@@ -1,3 +1,4 @@
+import { WorkHistory } from "./history.client";
 import { Evidence } from "@/features/collaboration/evidence.client";
 import { money, jobTime } from "@/features/jobs/format";
 import type { WorkflowView } from "./types";
@@ -77,21 +78,13 @@ export function WorkflowPanel({ view: b, grantId }: { view: WorkflowView; grantI
           <WorkForm view={b} action="work-correction" title="Request a correction" field="reason" />
         </>
       )}
-      <section className="job-panel">
-        <h3>Progress and support history</h3>
-        {!b.entries.length && <p>No updates are available.</p>}
-        <ol className="job-record-list">
-          {b.entries.map((e) => (
-            <li key={e.id}>
-              <strong>
-                {e.kind.replaceAll("_", " ")} · {jobTime(e.at)}
-              </strong>
-              <p className="job-text">{e.body}</p>
-              <Evidence assets={e.assets} grantId={grantId} />
-            </li>
-          ))}
-        </ol>
-      </section>
+      <WorkHistory
+        key={b.id + ":" + b.version + ":" + (grantId ?? "party")}
+        initial={b.entries}
+        next={b.nextEntries}
+        bookingId={b.id}
+        grantId={grantId}
+      />
       {b.dispute && (
         <section className="job-panel">
           <h3>Service issue · {b.dispute.status.replaceAll("_", " ")}</h3>

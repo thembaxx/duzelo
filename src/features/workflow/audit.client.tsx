@@ -1,24 +1,28 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCollaboration } from "@/features/collaboration/client-api";
 import { Evidence } from "@/features/collaboration/evidence.client";
 import { WorkflowPanel } from "./panel";
-import type { AuditView } from "./types";
-export function AuditWorkspace({
-  queue,
-}: {
-  queue: { id: string; kind: string; status: string; at: string }[];
-}) {
+import { AuditQueue } from "./queue.client";
+import type { AuditView, AuditQueuePage } from "./types";
+export function AuditWorkspace({ queue }: { queue: AuditQueuePage }) {
   const api = useCollaboration(),
     [kind, setKind] = useState("dispute"),
     [id, setId] = useState(""),
     [reason, setReason] = useState(""),
     [view, setView] = useState<AuditView | null>(null),
     [note, setNote] = useState(""),
-    [status, setStatus] = useState("investigating");
+    [status, setStatus] = useState("investigating"),
+    [triageReason, setTriageReason] = useState(""),
+    [pending, setPending] = useState(false),
+    latestRequest = useRef(0);
   useEffect(() => {
     if (!view) return;
-    const clear = () => setView(null),
+    const clear = () => {
+        latestRequest.current++;
+        setPending(false);
+        setView(null);
+      },
       timer = setTimeout(clear, Math.max(0, view.expiresAt - Date.now()));
     window.addEventListener("pagehide", clear);
     return () => {
@@ -26,8 +30,19 @@ export function AuditWorkspace({
       window.removeEventListener("pagehide", clear);
     };
   }, [view]);
+  function select(nextKind: string, nextId: string) {
+    latestRequest.current++;
+    setPending(false);
+    setKind(nextKind);
+    setId(nextId);
+    setView(null);
+    setNote("");
+    setTriageReason("");
+  }
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    const request = ++latestRequest.current;
+    setPending(true);
     setView(null);
     try {
       const r = await api.run("audit", { kind, id, reason });
@@ -35,34 +50,55 @@ export function AuditWorkspace({
           cache: "no-store",
         }),
         data = await response.json();
+      if (request !== latestRequest.current) return;
       if (!response.ok) throw new Error(data.error?.message ?? "Audit access ended.");
       setView(data as AuditView);
     } catch (e) {
-      if (e instanceof Error) api.setError(e.message);
+      if (e instanceof Error && request === latestRequest.current) api.setError(e.message);
+    } finally {
+      if (request === latestRequest.current) setPending(false);
     }
   }
-  async function earlier() {
+  async function earlier(kind: "messages" | "reports") {
     if (!view) return;
+    const request = latestRequest.current;
+    setPending(true);
     try {
-      const response = await fetch(
-          "/api/v1/collaboration/audit?id=" + view.grantId + "&before=" + view.next,
-          { cache: "no-store" },
-        ),
+      const query =
+        kind === "messages"
+          ? "&before=" + view.next
+          : "&reportCursor=" + encodeURIComponent(view.nextReports ?? "");
+      const response = await fetch("/api/v1/collaboration/audit?id=" + view.grantId + query, {
+          cache: "no-store",
+        }),
         data = await response.json();
+      if (request !== latestRequest.current) return;
       if (!response.ok) {
         setView(null);
         throw new Error(data.error?.message ?? "Audit access ended.");
       }
       setView((current) => {
         if (!current || current.grantId !== data.grantId) return current;
-        const messages = new Map([...data.messages, ...current.messages].map((m) => [m.id, m]));
+        const messages = new Map([...current.messages, ...data.messages].map((m) => [m.id, m])),
+          assets = new Map([...current.assets, ...data.assets].map((a) => [a.id, a])),
+          reports = new Map([...current.reports, ...data.reports].map((r) => [r.id, r]));
         return {
-          ...data,
+          ...current,
+          workflow: data.workflow,
+          expiresAt: data.expiresAt,
           messages: [...messages.values()].sort((a, b) => a.sequence - b.sequence),
+          assets: [...assets.values()],
+          reports: [...reports.values()],
+          ...(kind === "messages"
+            ? { hasMore: data.hasMore, next: data.next }
+            : { nextReports: data.nextReports }),
         };
       });
     } catch (e) {
-      api.setError(e instanceof Error ? e.message : "Earlier evidence unavailable.");
+      if (request === latestRequest.current)
+        api.setError(e instanceof Error ? e.message : "Earlier evidence unavailable.");
+    } finally {
+      if (request === latestRequest.current) setPending(false);
     }
   }
   async function triage(e: React.FormEvent) {
@@ -75,44 +111,22 @@ export function AuditWorkspace({
         expectedVersion: d.version,
         status,
         note,
-        reason,
+        reason: triageReason,
         consent: true,
       });
       setView(null);
       setNote("");
+      setTriageReason("");
     } catch {}
   }
   return (
     <>
-      <section className="job-panel">
-        <h2>Cases and safety reports</h2>
-        <p>
-          Queue references contain no private conversation text. Every evidence opening requires a
-          reason and a current MFA session.
-        </p>
-        <ul className="job-record-list">
-          {queue.map((r, i) => (
-            <li key={r.id + ":" + i}>
-              <button
-                className="text-link"
-                onClick={() => {
-                  setKind(r.kind);
-                  setId(r.id);
-                  setView(null);
-                }}
-              >
-                {r.kind} #{r.id.slice(0, 8)} · {r.status.replaceAll("_", " ")}
-              </button>
-            </li>
-          ))}
-        </ul>
-        {!queue.length && <p>No queued items.</p>}
-      </section>
+      <AuditQueue initial={queue} select={select} />
       <form className="job-panel" onSubmit={(e) => void submit(e)}>
         <h2>Open an evidence audit</h2>
         <label>
           Record type
-          <select value={kind} onChange={(e) => setKind(e.target.value)}>
+          <select value={kind} onChange={(e) => select(e.target.value, id)}>
             <option value="dispute">Service issue</option>
             <option value="booking">Work appointment</option>
             <option value="conversation">Job conversation</option>
@@ -120,7 +134,7 @@ export function AuditWorkspace({
         </label>
         <label>
           Record reference
-          <input required value={id} onChange={(e) => setId(e.target.value)} />
+          <input required value={id} onChange={(e) => select(kind, e.target.value)} />
         </label>
         <label>
           Reason for access
@@ -132,7 +146,7 @@ export function AuditWorkspace({
             onChange={(e) => setReason(e.target.value)}
           />
         </label>
-        <button className="button button-primary" disabled={api.busy}>
+        <button className="button button-primary" disabled={api.busy || pending}>
           Record reason and open audit
         </button>
       </form>
@@ -147,7 +161,11 @@ export function AuditWorkspace({
           <section className="job-panel">
             <h2>Conversation evidence</h2>
             {view.hasMore && (
-              <button className="button button-outline" onClick={() => void earlier()}>
+              <button
+                className="button button-outline"
+                disabled={pending}
+                onClick={() => void earlier("messages")}
+              >
                 Load earlier conversation evidence
               </button>
             )}
@@ -161,6 +179,16 @@ export function AuditWorkspace({
             </ol>
             <Evidence assets={view.assets} grantId={view.grantId} />
             <h3>Safety reports</h3>
+            {view.nextReports && (
+              <button
+                type="button"
+                className="button button-outline"
+                disabled={pending}
+                onClick={() => void earlier("reports")}
+              >
+                Load earlier safety reports
+              </button>
+            )}
             {view.reports.map((r) => (
               <p className="job-text" key={r.id}>
                 {r.status}: {r.reason}
@@ -187,10 +215,18 @@ export function AuditWorkspace({
                   onChange={(e) => setNote(e.target.value)}
                 />
               </label>
-              <p>
-                Uses your recorded access reason. This does not resolve fault, refund or payment.
-              </p>
-              <button className="button button-outline" disabled={api.busy}>
+              <label>
+                Reason for this review update
+                <textarea
+                  required
+                  minLength={10}
+                  maxLength={500}
+                  value={triageReason}
+                  onChange={(e) => setTriageReason(e.target.value)}
+                />
+              </label>
+              <p>This does not resolve fault, refund or payment.</p>
+              <button className="button button-outline" disabled={api.busy || pending}>
                 Save support review update
               </button>
             </form>

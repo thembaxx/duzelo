@@ -17,6 +17,8 @@ export interface MessagePage {
   next: number;
 }
 export interface ThreadView {
+  tombstones: string[];
+  removedCursor: number;
   id: string;
   jobId: string;
   title: string;

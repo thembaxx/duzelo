@@ -34,3 +34,15 @@ it("rejects sender/status/sequence injection and duplicate attachment IDs", () =
   ])
     expect(sendSchema.safeParse({ ...data, ...extra }).success).toBe(false);
 });
+it("never restores moderated text or photos from a delayed old response", () => {
+  const original = message(1),
+    removed = { ...original, deleted: true, body: "Message removed by moderation.", assets: [] };
+  expect(mergeMessages([removed], [original])).toEqual([removed]);
+});
+it("rejects case-variant duplicate message attachments", () => {
+  const id = "a0700000-0000-0000-0000-000000000001";
+  expect(
+    sendSchema.safeParse({ conversationId: id, body: "Photo", assetIds: [id, id.toUpperCase()] })
+      .success,
+  ).toBe(false);
+});

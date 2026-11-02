@@ -28,7 +28,6 @@ export async function mediaAccess(input: unknown, key: string | null) {
     return {
       jobId: a.jobId,
       assetId: data.assetId,
-      expires: Math.min(a.expires, Date.now() + config.ticketSeconds * 1000),
     };
   };
   const before = async (sql: Parameters<typeof run>[0], actor: Parameters<typeof run>[1]) => {
@@ -38,19 +37,27 @@ export async function mediaAccess(input: unknown, key: string | null) {
     ? await staffCommand("media.access", data, key, run, before)
     : await collaborationCommand("media.access", data, key, run, before);
   const actor = data.grantId ? await staffActor() : await collaborationActor();
-  if (grant.expires <= Date.now()) throw new Error("FORBIDDEN");
+  // Idempotency retains only an acknowledgement. Every retry gets a newly
+  // authorized, retention-bounded ticket, never an expired cached capability.
+  const current = await database().begin(async (sql) => {
+    if (data.grantId) await lockStaff(sql, actor);
+    else await lockActor(sql, actor, "either");
+    return assetPermission(sql, data.assetId, actor, data.grantId);
+  });
+  const expires = Math.min(current.expires, Date.now() + config.ticketSeconds * 1000);
+  if (expires <= Date.now()) throw new Error("FORBIDDEN");
   return {
     ticket: signTicket(
       {
         assetId: grant.assetId,
-        expires: grant.expires,
+        expires,
         actorId: actor.id,
         sessionId: actor.sessionId,
         ...(data.grantId ? { grantId: data.grantId } : {}),
       },
       config.secret,
     ),
-    expiresAt: grant.expires,
+    expiresAt: expires,
   };
 }
 export async function evidenceImage(id: string, token: string | null) {

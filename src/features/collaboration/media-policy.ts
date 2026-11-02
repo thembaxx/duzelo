@@ -49,7 +49,7 @@ export async function assetPermission(
         (g.resource_kind === "dispute" &&
           (g.resource_id === a.dispute_id ||
             g.booking_id === a.booking_id ||
-            g.conversation_id === a.conversation_id))
+            (g.conversation_id !== null && g.conversation_id === a.conversation_id)))
       )
     )
       throw new Error("FORBIDDEN");
@@ -57,6 +57,9 @@ export async function assetPermission(
   } else if (a.purpose === "message") {
     const c = await threadContext(sql, String(a.conversation_id), actor);
     if (!c.canRead || (!a.attached && a.owner_id !== actor.id)) throw new Error("FORBIDDEN");
+    const [removed] =
+      await sql`select 1 from private.message_assets x join public.messages m on m.id=x.message_id where x.asset_id=${id}::uuid and m.deleted_at is not null`;
+    if (removed) throw new Error("FORBIDDEN");
   } else {
     const b = await workContext(sql, String(a.booking_id), actor);
     if (a.purpose === "case") {

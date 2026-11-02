@@ -16,8 +16,11 @@ export function Conversation({ initial }: { initial: ThreadView }) {
     [connection, setConnection] = useState("Checking for updates…"),
     [older, setOlder] = useState(initial.page.hasMore),
     [loading, setLoading] = useState(false),
+    [uploading, setUploading] = useState(false),
     api = useCollaboration(),
     generation = useRef(0),
+    firstLoaded = useRef(initial.page.messages[0]?.sequence ?? 1),
+    removedCursor = useRef(0),
     latest = useRef(initial.page.messages.at(-1)?.sequence ?? 0),
     input = useRef<HTMLTextAreaElement>(null);
   async function load(before = 0, signal?: AbortSignal) {
@@ -25,7 +28,11 @@ export function Conversation({ initial }: { initial: ThreadView }) {
     const response = await fetch(
         "/api/v1/collaboration/thread?id=" +
           initial.id +
-          (before ? "&before=" + before : "&after=" + latest.current),
+          (before ? "&before=" + before : "&after=" + latest.current) +
+          "&floor=" +
+          firstLoaded.current +
+          "&removedAfter=" +
+          removedCursor.current,
         { signal, cache: "no-store" },
       ),
       data = await response.json();
@@ -49,10 +56,20 @@ export function Conversation({ initial }: { initial: ThreadView }) {
       latest.current = 0;
       return;
     }
-    setMessages((old) => mergeMessages(old, next.page.messages));
+    const removed = new Set(next.tombstones);
+    removedCursor.current = next.removedCursor;
+    setMessages((old) => {
+      const merged = mergeMessages(old, next.page.messages).map((m) =>
+        removed.has(m.id)
+          ? { ...m, deleted: true, body: "Message removed by moderation.", assets: [] }
+          : m,
+      );
+      firstLoaded.current = merged[0]?.sequence ?? 1;
+      return merged;
+    });
     latest.current = Math.max(latest.current, ...next.page.messages.map((m) => m.sequence));
     if (before) setOlder(next.page.hasMore);
-    return next.page.hasMore && !before;
+    return (next.page.hasMore && !before) || !!next.removedCursor;
   }
   useEffect(() => {
     let stopped = false,
@@ -106,6 +123,7 @@ export function Conversation({ initial }: { initial: ThreadView }) {
   }, [initial.id]);
   async function send(e: React.FormEvent) {
     e.preventDefault();
+    if (uploading) return;
     setNotice("");
     try {
       await api.run("thread-send", { conversationId: view.id, body, assetIds: assets });
@@ -191,8 +209,13 @@ export function Conversation({ initial }: { initial: ThreadView }) {
             target={{ purpose: "message", conversationId: view.id }}
             value={assets}
             onChange={setAssets}
+            onBusyChange={setUploading}
+            disabled={api.busy}
           />
-          <button className="button button-primary" disabled={api.busy || !body.trim()}>
+          <button
+            className="button button-primary"
+            disabled={api.busy || uploading || !body.trim()}
+          >
             {api.busy ? "Saving…" : "Send message"}
           </button>
         </form>

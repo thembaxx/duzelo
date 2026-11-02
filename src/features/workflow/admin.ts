@@ -1,4 +1,5 @@
 import "server-only";
+import { readCursor, writeCursor } from "@/features/collaboration/cursor";
 import { z } from "zod";
 import { database } from "@/lib/db/server";
 import { staffActor, lockStaff, staffCommand } from "@/features/collaboration/boundary";
@@ -6,39 +7,59 @@ import { auditInput, triageInput } from "./schema";
 import { auditGrant, auditResource } from "./audit-policy";
 import { workProjection } from "./queries";
 import { notify } from "@/features/quotes/policy";
-export async function auditQueue() {
+export async function auditQueue(cursor?: string) {
+  const position = readCursor(cursor);
   const actor = await staffActor();
   return database().begin(async (sql) => {
     await lockStaff(sql, actor);
     const rows =
-      await sql`select d.id,'dispute' as kind,d.status,d.created_at from public.disputes d join public.bookings b on b.id=d.booking_id join public.job_requests j on j.id=b.job_id join public.worker_profiles w on w.id=b.worker_id where d.status in('open','investigating','awaiting_evidence') and j.client_id<>${actor.id}::uuid and w.user_id<>${actor.id}::uuid union all select b.id,'booking',b.status::text,s.support_due_at from private.completion_submissions s join public.bookings b on b.id=s.booking_id join public.job_requests j on j.id=b.job_id join public.worker_profiles w on w.id=b.worker_id where s.status='pending' and s.support_due_at is not null and j.client_id<>${actor.id}::uuid and w.user_id<>${actor.id}::uuid union all select c.id,'conversation',s.status,s.created_at from private.conversation_reports r join public.safety_reports s on s.id=r.report_id join public.conversations c on c.id=r.conversation_id join public.job_requests j on j.id=c.job_id join public.worker_profiles w on w.id=c.worker_id where s.status in('open','triaged') and j.client_id<>${actor.id}::uuid and w.user_id<>${actor.id}::uuid order by created_at desc limit 50`;
-    return rows.map((r) => ({
+      await sql`with cases as (select d.id,'dispute' as kind,d.status,d.created_at from public.disputes d join public.bookings b on b.id=d.booking_id join public.job_requests j on j.id=b.job_id join public.worker_profiles w on w.id=b.worker_id where d.status in('open','investigating','awaiting_evidence') and j.client_id<>${actor.id}::uuid and w.user_id<>${actor.id}::uuid union all select b.id,'booking',b.status::text,s.support_due_at from private.completion_submissions s join public.bookings b on b.id=s.booking_id join public.job_requests j on j.id=b.job_id join public.worker_profiles w on w.id=b.worker_id where s.status='pending' and s.support_due_at is not null and j.client_id<>${actor.id}::uuid and w.user_id<>${actor.id}::uuid union all (select distinct on(c.id) c.id,'conversation',s.status,s.created_at from private.conversation_reports r join public.safety_reports s on s.id=r.report_id join public.conversations c on c.id=r.conversation_id join public.job_requests j on j.id=c.job_id join public.worker_profiles w on w.id=c.worker_id where s.status in('open','triaged') and j.client_id<>${actor.id}::uuid and w.user_id<>${actor.id}::uuid order by c.id,s.created_at desc,s.id desc)) select *,created_at::text as cursor_at from cases where (${position?.at ?? null}::timestamptz is null or (created_at,id,kind)<(${position?.at ?? null}::timestamptz,${position?.id ?? null}::uuid,${position?.kind ?? ""})) order by created_at desc,id desc,kind desc limit 51`;
+    const items = rows.slice(0, 50).map((r) => ({
       id: String(r.id),
       kind: String(r.kind),
       status: String(r.status),
       at: new Date(r.created_at).toISOString(),
     }));
+    return {
+      items,
+      nextCursor:
+        rows.length > 50
+          ? writeCursor(String(rows[49]!.cursor_at), String(rows[49]!.id), String(rows[49]!.kind))
+          : null,
+    };
   });
 }
 export async function openAudit(input: unknown, key: string | null) {
   const data = auditInput.parse(input);
-  return staffCommand(
+  const grant = await staffCommand(
     "audit.open",
     data,
     key,
     async (sql, actor) => {
       const r = await auditResource(sql, data.kind, data.id, actor);
       const [g] =
-        await sql`insert into private.workflow_access_grants(actor_id,session_id,resource_kind,resource_id,reason,expires_at) values(${actor.id}::uuid,${actor.sessionId}::uuid,${data.kind},${data.id}::uuid,${data.reason},clock_timestamp()+interval '5 minutes') returning id`;
-      return { grantId: String(g!.id), jobId: String(r.job_id) };
+        await sql`insert into private.workflow_access_grants(actor_id,session_id,resource_kind,resource_id,reason,expires_at) values(${actor.id}::uuid,${actor.sessionId}::uuid,${data.kind},${data.id}::uuid,${data.reason},clock_timestamp()+interval '5 minutes') returning id,expires_at`;
+      return {
+        grantId: String(g!.id),
+        jobId: String(r.job_id),
+        expiresAt: new Date(g!.expires_at).getTime(),
+      };
     },
     async (sql, actor) => {
       await auditResource(sql, data.kind, data.id, actor);
     },
   );
+  if (grant.expiresAt <= Date.now()) throw new Error("EXPIRED_AUDIT");
+  return grant;
 }
-export async function auditView(id: string, before = 0) {
+export async function auditView(
+  id: string,
+  before = 0,
+  reportCursor?: string,
+  entryCursor?: string,
+) {
   z.guid().parse(id);
+  const reportPosition = readCursor(reportCursor);
   const actor = await staffActor();
   return database().begin(async (sql) => {
     const g = await auditGrant(sql, id, actor);
@@ -67,16 +88,18 @@ export async function auditView(id: string, before = 0) {
           },
           actor,
           true,
+          entryCursor,
         );
     }
     const messages = g.conversation_id
       ? await sql`select m.id,m.sequence,m.body,m.deleted_at,m.sent_at from public.messages m where conversation_id=${g.conversation_id}::uuid and (${before}::bigint=0 or sequence<${before}::bigint) order by sequence desc limit 31`
       : [];
+    const messageIds = messages.slice(0, 30).map((m) => String(m.id));
     const assets = g.conversation_id
-      ? await sql`select a.id,a.state='stored' and a.retain_until>clock_timestamp() as available from private.collaboration_assets a where a.conversation_id=${g.conversation_id}::uuid and a.attached`
+      ? await sql`select a.id,a.state='stored' and a.retain_until>clock_timestamp() as available from private.collaboration_assets a join private.message_assets x on x.asset_id=a.id where a.conversation_id=${g.conversation_id}::uuid and a.attached and x.message_id=any(${messageIds}::uuid[]) order by a.id`
       : [];
     const reports = g.conversation_id
-      ? await sql`select s.id,s.reason,s.status from private.conversation_reports r join public.safety_reports s on s.id=r.report_id where r.conversation_id=${g.conversation_id}::uuid order by s.created_at desc limit 50`
+      ? await sql`select s.id,s.reason,s.status,s.created_at::text as cursor_at from private.conversation_reports r join public.safety_reports s on s.id=r.report_id where r.conversation_id=${g.conversation_id}::uuid and (${reportPosition?.at ?? null}::timestamptz is null or(s.created_at,s.id)<(${reportPosition?.at ?? null}::timestamptz,${reportPosition?.id ?? null}::uuid)) order by s.created_at desc,s.id desc limit 51`
       : [];
     await auditGrant(sql, id, actor);
     return {
@@ -95,7 +118,11 @@ export async function auditView(id: string, before = 0) {
           at: new Date(m.sent_at).toISOString(),
         })),
       assets: assets.map((a) => ({ id: String(a.id), available: !!a.available })),
-      reports: reports.map((r) => ({
+      nextReports:
+        reports.length > 50
+          ? writeCursor(String(reports[49]!.cursor_at), String(reports[49]!.id))
+          : null,
+      reports: reports.slice(0, 50).map((r) => ({
         id: String(r.id),
         reason: String(r.reason),
         status: String(r.status),

@@ -12,7 +12,7 @@ export const progressInput = bookingInput
 const assets = z
   .array(z.guid())
   .max(8)
-  .refine((v) => new Set(v).size === v.length);
+  .refine((v) => new Set(v.map((id) => id.toLowerCase())).size === v.length);
 export const completionInput = consentInput
   .extend({ summary: z.string().trim().min(15).max(4000), assetIds: assets })
   .strict()

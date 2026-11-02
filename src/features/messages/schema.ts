@@ -7,7 +7,7 @@ export const sendSchema = threadSchema
     assetIds: z
       .array(z.guid())
       .max(4)
-      .refine((v) => new Set(v).size === v.length),
+      .refine((v) => new Set(v.map((id) => id.toLowerCase())).size === v.length),
   })
   .strict();
 export const reportSchema = threadSchema

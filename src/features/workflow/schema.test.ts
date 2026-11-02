@@ -73,3 +73,13 @@ it("requires a future bounded proposal, shorter than a day and expiring before w
   ])
     expect(() => proposalTiming(s!, e!, x!, now)).toThrow("TIMING");
 });
+it("rejects case-variant duplicate completion evidence", () => {
+  const id = "a0700000-0000-0000-0000-000000000001";
+  expect(
+    completionInput.safeParse({
+      ...base,
+      summary: "A real completion explanation.",
+      assetIds: [id, id.toUpperCase()],
+    }).success,
+  ).toBe(false);
+});
