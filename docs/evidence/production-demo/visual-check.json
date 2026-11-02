@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-11-02T13:21:35.705Z",
+  "checkedAt": "2026-11-02T13:55:42.203Z",
   "base": "http://127.0.0.1:3001",
   "checks": [
     {
@@ -41,7 +41,11 @@
       "themes": [
         "light",
         "dark"
-      ]
+      ],
+      "appliedBackgrounds": {
+        "light": "\"rgb(242,243,240)\"",
+        "dark": "\"#45516E\""
+      }
     },
     {
       "width": 390,
@@ -82,7 +86,11 @@
       "themes": [
         "light",
         "dark"
-      ]
+      ],
+      "appliedBackgrounds": {
+        "light": "\"rgb(242,243,240)\"",
+        "dark": "\"#45516E\""
+      }
     },
     {
       "width": 768,

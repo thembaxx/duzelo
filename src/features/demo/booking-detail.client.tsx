@@ -233,7 +233,9 @@ function DemoConversation({ booking: b, provider }: { booking: DemoBooking; prov
                 <p>
                   {e.kind === "supplies"
                     ? "The sample service checklist above explains what’s included. For this demo, just make space around the work area. No real visit is arranged."
-                    : `Your demo arrival window begins at ${b.slot} SAST on ${demoDate(b.date, true)}. This is a simulated schedule.`}
+                    : e.schedule
+                      ? `Your demo arrival window begins at ${e.schedule.slot} SAST on ${demoDate(e.schedule.date, true)}. This is a simulated schedule.`
+                      : "This older demo reply did not save its original arrival window. Check the current sample schedule above."}
                 </p>
               </div>
             </div>

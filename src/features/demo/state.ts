@@ -2,6 +2,7 @@ import { z } from "zod";
 import { demoProviders, findDemoProvider } from "./catalogue";
 
 export const DEMO_STORAGE_KEY = "duzelo-demo-v1";
+export const demoSlots = ["09:00", "11:00", "14:00"] as const;
 export const demoStatus = {
   confirmed: "Confirmed",
   "in-progress": "In progress",
@@ -27,7 +28,11 @@ const eventSchema = z
       "arrival",
       "reviewed",
     ]),
-    at: z.string().datetime(),
+    at: z.string().max(40).datetime(),
+    schedule: z
+      .object({ date: dateSchema, slot: z.enum(demoSlots) })
+      .strict()
+      .optional(),
   })
   .strict();
 const bookingSchema = z
@@ -36,7 +41,7 @@ const bookingSchema = z
     provider: z.string().max(100),
     service: z.string().max(100),
     date: dateSchema,
-    slot: z.enum(["09:00", "11:00", "14:00"]),
+    slot: z.enum(demoSlots),
     status: z.enum(["confirmed", "in-progress", "awaiting-review", "completed", "cancelled"]),
     events: z.array(eventSchema).min(1).max(80),
     review: z.number().int().min(1).max(5).optional(),
@@ -50,7 +55,10 @@ export const demoStateSchema = z
   .object({
     version: z.literal(1),
     anchor: dateSchema,
-    saved: z.array(z.string().refine((s) => !!findDemoProvider(s))).max(8),
+    saved: z
+      .array(z.string().refine((s) => !!findDemoProvider(s)))
+      .max(8)
+      .refine((s) => new Set(s).size === s.length, "Duplicate saved provider"),
     bookings: z.array(bookingSchema).max(200),
   })
   .strict()
@@ -61,7 +69,6 @@ export const demoStateSchema = z
 export type DemoBooking = z.infer<typeof bookingSchema>;
 export type DemoState = z.infer<typeof demoStateSchema>;
 export type DemoEvent = z.infer<typeof eventSchema>;
-export const demoSlots = ["09:00", "11:00", "14:00"] as const;
 export function demoToday(now = new Date()) {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Africa/Johannesburg",
@@ -101,7 +108,7 @@ export function seedDemoState(anchor = demoToday()): DemoState {
     const kinds: DemoEvent["kind"][] = ["created", "confirmed"];
     if (["in-progress", "awaiting-review", "completed"].includes(status)) kinds.push("started");
     if (["awaiting-review", "completed"].includes(status)) kinds.push("finished");
-    if (status === "completed") kinds.push("completed");
+    if (status === "completed") kinds.push("completed", "reviewed");
     if (status === "cancelled") kinds.push("cancelled");
     return {
       id: `demo-booking-${1001 + index}`,
@@ -145,6 +152,8 @@ function futureDate(date: string, at: string) {
 export function reduceDemoState(state: DemoState, action: DemoAction): DemoState {
   if (action.type === "save") {
     if (!findDemoProvider(action.slug)) return state;
+    if (!state.saved.includes(action.slug) && state.saved.length >= demoProviders.length)
+      return state;
     return {
       ...state,
       saved: state.saved.includes(action.slug)
@@ -152,7 +161,7 @@ export function reduceDemoState(state: DemoState, action: DemoAction): DemoState
         : [...state.saved, action.slug],
     };
   }
-  if (!z.string().datetime().safeParse(action.at).success) return state;
+  if (!z.string().max(40).datetime().safeParse(action.at).success) return state;
   if (action.type === "create") {
     if (
       state.bookings.length >= 200 ||
@@ -216,7 +225,43 @@ export function reduceDemoState(state: DemoState, action: DemoAction): DemoState
       next = { ...b, review: action.rating };
       kind = "reviewed";
     }
-    return kind ? { ...next, events: [...next.events, { kind, at: action.at }] } : b;
+    return kind
+      ? {
+          ...next,
+          events: [
+            ...next.events,
+            {
+              kind,
+              at: action.at,
+              ...(kind === "arrival" ? { schedule: { date: b.date, slot: b.slot } } : {}),
+            },
+          ],
+        }
+      : b;
   });
-  return { ...state, bookings };
+  return bookings.some((b, i) => b !== state.bookings[i]) ? { ...state, bookings } : state;
+}
+
+/** Completed events, rather than appointment dates, drive rolling 30-day activity. */
+export function demoActivity(bookings: readonly DemoBooking[], today = demoToday()) {
+  const end = Date.parse(today + "T00:00:00+02:00") + 86400000;
+  return Array.from({ length: 6 }, (_, i) => {
+    const from = end - (6 - i) * 30 * 86400000,
+      to = from + 30 * 86400000;
+    const count = bookings.filter(
+      (b) =>
+        b.status === "completed" &&
+        b.events.some(
+          (e) => e.kind === "completed" && Date.parse(e.at) >= from && Date.parse(e.at) < to,
+        ),
+    ).length;
+    const label =
+      i === 5
+        ? "Now"
+        : new Intl.DateTimeFormat("en-ZA", {
+            month: "short",
+            timeZone: "Africa/Johannesburg",
+          }).format(new Date(from + 15 * 86400000));
+    return { count, label };
+  });
 }

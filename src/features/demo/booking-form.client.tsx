@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, CalendarBlank, Check, LockSimple } from "@phosphor-icons/react";
 import { demoMoney, type DemoProvider } from "./catalogue";
@@ -13,9 +13,18 @@ export function BookingForm({ provider: p }: { provider: DemoProvider }) {
     [day, setDay] = useState("1"),
     [slot, setSlot] = useState<(typeof demoSlots)[number]>("09:00");
   const [error, setError] = useState(""),
-    [submitting, setSubmitting] = useState(false);
+    [pendingId, setPendingId] = useState<string | null>(null);
+  const submitting = pendingId !== null;
   const service = p.services.find((s) => s.id === serviceId)!;
   const anchor = state ? demoToday() : null;
+  useEffect(() => {
+    if (!pendingId || !state) return;
+    if (state.bookings.some((b) => b.id === pendingId)) router.push(`/demo/bookings/${pendingId}`);
+    else {
+      setPendingId(null);
+      setError("The sample workspace changed. Please try the booking again.");
+    }
+  }, [pendingId, state, router]);
   return (
     <form
       id="demo-booking-form"
@@ -30,18 +39,26 @@ export function BookingForm({ provider: p }: { provider: DemoProvider }) {
           );
           return;
         }
-        setSubmitting(true);
+        const at = new Date().toISOString(),
+          date = shiftDemoDate(anchor, Number(day));
+        if (date <= demoToday(new Date(at))) {
+          setError(
+            "The day changed while this form was open. Choose a future sample day and try again.",
+          );
+          return;
+        }
         const id = "demo-booking-" + crypto.randomUUID();
-        dispatch({
+        const accepted = dispatch({
           type: "create",
           id,
           provider: p.slug,
           service: service.id,
-          date: shiftDemoDate(anchor, Number(day)),
+          date,
           slot,
-          at: new Date().toISOString(),
+          at,
         });
-        router.push(`/demo/bookings/${id}?created=1`);
+        if (accepted) setPendingId(id);
+        else setError("The sample workspace changed. Choose a future day and try again.");
       }}
     >
       <p className="demo-kicker">TRY IT FROM START TO FINISH</p>

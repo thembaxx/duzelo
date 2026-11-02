@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { demoProviders, filterDemoProviders } from "./catalogue";
 import {
+  demoActivity,
   demoStateSchema,
   demoToday,
   reduceDemoState,
@@ -27,6 +28,8 @@ describe("isolated sample workspace", () => {
     expect(new Set(state.bookings.map((b) => b.status)).size).toBe(5);
     expect(state.bookings.some((b) => b.date === shiftDemoDate(anchor, -178))).toBe(true);
     expect(JSON.stringify(state)).not.toMatch(/address|phone|email|bank|payment|token|document/);
+    for (const b of state.bookings.filter((b) => b.review))
+      expect(b.events.at(-1)?.kind).toBe("reviewed");
   });
   it("uses the South African date across the UTC day boundary", () => {
     expect(demoToday(new Date("2026-11-02T22:30:00Z"))).toBe("2026-11-03");
@@ -120,5 +123,48 @@ describe("isolated sample workspace", () => {
     expect(filterDemoProviders("tap repair", "all", "recommended")).toHaveLength(1);
     expect(filterDemoProviders("impossible-service", "all", "recommended")).toHaveLength(0);
     expect(filterDemoProviders("", "all", "recommended", state.saved)).toHaveLength(2);
+  });
+  it("rejects duplicate saved records and cannot append beyond the catalogue limit", () => {
+    const state = {
+      ...seedDemoState(anchor),
+      saved: Array.from({ length: 8 }, () => demoProviders[0]!.slug),
+    };
+    expect(demoStateSchema.safeParse(state).success).toBe(false);
+    expect(reduceDemoState(state, { type: "save", slug: demoProviders[1]!.slug })).toBe(state);
+    expect(
+      demoStateSchema.safeParse({ ...state, saved: demoProviders.map((p) => p.slug) }).success,
+    ).toBe(true);
+  });
+  it("preserves the arrival reply's original schedule after a reschedule", () => {
+    let state = reduceDemoState(seedDemoState(anchor), create);
+    state = reduceDemoState(state, {
+      type: "message",
+      id: "demo-booking-test",
+      kind: "arrival",
+      at,
+    });
+    state = reduceDemoState(state, {
+      type: "reschedule",
+      id: "demo-booking-test",
+      date: "2026-11-12",
+      slot: "14:00",
+      at,
+    });
+    expect(state.bookings[0]!.events.find((e) => e.kind === "arrival")!.schedule).toEqual({
+      date: "2026-11-03",
+      slot: "09:00",
+    });
+    expect(state.bookings[0]!.date).toBe("2026-11-12");
+  });
+  it("charts completed events in half-open periods, including a simulated future appointment completed now", () => {
+    const initial = seedDemoState(anchor);
+    expect(demoActivity(initial.bookings, anchor).reduce((n, b) => n + b.count, 0)).toBe(9);
+    let state = reduceDemoState(initial, create);
+    for (let i = 0; i < 3; i++)
+      state = reduceDemoState(state, { type: "progress", id: "demo-booking-test", at });
+    expect(demoActivity(state.bookings, anchor).reduce((n, b) => n + b.count, 0)).toBe(10);
+    expect(demoActivity(state.bookings, anchor).at(-1)!.count).toBe(
+      demoActivity(initial.bookings, anchor).at(-1)!.count + 1,
+    );
   });
 });

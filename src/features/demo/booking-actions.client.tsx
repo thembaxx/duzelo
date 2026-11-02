@@ -60,15 +60,26 @@ export function BookingActions({ booking: b }: { booking: DemoBooking }) {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                dispatch({
+                setNotice("");
+                const at = new Date().toISOString(),
+                  date = shiftDemoDate(anchor, Number(day));
+                if (date <= demoToday(new Date(at))) {
+                  setNotice(
+                    "The day changed while this form was open. Choose a future sample day and try again.",
+                  );
+                  return;
+                }
+                const accepted = dispatch({
                   type: "reschedule",
                   id: b.id,
-                  date: shiftDemoDate(anchor, Number(day)),
+                  date,
                   slot,
-                  at: new Date().toISOString(),
+                  at,
                 });
                 setNotice(
-                  "Your demo visit has been rescheduled. The new date is saved in this browser.",
+                  accepted
+                    ? "Your demo visit has been rescheduled. The new date is saved in this browser."
+                    : "The sample workspace changed. Please try the schedule again.",
                 );
               }}
             >

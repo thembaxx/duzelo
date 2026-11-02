@@ -272,6 +272,11 @@ test(
       await page.goto(baseURL + "/demo", { waitUntil: "networkidle" });
       await expect(page.getByText(/saved demo could not be loaded/)).toBeVisible();
       assert.equal((await sampleState(page)).version, 1);
+      await page.evaluate(
+        (key) => window.dispatchEvent(new StorageEvent("storage", { key })),
+        storageKey,
+      );
+      await expect(page.getByText(/saved demo could not be loaded/)).toHaveCount(0);
       await noOverflow(page);
       assert.equal(
         await page.locator(".demo-welcome").evaluate((el) => getComputedStyle(el).animationName),
@@ -310,6 +315,64 @@ test(
         .click();
       await expect(blockedPage.locator(".demo-provider-card")).toHaveCount(3);
       await blocked.close();
+    } finally {
+      await browser.close();
+    }
+  },
+);
+
+test(
+  "midnight forms reject stale dates and only navigate to accepted bookings",
+  { timeout: 90000 },
+  async () => {
+    const browser = await chromium.launch({ headless: true });
+    try {
+      const context = await contextFor(browser, {
+          viewport: { width: 390, height: 844 },
+          reducedMotion: "reduce",
+        }),
+        page = await context.newPage();
+      await page.clock.install({ time: new Date("2026-11-02T21:50:00.000Z") });
+      await page.goto(baseURL + "/demo/providers/demo-lindi-home-care", {
+        waitUntil: "networkidle",
+      });
+      await expect(page.getByRole("button", { name: "Create demo booking" })).toBeEnabled();
+      await page.clock.setSystemTime(new Date("2026-11-02T22:01:00.000Z"));
+      await page.getByRole("button", { name: "Create demo booking" }).click();
+      await expect(page.getByText(/The day changed while this form was open/)).toBeVisible();
+      assert.match(page.url(), /\/demo\/providers\//);
+      assert.equal((await sampleState(page)).bookings.length, 14);
+      await page.getByLabel("Booking day", { exact: true }).selectOption("2");
+      await page.getByRole("button", { name: "Create demo booking" }).click();
+      await page.waitForURL(/\/demo\/bookings\/demo-booking-/);
+      const id = new URL(page.url()).pathname.split("/").at(-1);
+      assert.ok((await sampleState(page)).bookings.some((b) => b.id === id));
+      await page.clock.setSystemTime(new Date("2026-11-03T21:50:00.000Z"));
+      await page.goto(baseURL + "/demo/bookings/demo-booking-1001", { waitUntil: "networkidle" });
+      await page.getByText("Change sample date & time", { exact: true }).click();
+      await page.getByLabel("New booking day", { exact: true }).selectOption("1");
+      const before = (await sampleState(page)).bookings.find((b) => b.id === "demo-booking-1001");
+      await page.clock.setSystemTime(new Date("2026-11-03T22:01:00.000Z"));
+      await page.getByRole("button", { name: "Save demo schedule" }).click();
+      await expect(page.getByText(/The day changed while this form was open/)).toBeVisible();
+      const after = (await sampleState(page)).bookings.find((b) => b.id === before.id);
+      assert.deepEqual(
+        { date: after.date, slot: after.slot, events: after.events },
+        { date: before.date, slot: before.slot, events: before.events },
+      );
+      await context.close();
+      const unsupported = await contextFor(browser, { viewport: { width: 1440, height: 900 } }),
+        fallback = await unsupported.newPage(),
+        errors = [];
+      await fallback.addInitScript(() => {
+        window.ResizeObserver = undefined;
+      });
+      fallback.on("pageerror", (error) => errors.push(error.message));
+      await fallback.goto(baseURL + "/demo", { waitUntil: "networkidle" });
+      await expect(fallback.getByText(/This browser cannot display the map/)).toBeVisible();
+      await expect(fallback.locator(".demo-provider-card")).toHaveCount(8);
+      assert.deepEqual(errors, []);
+      await unsupported.close();
     } finally {
       await browser.close();
     }

@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   DEMO_STORAGE_KEY,
   demoStateSchema,
@@ -12,29 +20,37 @@ import {
 
 type DemoStore = {
   state: DemoState | null;
-  dispatch: (action: DemoAction) => void;
+  dispatch: (action: DemoAction) => boolean;
   reset: () => void;
   storageNotice: string;
 };
 const Context = createContext<DemoStore | null>(null);
 export function DemoStoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<DemoState | null>(null);
-  const [storageNotice, setStorageNotice] = useState("");
+  const current = useRef<DemoState | null>(null);
+  const [loadNotice, setLoadNotice] = useState(""),
+    [writeNotice, setWriteNotice] = useState("");
+  const replace = useCallback((next: DemoState) => {
+    current.current = next;
+    setState(next);
+  }, []);
   useEffect(() => {
     function read() {
       try {
         const raw = localStorage.getItem(DEMO_STORAGE_KEY);
         if (!raw) {
-          setState(seedDemoState());
+          replace(seedDemoState());
+          setLoadNotice("");
           return;
         }
-        if (raw.length > 500_000) throw new Error("SIZE");
+        if (raw.length > 2_000_000) throw new Error("SIZE");
         const parsed = demoStateSchema.safeParse(JSON.parse(raw));
         if (!parsed.success) throw new Error("FORMAT");
-        setState(parsed.data);
+        replace(parsed.data);
+        setLoadNotice("");
       } catch {
-        setState(seedDemoState());
-        setStorageNotice("The saved demo could not be loaded. A fresh sample workspace is ready.");
+        replace(seedDemoState());
+        setLoadNotice("The saved demo could not be loaded. A fresh sample workspace is ready.");
       }
     }
     read();
@@ -43,27 +59,36 @@ export function DemoStoreProvider({ children }: { children: ReactNode }) {
     }
     window.addEventListener("storage", sync);
     return () => window.removeEventListener("storage", sync);
-  }, []);
+  }, [replace]);
   useEffect(() => {
     if (!state) return;
     try {
       const raw = JSON.stringify(state);
-      if (localStorage.getItem(DEMO_STORAGE_KEY) !== raw)
+      if (localStorage.getItem(DEMO_STORAGE_KEY) !== raw) {
         localStorage.setItem(DEMO_STORAGE_KEY, raw);
+        setWriteNotice("");
+      }
     } catch {
-      setStorageNotice(
-        "Browser storage is unavailable. Demo changes will last for this visit only.",
-      );
+      setWriteNotice("Browser storage is unavailable. Demo changes will last for this visit only.");
     }
   }, [state]);
   const dispatch = useCallback(
-    (action: DemoAction) => setState((s) => (s ? reduceDemoState(s, action) : s)),
-    [],
+    (action: DemoAction) => {
+      const before = current.current;
+      if (!before) return false;
+      const next = reduceDemoState(before, action);
+      if (next === before) return false;
+      replace(next);
+      return true;
+    },
+    [replace],
   );
   const reset = useCallback(() => {
-    setState(seedDemoState());
-    setStorageNotice("");
-  }, []);
+    replace(seedDemoState());
+    setLoadNotice("");
+    setWriteNotice("");
+  }, [replace]);
+  const storageNotice = [loadNotice, writeNotice].filter(Boolean).join(" ");
   return (
     <Context.Provider value={{ state, dispatch, reset, storageNotice }}>
       {children}

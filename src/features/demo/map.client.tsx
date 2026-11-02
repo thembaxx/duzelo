@@ -44,6 +44,7 @@ export default function DemoMap({
   const appliedStyle = useRef<string | null>(null);
   styleRef.current = style;
   const [ready, setReady] = useState(false),
+    [styleBackground, setStyleBackground] = useState(""),
     [error, setError] = useState(""),
     [retry, setRetry] = useState(0);
   useEffect(() => {
@@ -57,6 +58,7 @@ export default function DemoMap({
       15000,
     );
     try {
+      if (typeof ResizeObserver === "undefined") throw new Error("MAP_SUPPORT");
       instance = new LibreMap({
         container: host.current,
         style: styleRef.current,
@@ -83,6 +85,16 @@ export default function DemoMap({
           "Demo neighbourhood map. Arrow keys pan; plus and minus zoom. Equivalent providers appear in the list.",
         );
       instance.addControl(new NavigationControl({ showCompass: false }), "top-right");
+      instance.on("idle", () => {
+        if (instance?.isStyleLoaded())
+          setStyleBackground(
+            JSON.stringify(
+              instance.getStyle().layers.find((l) => l.type === "background")?.paint?.[
+                "background-color"
+              ] ?? null,
+            ),
+          );
+      });
       instance.on("load", () => {
         window.clearTimeout(timeout);
         if (instance) resetCamera(instance);
@@ -103,11 +115,12 @@ export default function DemoMap({
         "This browser cannot display the map. All sample providers are available in the list.",
       );
     }
-    const observer = new ResizeObserver(() => instance?.resize());
-    observer.observe(host.current);
+    const observer =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(() => instance?.resize());
+    observer?.observe(host.current);
     return () => {
       window.clearTimeout(timeout);
-      observer.disconnect();
+      observer?.disconnect();
       markers.current.forEach((m) => m.remove());
       markers.current = [];
       map.current = null;
@@ -169,6 +182,7 @@ export default function DemoMap({
         ref={host}
         className="demo-map"
         data-ready={ready}
+        data-style-background={styleBackground}
         role="region"
         aria-label="Interactive demo map of Mkhondo"
       />

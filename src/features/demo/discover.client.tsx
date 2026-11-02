@@ -71,6 +71,12 @@ export function DemoDiscover({ savedOnly = false }: { savedOnly?: boolean }) {
     else next.delete(key);
     router.replace(pathname + (next.size ? "?" + next.toString() : ""), { scroll: false });
   }
+  if (savedOnly && !state)
+    return (
+      <p className="demo-shell demo-page-loading" role="status">
+        Loading your saved sample providers…
+      </p>
+    );
   return (
     <div className="demo-shell demo-discover">
       {!savedOnly && (

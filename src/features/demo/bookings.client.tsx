@@ -13,7 +13,7 @@ import {
   Sparkle,
 } from "@phosphor-icons/react";
 import { demoMoney, findDemoProvider } from "./catalogue";
-import { demoDate, demoStatus, type DemoBooking } from "./state";
+import { demoActivity, demoDate, demoStatus, type DemoBooking } from "./state";
 import { useDemo } from "./store.client";
 
 export function BookingStatus({ status }: { status: DemoBooking["status"] }) {
@@ -112,26 +112,12 @@ export function DemoBookings() {
             </div>
           </div>
           <div className="demo-activity-chart" aria-hidden="true">
-            {[0, 1, 2, 3, 4, 5].map((i) => {
-              const from =
-                new Date(state.anchor + "T00:00:00Z").getTime() - (6 - i) * 30 * 86400000;
-              const to = from + 30 * 86400000;
-              const count = completed.filter((b) => {
-                const t = Date.parse(b.date);
-                return t >= from && t <= to;
-              }).length;
-              return (
-                <div key={i}>
-                  <span className={`demo-bar demo-bar-${Math.min(count, 5)}`} />
-                  <small>
-                    {new Intl.DateTimeFormat("en-ZA", {
-                      month: "short",
-                      timeZone: "Africa/Johannesburg",
-                    }).format(new Date(from + 15 * 86400000))}
-                  </small>
-                </div>
-              );
-            })}
+            {demoActivity(state.bookings).map(({ count, label }, i) => (
+              <div key={i}>
+                <span className={`demo-bar demo-bar-${Math.min(count, 5)}`} />
+                <small>{label}</small>
+              </div>
+            ))}
           </div>
           <p className="demo-fine-print">
             Fictional history, remembered in this browser. Explore a job to see its timeline.

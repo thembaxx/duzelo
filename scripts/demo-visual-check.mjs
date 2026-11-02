@@ -102,12 +102,29 @@ try {
       await page.screenshot({
         path: `${output}/demo-map-${width === 390 ? "mobile" : "desktop"}.png`,
       });
+      await expect(page.locator(".demo-map")).not.toHaveAttribute("data-style-background", "");
+      const lightBackground = await page.locator(".demo-map").getAttribute("data-style-background");
       const changed = page.waitForResponse(
         (response) =>
           response.url() === "https://tiles.openfreemap.org/styles/fiord" && response.ok(),
       );
       await page.getByRole("button", { name: "Dark theme", exact: true }).click();
-      await changed;
+      const styleResponse = await changed;
+      const darkStyle = await styleResponse.json();
+      const darkBackground = JSON.stringify(
+        darkStyle.layers.find((l) => l.type === "background")?.paint?.["background-color"] ?? null,
+      );
+      assert.notEqual(
+        darkBackground,
+        lightBackground,
+        "The published dark palette differs from light",
+      );
+      await expect(page.locator(".demo-map")).toHaveAttribute(
+        "data-style-background",
+        darkBackground,
+        { timeout: 25000 },
+      );
+      await expect(page.locator(".demo-map-error")).toHaveCount(0);
       await page.waitForLoadState("networkidle");
       await page.waitForTimeout(400);
       // Theme controls can scroll the header into view; restore the map framing.
@@ -126,6 +143,7 @@ try {
         pins: 8,
         clipped: 0,
         themes: ["light", "dark"],
+        appliedBackgrounds: { light: lightBackground, dark: darkBackground },
       });
     }
     await context.close();

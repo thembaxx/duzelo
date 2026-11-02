@@ -10,11 +10,11 @@ Open `/demo` from the public homepage or navigation. No account is required. Eig
 - Keyboard-selectable price pins preview providers; map camera and selection survive a theme change.
 - Save/unsave providers; open full service profiles and illustrative photos.
 - Choose a service, future day and SAST start time to create a sample booking.
-- Reschedule or cancel a confirmed visit; simulate arrival, work completion and client confirmation.
-- Try scripted questions and sample replies; leave one bounded sample rating after completion.
+- Reschedule or cancel a confirmed visit; simulate arrival, work completion and client confirmation. Date inputs reject stale days across Johannesburg midnight, and creation navigates only after the sample booking exists.
+- Try scripted questions and sample replies; arrival replies retain their original schedule after rescheduling. Leave one bounded sample rating after completion. Activity charts use completion timestamps.
 - Revisit completed jobs or book a provider again; reset restores the sample workspace.
 
-Browser state is versioned, schema-validated and limited to known sample IDs, dates, statuses and event kinds. No free-text personal information is collected. Corrupt state restores a fresh demo with a notice; blocked storage falls back to memory with a notice. Tabs synchronize using browser storage events (last saved workspace wins). The dataset is limited to 200 bookings and 80 events per booking; reset is always available.
+Browser state is versioned, schema-validated and limited to known sample IDs, dates, statuses and event kinds. No free-text personal information is collected. Corrupt state restores a fresh demo with a notice; blocked storage falls back to memory with a notice. Tabs synchronize using browser storage events (last saved workspace wins). The dataset is limited to 200 bookings and 80 events per booking; the 2 MB read guard covers that bounded data. Saved IDs must be unique. Load and write warnings recover separately. Reset is always available.
 
 `src/features/demo` imports no server auth, payment, database or real booking command. All demo mutations stay in React/browser storage. The service worker excludes `/demo` routes and map requests, and demo metadata is noindex. This does not bypass guards for `/app`, `/admin` or any real API. No Supabase data is seeded and no sensitive flags are changed.
 
