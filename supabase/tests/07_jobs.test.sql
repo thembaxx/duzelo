@@ -66,9 +66,11 @@ update public.job_requests set time_slots=jsonb_build_array(jsonb_build_object('
 insert into private.worker_schedule_blocks(worker_id,starts_at,ends_at) values ('30000000-0000-0000-0000-000000000002',now()+interval '1 day',now()+interval '1 day 2 hours');
 select is((select count(*)::int from private.job_candidates('51000000-0000-0000-0000-000000000001')),0,'private hard schedule block prevents invitation');
 delete from private.worker_schedule_blocks;
-update public.bookings set scheduled_start=now()+interval '1 day',scheduled_end=now()+interval '1 day 2 hours' where id='80000000-0000-0000-0000-000000000001';
+-- M07 requires a retained other-party acceptance for a fixture reschedule too.
+insert into private.booking_reschedules(booking_id,proposed_by,base_version,starts_at,ends_at,expires_at,status,decided_by,decided_at,applied_version) values('80000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001',1,now()+interval '1 day',now()+interval '1 day 2 hours',now()+interval '1 hour','accepted','10000000-0000-0000-0000-000000000002',now(),2);
+update public.bookings set scheduled_start=now()+interval '1 day',scheduled_end=now()+interval '1 day 2 hours',version=2 where id='80000000-0000-0000-0000-000000000001';
 select is((select count(*)::int from private.job_candidates('51000000-0000-0000-0000-000000000001')),0,'booked time prevents invitation');
-update public.bookings set scheduled_start=null,scheduled_end=null where id='80000000-0000-0000-0000-000000000001';
+update public.bookings set status='cancelled' where id='80000000-0000-0000-0000-000000000001';
 update public.job_requests set client_id='10000000-0000-0000-0000-000000000002' where id='51000000-0000-0000-0000-000000000001';
 select is((select count(*)::int from private.job_candidates('51000000-0000-0000-0000-000000000001')),0,'dual-mode account cannot match its own request');
 update public.job_requests set client_id='10000000-0000-0000-0000-000000000001',visibility='direct',requested_worker_id='30000000-0000-0000-0000-000000000003' where id='51000000-0000-0000-0000-000000000001';

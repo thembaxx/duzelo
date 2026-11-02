@@ -17,9 +17,11 @@ export function Conversation({ initial }: { initial: ThreadView }) {
     [older, setOlder] = useState(initial.page.hasMore),
     [loading, setLoading] = useState(false),
     api = useCollaboration(),
+    generation = useRef(0),
     latest = useRef(initial.page.messages.at(-1)?.sequence ?? 0),
     input = useRef<HTMLTextAreaElement>(null);
   async function load(before = 0, signal?: AbortSignal) {
+    const requestId = ++generation.current;
     const response = await fetch(
         "/api/v1/collaboration/thread?id=" +
           initial.id +
@@ -27,7 +29,19 @@ export function Conversation({ initial }: { initial: ThreadView }) {
         { signal, cache: "no-store" },
       ),
       data = await response.json();
-    if (!response.ok) throw new Error(data.error?.message ?? "Conversation unavailable.");
+    if (signal?.aborted || requestId !== generation.current) return;
+    if (!response.ok) {
+      if ([401, 403].includes(response.status)) {
+        setMessages([]);
+        setView((v) => ({
+          ...v,
+          title: "Conversation unavailable",
+          canRead: false,
+          canSend: false,
+        }));
+      }
+      throw new Error(data.error?.message ?? "Conversation unavailable.");
+    }
     const next = data as ThreadView;
     setView(next);
     if (!next.canRead) {
@@ -69,12 +83,14 @@ export function Conversation({ initial }: { initial: ThreadView }) {
           delay = Math.min(delay * 2, 30000);
         }
       } finally {
+        controller = null;
         if (!stopped) timer = setTimeout(tick, delay);
       }
     }
     function wake() {
+      // A running tick schedules its own successor; never start overlapping polls.
+      if (controller && !controller.signal.aborted) return;
       clearTimeout(timer);
-      controller?.abort();
       timer = setTimeout(tick, 100);
     }
     void tick();

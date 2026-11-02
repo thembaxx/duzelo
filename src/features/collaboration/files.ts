@@ -2,6 +2,7 @@ import "server-only";
 import { createHash, randomUUID } from "node:crypto";
 import { z } from "zod";
 import { database } from "@/lib/db/server";
+import { allowAuthAttempt } from "@/features/auth/rate-limit";
 import { lockActor } from "@/features/jobs/boundary";
 import { workerStorage } from "@/features/workers/storage";
 import { scanWorkerImage } from "@/features/workers/antivirus";
@@ -18,6 +19,7 @@ export async function uploadEvidence(input: unknown, file: File, key: string | n
     .parse(key);
   const meta = uploadSchema.parse(input),
     actor = await collaborationActor();
+  if (!(await allowAuthAttempt("workflow-upload", actor.id, 20, 60))) throw new Error("LIMITED");
   await database().begin(async (sql) => {
     await lockActor(sql, actor, "either");
     await uploadContext(sql, meta, actor);
