@@ -17,7 +17,7 @@ export async function exactLocation(input: unknown, key: string | null) {
       const job = await lockJob(sql, data.jobId, actor, true);
       await eligible(sql, data.jobId, job.match!.worker_id, false);
       const confirmed =
-        await sql`select id from public.bookings where job_id=${data.jobId}::uuid and worker_id=${job.match!.worker_id}::uuid and status='confirmed' and ${job.status}='booked'`;
+        await sql`select id from public.bookings where job_id=${data.jobId}::uuid and worker_id=${job.match!.worker_id}::uuid and status in('confirmed','in_progress','completion_pending') and ${job.status} in('booked','in_progress','completion_pending')`;
       const [grant] =
         await sql`select expires_at from private.current_inspection_access(${data.jobId}::uuid,${job.match!.worker_id}::uuid)`;
       if (!confirmed.length && !grant) throw new Error("FORBIDDEN");

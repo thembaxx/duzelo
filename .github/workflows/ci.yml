@@ -2,7 +2,7 @@ name: Application checks
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, feat/milestone-07-workflow]
 permissions:
   contents: read
 concurrency:
@@ -92,4 +92,7 @@ jobs:
             docs/evidence/screenshots/jobs-*.png
             docs/evidence/screenshots/quotes-*.png
             docs/evidence/screenshots/booking-*.png
+            docs/evidence/screenshots/chat-*.png
+            docs/evidence/screenshots/workflow-*.png
+            docs/evidence/screenshots/audit-*.png
           retention-days: 14

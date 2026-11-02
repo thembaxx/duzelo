@@ -10,6 +10,8 @@ import { PwaRuntime } from "@/components/pwa-runtime";
 import { RevealDirector } from "@/components/reveal-director";
 import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/site";
 import "./globals.css";
+import "@/features/collaboration/collaboration.css";
+import { workflowConfig } from "@/features/collaboration/config";
 import "@/features/auth/auth.css";
 import { discoveryConfig } from "@/features/discovery/config";
 import { workerConfig } from "@/features/workers/config";
@@ -66,6 +68,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
   discoveryConfig();
   jobsConfig();
   quotesConfig();
+  workflowConfig();
   return (
     <html
       lang="en"

@@ -1,3 +1,4 @@
+import { OpenConversation } from "@/features/messages/open.client";
 import { money, jobTime } from "@/features/jobs/format";
 import type { QuoteView } from "./types";
 import { QuoteActions } from "./actions.client";
@@ -6,11 +7,13 @@ export function QuoteCard({
   jobVersion,
   worker,
   actions = true,
+  messaging = false,
 }: {
   quote: QuoteView;
   jobVersion: number;
   worker: boolean;
   actions?: boolean;
+  messaging?: boolean;
 }) {
   return (
     <article
@@ -93,6 +96,9 @@ export function QuoteCard({
         Tax treatment is the provider’s declaration, not verified VAT registration or a tax invoice.
         This quote does not confirm a payment.
       </p>
+      {actions && messaging && ["submitted", "accepted"].includes(q.status) && (
+        <OpenConversation quoteId={q.id} />
+      )}
       {actions && <QuoteActions quote={q} jobVersion={jobVersion} worker={worker} />}
     </article>
   );

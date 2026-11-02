@@ -1,3 +1,7 @@
+import { workflowConfig } from "@/features/collaboration/config";
+import { workflowView } from "@/features/workflow/queries";
+import { WorkflowPanel } from "@/features/workflow/panel";
+import { OpenConversation } from "@/features/messages/open.client";
 import Link from "next/link";
 import { z } from "zod";
 import { notFound } from "next/navigation";
@@ -67,6 +71,7 @@ export async function BookingPage({ id, worker = false }: { id: string; worker?:
     if (error instanceof Error && error.message === "FORBIDDEN") notFound();
     throw error;
   });
+  const work = workflowConfig() ? await workflowView(id) : null;
   return (
     <div className="quotes-page">
       <AgreementNavigation worker={worker} />
@@ -76,7 +81,13 @@ export async function BookingPage({ id, worker = false }: { id: string; worker?:
       {quotesConfig()!.mode === "local" && (
         <p className="test-notice">Isolated local appointment. Fictional parties and no payment.</p>
       )}
-      <BookingDetail key={booking.id + ":" + booking.version} booking={booking} />
+      <BookingDetail key={booking.id + ":" + booking.version} booking={booking} workflow={!!work} />
+      {work && (
+        <>
+          <OpenConversation quoteId={booking.quote.id} />
+          <WorkflowPanel key={work.version} view={work} />
+        </>
+      )}
       <AgreementNotices worker={worker} />
     </div>
   );

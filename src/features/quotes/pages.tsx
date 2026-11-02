@@ -1,3 +1,4 @@
+import { workflowConfig } from "@/features/collaboration/config";
 import Link from "next/link";
 import Image from "next/image";
 import { z } from "zod";
@@ -32,6 +33,11 @@ export function AgreementNavigation({ worker = false }: { worker?: boolean }) {
       <Link className="text-link" href={prefix + (worker ? "/quotes" : "/jobs")}>
         {worker ? "Quote workspace" : "My requests"}
       </Link>
+      {workflowConfig() && (
+        <Link className="text-link" href="/app/inbox">
+          Job conversations
+        </Link>
+      )}
       <Link className="text-link" href={prefix + "/bookings"}>
         Appointments
       </Link>
@@ -92,7 +98,13 @@ export async function QuotesPage({
   });
   const cards = (quotes: typeof view.offers) =>
     quotes.map((q) => (
-      <QuoteCard key={q.id} quote={q} jobVersion={view.jobVersion} worker={worker} />
+      <QuoteCard
+        key={q.id}
+        quote={q}
+        jobVersion={view.jobVersion}
+        worker={worker}
+        messaging={!!workflowConfig()}
+      />
     ));
   return (
     <div className="quotes-page">

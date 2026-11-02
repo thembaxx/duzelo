@@ -8,7 +8,13 @@ import { useAgreementMutation } from "@/features/quotes/client-api";
 import { jobTime } from "@/features/jobs/format";
 import { LocationReveal } from "./location.client";
 import { appointmentStatus } from "./status";
-export function BookingDetail({ booking: b }: { booking: BookingView }) {
+export function BookingDetail({
+  booking: b,
+  workflow = false,
+}: {
+  booking: BookingView;
+  workflow?: boolean;
+}) {
   const router = useRouter(),
     mutation = useAgreementMutation(),
     [pending, startTransition] = useTransition(),
@@ -46,7 +52,9 @@ export function BookingDetail({ booking: b }: { booking: BookingView }) {
             ? "The worker has not confirmed. Exact address access is withheld."
             : b.status === "confirmed"
               ? "The selected worker confirmed this appointment. Payment and work completion are separate."
-              : "This appointment is closed. No new provider is invited automatically."}
+              : ["in_progress", "completion_pending", "disputed"].includes(b.status)
+                ? "Work updates and support requests are recorded below. Completion and payment require separate decisions."
+                : "This appointment is closed. No new provider is invited automatically."}
         </p>
         {b.status === "pending_worker" && Date.parse(b.startsAt) <= Date.now() && (
           <p className="job-notice">
@@ -87,7 +95,9 @@ export function BookingDetail({ booking: b }: { booking: BookingView }) {
         )}
       </section>
       <QuoteCard quote={b.quote} jobVersion={0} worker={b.worker} actions={false} />
-      {b.worker && b.status === "confirmed" && <LocationReveal jobId={b.jobId} />}
+      {b.worker && ["confirmed", "in_progress", "completion_pending"].includes(b.status) && (
+        <LocationReveal jobId={b.jobId} />
+      )}
       {b.canCancel && (
         <section className="job-panel">
           <h2>Cancel this appointment</h2>
@@ -150,7 +160,11 @@ export function BookingDetail({ booking: b }: { booking: BookingView }) {
         </p>
       )}
       {message && <p role="status">{message}</p>}
-      <p>Payments, conversations, starting work and completion are not open in this milestone.</p>
+      {!workflow && (
+        <p>
+          Work progress and messaging await release configuration. No payment is collected here.
+        </p>
+      )}
       <nav className="job-actions" aria-label="Booking navigation">
         <Link className="text-link" href={"/app/" + (b.worker ? "worker" : "client") + "/bookings"}>
           All appointments
