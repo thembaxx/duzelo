@@ -16,8 +16,8 @@ export const privateStreet = "M06-PRIVATE-STREET-42",
   privateTitle = "M06-CLOSED-TITLE-42";
 export async function resetAgreementFixtures(sql: ReturnType<typeof postgres>) {
   await sql`update private.inspection_access_grants set revoked_at=now() where granted_by_client_id in (select id from auth.users where phone='27820000007') and revoked_at is null`;
-  await sql`update public.bookings set status='cancelled',cancelled_at=now() where job_id in(select id from public.job_requests where client_id in(select id from auth.users where phone='27820000007')) and status in ('pending_worker','confirmed')`;
-  await sql`update public.job_requests set status='cancelled' where client_id in(select id from auth.users where phone='27820000007') and status in ('open','matching','quoted','booked')`;
+  await sql`update public.bookings set status='cancelled',cancelled_at=now() where job_id in(select id from public.job_requests where client_id in(select id from auth.users where phone='27820000007')) and status in ('pending_worker','confirmed','in_progress','completion_pending')`;
+  await sql`update public.job_requests set status='cancelled' where client_id in(select id from auth.users where phone='27820000007') and status in ('open','matching','quoted','booked','in_progress','completion_pending')`;
   // Isolate each viewport's daily submission budget without deleting agreement history.
   // This helper is loopback-only; the application still enforces the real quota.
   await sql`update private.job_dispatch set submitted_at=now()-interval '2 days' where job_id in(select id from public.job_requests where client_id in(select id from auth.users where phone='27820000007')) and submitted_at is not null`;
