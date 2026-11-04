@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowClockwise, DownloadSimple, WifiSlash, X } from "@phosphor-icons/react";
 
 type InstallEvent = Event & {
@@ -13,6 +13,7 @@ export function PwaRuntime() {
   const [waiting, setWaiting] = useState<ServiceWorker | null>(null);
   const [installPrompt, setInstallPrompt] = useState<InstallEvent | null>(null);
   const [dismissed, setDismissed] = useState(false);
+  const approvedUpdate = useRef(false);
 
   useEffect(() => {
     const onConnection = () => setOffline(!navigator.onLine);
@@ -31,7 +32,8 @@ export function PwaRuntime() {
     let didReload = false;
     const hadController = Boolean(navigator.serviceWorker?.controller);
     const onController = () => {
-      if (!hadController || didReload) return;
+      // Do not interrupt a quote, booking or message unless the user chose to update.
+      if (!hadController || didReload || !approvedUpdate.current) return;
       didReload = true;
       window.location.reload();
     };
@@ -74,6 +76,16 @@ export function PwaRuntime() {
     };
   }, []);
 
+  function applyUpdate() {
+    if (!waiting) return;
+    approvedUpdate.current = true;
+    try {
+      waiting.postMessage({ type: "SKIP_WAITING" });
+    } catch {
+      approvedUpdate.current = false;
+    }
+  }
+
   async function install() {
     if (!installPrompt) return;
     await installPrompt.prompt();
@@ -93,7 +105,7 @@ export function PwaRuntime() {
         <div className="pwa-notice" role="status">
           <ArrowClockwise size={18} aria-hidden="true" />
           <span>An update is ready.</span>
-          <button type="button" onClick={() => waiting.postMessage({ type: "SKIP_WAITING" })}>
+          <button type="button" onClick={applyUpdate}>
             Refresh app
           </button>
         </div>
