@@ -17,7 +17,9 @@ export function StartJob({
   return (
     <form
       method="post"
-      className="job-panel"
+      className="job-panel job-start-panel"
+      aria-labelledby="start-job-title"
+      aria-busy={mutation.busy}
       onSubmit={async (e) => {
         e.preventDefault();
         try {
@@ -29,29 +31,39 @@ export function StartJob({
         } catch {}
       }}
     >
-      <h2>{workerSlug ? "Request this provider" : "Tell us what needs doing."}</h2>
+      <h2 id="start-job-title">{workerSlug ? "Request this provider" : "Start a request"}</h2>
       <p>
         {workerSlug
-          ? "Only the selected provider can be invited. Their eligibility and coverage will be checked on submission."
-          : "Your request starts as a private, recoverable draft. No worker is contacted until you review and submit it."}
+          ? "Only this provider can be invited, after eligibility and coverage checks."
+          : "Start with a private draft. Review your details before inviting workers."}
       </p>
       {options.local && (
         <p className="test-notice">
           Isolated local testing. Test requests do not contact live workers or send SMS.
         </p>
       )}
-      <p>
-        Photos are optional. Exact location stays private; invited workers see the public town and
-        the work details you choose to share.
-      </p>
+      <details className="job-privacy-details">
+        <summary>Privacy and photos</summary>
+        <p>
+          Photos are optional. Your exact location stays private; invited workers can see the town
+          and the job details you choose to share.
+        </p>
+      </details>
       {mutation.error && (
         <p role="alert" className="form-error">
           {mutation.error}
         </p>
       )}
-      <button type="submit" className="button button-primary" disabled={!ready || mutation.busy}>
-        {mutation.busy ? "Starting…" : "Start request"}
-      </button>
+      <div className="job-actions">
+        <button type="submit" className="button button-primary" disabled={!ready || mutation.busy}>
+          <span aria-live="polite">{mutation.busy ? "Starting…" : "Start request"}</span>
+        </button>
+        {!ready && !mutation.error && (
+          <p className="job-help" role="status">
+            Request setup isn’t ready yet.
+          </p>
+        )}
+      </div>
     </form>
   );
 }

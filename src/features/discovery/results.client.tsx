@@ -1,5 +1,5 @@
 "use client";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { DiscoveryCards } from "./cards";
 import type { useDiscoverySearch } from "./use-search";
 export function DiscoveryResults({
@@ -16,6 +16,8 @@ export function DiscoveryResults({
   onSelect: (slug: string) => void;
 }) {
   const gesture = useRef({ start: null as number | null, dragged: false });
+  const listener = useRef<AbortController | null>(null);
+  useEffect(() => () => listener.current?.abort(), []);
   return (
     <section
       id="worker-results"
@@ -30,23 +32,59 @@ export function DiscoveryResults({
           className="discovery-sheet-handle"
           aria-expanded={expanded}
           onClick={(event) => {
-            if (!gesture.current.dragged || event.detail === 0) setExpanded((n) => !n);
-            gesture.current.dragged = false;
+            // A drag can synthesize a click after the release. Do not toggle twice.
+            if (gesture.current.dragged) {
+              gesture.current.dragged = false;
+              return;
+            }
+            const handle = event.currentTarget;
+            setExpanded((current) => !current);
+            // Collapsing an absolutely positioned mobile sheet moves the handle
+            // toward the map's bottom edge. Keep it on screen after layout.
+            requestAnimationFrame(() => {
+              handle.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" });
+            });
           }}
           onPointerDown={(event) => {
-            gesture.current = { start: event.clientY, dragged: false };
-            event.currentTarget.setPointerCapture(event.pointerId);
-          }}
-          onPointerUp={(event) => {
-            const start = gesture.current.start;
-            if (start !== null && Math.abs(start - event.clientY) > 40) {
-              gesture.current.dragged = true;
-              setExpanded(start > event.clientY);
-            }
-            gesture.current.start = null;
-          }}
-          onPointerCancel={() => {
-            gesture.current = { start: null, dragged: false };
+            const initialY = event.clientY;
+            const pointerId = event.pointerId;
+            gesture.current = { start: initialY, dragged: false };
+            listener.current?.abort();
+            const controller = new AbortController();
+            listener.current = controller;
+            // Capture movement before the map or its overlays can stop
+            // pointer events. Release can occur outside the moving sheet.
+            const onMove = (move: PointerEvent) => {
+              if (move.pointerId !== pointerId || gesture.current.dragged) return;
+              const distance = initialY - move.clientY;
+              if (Math.abs(distance) > 40) {
+                gesture.current.dragged = true;
+                setExpanded(distance > 0);
+              }
+            };
+            window.addEventListener("pointermove", onMove, {
+              capture: true,
+              signal: controller.signal,
+            });
+            window.addEventListener(
+              "pointerup",
+              (release) => {
+                if (release.pointerId !== pointerId) return;
+                onMove(release);
+                gesture.current.start = null;
+                controller.abort();
+              },
+              { capture: true, signal: controller.signal },
+            );
+            window.addEventListener(
+              "pointercancel",
+              (cancel) => {
+                if (cancel.pointerId !== pointerId) return;
+                gesture.current.start = null;
+                controller.abort();
+              },
+              { capture: true, signal: controller.signal },
+            );
           }}
         >
           {expanded ? "Collapse worker list" : "Expand worker list"}
