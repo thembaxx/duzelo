@@ -29,13 +29,25 @@ export function DiscoveryResults({
           type="button"
           className="discovery-sheet-handle"
           aria-expanded={expanded}
-          onClick={(event) => {
-            if (!gesture.current.dragged || event.detail === 0) setExpanded((n) => !n);
-            gesture.current.dragged = false;
+          onClick={() => {
+            // A drag can emit a synthetic click with detail=0 after pointer capture.
+            // Swallow that click so it cannot undo the completed swipe.
+            if (gesture.current.dragged) {
+              gesture.current.dragged = false;
+              return;
+            }
+            setExpanded((current) => !current);
           }}
           onPointerDown={(event) => {
             gesture.current = { start: event.clientY, dragged: false };
             event.currentTarget.setPointerCapture(event.pointerId);
+          }}
+          onPointerMove={(event) => {
+            const start = gesture.current.start;
+            if (start !== null && Math.abs(start - event.clientY) > 40) {
+              gesture.current.dragged = true;
+              setExpanded(start > event.clientY);
+            }
           }}
           onPointerUp={(event) => {
             const start = gesture.current.start;
@@ -46,7 +58,8 @@ export function DiscoveryResults({
             gesture.current.start = null;
           }}
           onPointerCancel={() => {
-            gesture.current = { start: null, dragged: false };
+            // Keep drag suppression until the subsequent click (if any).
+            gesture.current.start = null;
           }}
         >
           {expanded ? "Collapse worker list" : "Expand worker list"}
