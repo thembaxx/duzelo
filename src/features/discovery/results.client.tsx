@@ -31,14 +31,19 @@ export function DiscoveryResults({
           type="button"
           className="discovery-sheet-handle"
           aria-expanded={expanded}
-          onClick={() => {
-            // A drag can emit a synthetic click with detail=0 after pointer capture.
-            // Swallow that click so it cannot undo the completed swipe.
+          onClick={(event) => {
+            // A drag can synthesize a click after the release. Do not toggle twice.
             if (gesture.current.dragged) {
               gesture.current.dragged = false;
               return;
             }
+            const handle = event.currentTarget;
             setExpanded((current) => !current);
+            // Collapsing an absolutely positioned mobile sheet moves the handle
+            // toward the map's bottom edge. Keep it on screen after layout.
+            requestAnimationFrame(() => {
+              handle.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" });
+            });
           }}
           onPointerDown={(event) => {
             const initialY = event.clientY;
