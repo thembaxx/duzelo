@@ -205,6 +205,8 @@ test("coarse discovery, real map, fallback, theme, pagination and saved-address 
     await handle.press("Enter");
     await expect(handle).toHaveAttribute("aria-expanded", "true");
     await handle.click();
+    await expect(handle).toBeInViewport();
+    await handle.hover();
     const bounds = await handle.boundingBox();
     const x = bounds!.x + bounds!.width / 2,
       y = bounds!.y + bounds!.height / 2;
