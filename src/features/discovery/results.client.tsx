@@ -47,28 +47,38 @@ export function DiscoveryResults({
             listener.current?.abort();
             const controller = new AbortController();
             listener.current = controller;
-            // A pointer released above the sheet may not fire onPointerUp on
-            // the button. Observe the release at window scope instead.
+            // Capture movement before the map or its overlays can stop
+            // pointer events. Release can occur outside the moving sheet.
+            const onMove = (move: PointerEvent) => {
+              if (move.pointerId !== pointerId || gesture.current.dragged) return;
+              const distance = initialY - move.clientY;
+              if (Math.abs(distance) > 40) {
+                gesture.current.dragged = true;
+                setExpanded(distance > 0);
+              }
+            };
+            window.addEventListener("pointermove", onMove, {
+              capture: true,
+              signal: controller.signal,
+            });
             window.addEventListener(
               "pointerup",
               (release) => {
                 if (release.pointerId !== pointerId) return;
-                const distance = initialY - release.clientY;
-                if (Math.abs(distance) > 40) {
-                  gesture.current.dragged = true;
-                  setExpanded(distance > 0);
-                }
+                onMove(release);
                 gesture.current.start = null;
                 controller.abort();
               },
-              { signal: controller.signal },
+              { capture: true, signal: controller.signal },
             );
             window.addEventListener(
               "pointercancel",
               (cancel) => {
-                if (cancel.pointerId === pointerId) controller.abort();
+                if (cancel.pointerId !== pointerId) return;
+                gesture.current.start = null;
+                controller.abort();
               },
-              { signal: controller.signal },
+              { capture: true, signal: controller.signal },
             );
           }}
         >
