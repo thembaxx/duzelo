@@ -59,7 +59,9 @@ export function StartJob({
           <span aria-live="polite">{mutation.busy ? "Starting…" : "Start request"}</span>
         </button>
         {!ready && !mutation.error && (
-          <p className="job-help" role="status">Request setup isn’t ready yet.</p>
+          <p className="job-help" role="status">
+            Request setup isn’t ready yet.
+          </p>
         )}
       </div>
     </form>
