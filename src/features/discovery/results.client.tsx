@@ -1,5 +1,5 @@
 "use client";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { DiscoveryCards } from "./cards";
 import type { useDiscoverySearch } from "./use-search";
 export function DiscoveryResults({
@@ -16,6 +16,8 @@ export function DiscoveryResults({
   onSelect: (slug: string) => void;
 }) {
   const gesture = useRef({ start: null as number | null, dragged: false });
+  const listener = useRef<AbortController | null>(null);
+  useEffect(() => () => listener.current?.abort(), []);
   return (
     <section
       id="worker-results"
@@ -39,27 +41,35 @@ export function DiscoveryResults({
             setExpanded((current) => !current);
           }}
           onPointerDown={(event) => {
-            gesture.current = { start: event.clientY, dragged: false };
-            event.currentTarget.setPointerCapture(event.pointerId);
-          }}
-          onPointerMove={(event) => {
-            const start = gesture.current.start;
-            if (start !== null && Math.abs(start - event.clientY) > 40) {
-              gesture.current.dragged = true;
-              setExpanded(start > event.clientY);
-            }
-          }}
-          onPointerUp={(event) => {
-            const start = gesture.current.start;
-            if (start !== null && Math.abs(start - event.clientY) > 40) {
-              gesture.current.dragged = true;
-              setExpanded(start > event.clientY);
-            }
-            gesture.current.start = null;
-          }}
-          onPointerCancel={() => {
-            // Keep drag suppression until the subsequent click (if any).
-            gesture.current.start = null;
+            const initialY = event.clientY;
+            const pointerId = event.pointerId;
+            gesture.current = { start: initialY, dragged: false };
+            listener.current?.abort();
+            const controller = new AbortController();
+            listener.current = controller;
+            // A pointer released above the sheet may not fire onPointerUp on
+            // the button. Observe the release at window scope instead.
+            window.addEventListener(
+              "pointerup",
+              (release) => {
+                if (release.pointerId !== pointerId) return;
+                const distance = initialY - release.clientY;
+                if (Math.abs(distance) > 40) {
+                  gesture.current.dragged = true;
+                  setExpanded(distance > 0);
+                }
+                gesture.current.start = null;
+                controller.abort();
+              },
+              { signal: controller.signal },
+            );
+            window.addEventListener(
+              "pointercancel",
+              (cancel) => {
+                if (cancel.pointerId === pointerId) controller.abort();
+              },
+              { signal: controller.signal },
+            );
           }}
         >
           {expanded ? "Collapse worker list" : "Expand worker list"}
