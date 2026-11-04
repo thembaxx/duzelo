@@ -1,0 +1,26 @@
+/* Duzelo installed shell: use the viewport, protect service forms and respect OS insets. */
+@media (display-mode: standalone) {
+  html, body {
+    min-height: 100dvh;
+    background: var(--background);
+  }
+  .skip-link:focus {
+    top: max(14px, env(safe-area-inset-top, 0px));
+  }
+  .pwa-status-stack {
+    padding-bottom: max(10px, env(safe-area-inset-bottom, 0px));
+    padding-left: max(12px, env(safe-area-inset-left, 0px));
+    padding-right: max(12px, env(safe-area-inset-right, 0px));
+  }
+  .pwa-notice {
+    max-width: min(100%, 38rem);
+  }
+}
+@media (max-width: 760px) and (display-mode: standalone) {
+  .mobile-menu.is-open .mobile-menu-inner {
+    max-height: calc(100dvh - 78px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+}
