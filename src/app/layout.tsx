@@ -21,6 +21,7 @@ import { quotesConfig } from "@/features/quotes/config";
 import "@/features/quotes/quotes.css";
 import "@/features/jobs/jobs.css";
 import "@/features/discovery/discovery.css";
+import "./mobile-ux.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
