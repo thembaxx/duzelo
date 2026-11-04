@@ -56,3 +56,51 @@ html {
     transition: none;
   }
 }
+
+/* Give the first request action a calm, scannable hierarchy. */
+.job-start-panel {
+  display: grid;
+  gap: clamp(12px, 2vw, 20px);
+  max-width: 42rem;
+}
+.job-start-panel > :is(h2, p) {
+  margin: 0;
+}
+.job-start-panel > p {
+  color: var(--muted-foreground);
+  line-height: 1.55;
+}
+.job-privacy-details {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface-raised);
+  padding: 4px 16px;
+}
+.job-privacy-details summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.job-privacy-details p {
+  line-height: 1.55;
+  margin: 0 0 14px;
+}
+.job-start-panel .job-actions {
+  margin: 0;
+  gap: 12px;
+}
+.job-start-panel .job-help {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 14px;
+}
+@media (max-width: 500px) {
+  .job-start-panel .job-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .job-start-panel .job-actions .button {
+    width: 100%;
+    justify-content: center;
+  }
+}
