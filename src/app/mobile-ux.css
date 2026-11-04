@@ -1,0 +1,58 @@
+/* Responsive, native-feeling foundations for discovery, auth and guided jobs.
+   This intentionally complements the existing feature CSS, not a new component system. */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+:is(.job-panel, .discovery-card, .worker-section, .auth-form, .discovery-results) {
+  min-width: 0;
+}
+:is(.job-panel, .discovery-card, .worker-review-list, .discovery-results) {
+  overflow-wrap: anywhere;
+}
+:is(.job-actions, .discovery-toolbar, .discovery-filter-row) {
+  row-gap: 12px;
+}
+:is(.auth-form, .worker-form, .job-panel, .discovery-filters)
+  :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea),
+.service-search input {
+  font-size: 16px;
+}
+:is(.job-actions, .discovery-toolbar) :is(a, button),
+:is(.auth-form, .worker-form) button[type="submit"] {
+  min-height: 44px;
+}
+
+@media (pointer: coarse), (max-width: 767px) {
+  :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) {
+    font-size: 16px !important; /* Avoid Safari autofocus/keyboard zoom. */
+  }
+  :is(.service-search button, .service-pill, .discovery-save, .discovery-pagination button) {
+    min-height: 44px;
+  }
+}
+@media (max-width: 600px) {
+  .shell {
+    width: min(calc(100% - 32px), 1200px);
+  }
+  .service-search input {
+    min-width: 0;
+  }
+  .job-actions,
+  .discovery-filter-row {
+    flex-wrap: wrap;
+  }
+  .discovery-card {
+    max-width: 100%;
+  }
+}
+@media (max-width: 390px) {
+  .job-step-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.discovery-save, .service-pill, .job-actions button) {
+    transition: none;
+  }
+}
