@@ -30,10 +30,13 @@ export function PwaRuntime() {
     window.addEventListener("appinstalled", onInstalled);
 
     let didReload = false;
-    const hadController = Boolean(navigator.serviceWorker?.controller);
+    let hadController = Boolean(navigator.serviceWorker?.controller);
     const onController = () => {
+      // First takeover is not an app update; never interrupt a first-time install.
+      const replacedExistingController = hadController;
+      hadController = true;
       // Do not interrupt a quote, booking or message unless the user chose to update.
-      if (!hadController || didReload || !approvedUpdate.current) return;
+      if (!replacedExistingController || didReload || !approvedUpdate.current) return;
       didReload = true;
       window.location.reload();
     };
