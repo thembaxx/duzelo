@@ -9,7 +9,10 @@ export function playDemoHaptic(intent: DemoHaptic = "select"): boolean {
   if (typeof navigator === "undefined" || typeof document === "undefined") return false;
   if (typeof navigator.vibrate !== "function") return false;
   if (document.visibilityState !== "visible" || !document.hasFocus()) return false;
-  if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches)
+  if (
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+  )
     return false;
   return navigator.vibrate(demoHapticPattern(intent));
 }
