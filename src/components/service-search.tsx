@@ -27,7 +27,7 @@ export function ServiceSearch({
         placeholder="Try plumbing, painting, cleaning…"
       />
       <button type="submit">
-        {demo ? "Search demo" : "Find a service"}{" "}
+        {demo ? "Find a service · demo" : "Find a service"}{" "}
         <ArrowRight size={17} aria-hidden="true" />
       </button>
     </form>
