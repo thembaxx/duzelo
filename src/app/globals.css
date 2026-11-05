@@ -2591,3 +2591,36 @@ body {
     transition: none !important;
   }
 }
+
+/* Visual audit: prioritise the service search on narrow home screens.
+   The original mobile order placed a large illustrative photo before search. */
+@media (max-width: 560px) {
+  .editorial-hero-layout {
+    padding-block: 28px 30px;
+  }
+  .editorial-hero .hero-eyebrow {
+    margin-bottom: 16px;
+    font-size: 11px;
+  }
+  .editorial-hero h1 {
+    font-size: clamp(44px, 10vw, 56px);
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+  .editorial-hero .hero-description {
+    order: 3;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .editorial-hero .hero-search-wrap {
+    order: 4;
+    width: 100%;
+    margin-bottom: 14px;
+  }
+  .editorial-hero .home-photo-preview {
+    order: 5;
+  }
+  .editorial-hero .service-search input {
+    font-size: 16px;
+  }
+}
