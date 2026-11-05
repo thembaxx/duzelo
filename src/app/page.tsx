@@ -31,8 +31,7 @@ export default function HomePage() {
               <em>A lot</em> <span className="word-underline">closer.</span>
             </h1>
             <p className="hero-description" data-intro>
-              Explore everyday services near you. Search the Mkhondo pilot demo to see how
-              finding local help could work.
+              Browse local services in the Mkhondo demo before bookings launch.
             </p>
             <div className="hero-search-wrap" data-intro>
               <ServiceSearch demo />
