@@ -23,9 +23,9 @@ export default function HomePage() {
         <div className="shell editorial-hero-layout">
           <HeroIntro>
             <h1 data-intro>
-              Find good help.
+              A little help.
               <br />
-              <em>Closer to home.</em>
+              <em>A lot</em> <span className="word-underline">closer.</span>
             </h1>
             <div className="hero-search-wrap" data-intro>
               <ServiceSearch demo />
