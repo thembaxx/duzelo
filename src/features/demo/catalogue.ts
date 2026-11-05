@@ -397,6 +397,16 @@ export function demoMoney(amount: number) {
 export function categoryName(id: DemoCategory) {
   return demoCategories.find((c) => c.id === id)?.name ?? "All services";
 }
+/** Everyday words used by customers, mapped only to fictional demo categories. */
+const demoCategoryAliases: Partial<Record<DemoCategory, readonly string[]>> = {
+  cleaning: ["cleaner", "cleaners", "housekeeping"],
+  gardening: ["gardener", "gardeners", "lawn mowing", "weeding"],
+  plumbing: ["plumber", "plumbers", "leak", "leaks"],
+  electrical: ["electrician", "electricians", "wiring"],
+  painting: ["painter", "painters"],
+  "home-repairs": ["handyman", "handyperson", "furniture assembly"],
+};
+
 export function filterDemoProviders(
   query: string,
   category: string,
@@ -415,7 +425,9 @@ export function filterDemoProviders(
           p.headline,
           p.area,
           categoryName(p.category),
-          ...p.services.map((s) => s.name),
+          ...(demoCategoryAliases[p.category] ?? []),
+          p.bio,
+          ...p.services.flatMap((service) => [service.name, ...service.includes]),
         ]
           .join(" ")
           .toLocaleLowerCase("en-ZA")
