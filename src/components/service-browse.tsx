@@ -77,7 +77,13 @@ export function ServiceBrowse() {
         {categories.length === 0 && (
           <div className="service-browser-empty">
             <p>No services match your search.</p>
-            <button type="button" onClick={() => { setSearch(""); setSelected("all"); }}>
+            <button
+              type="button"
+              onClick={() => {
+                setSearch("");
+                setSelected("all");
+              }}
+            >
               Clear filters
             </button>
           </div>
