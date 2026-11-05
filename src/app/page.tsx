@@ -31,7 +31,8 @@ export default function HomePage() {
               <em>A lot</em> <span className="word-underline">closer.</span>
             </h1>
             <p className="hero-description" data-intro>
-              Browse local services in the Mkhondo demo before bookings launch.
+              From the tap that drips to the garden that needs love. Discover the right kind of help
+              for real life, right where you live.
             </p>
             <div className="hero-search-wrap" data-intro>
               <ServiceSearch demo />
@@ -49,7 +50,7 @@ export default function HomePage() {
               </Link>
             </div>
             <Link href="/demo" className="home-demo-cta" data-intro>
-              Explore the interactive demo <ArrowRight size={18} aria-hidden="true" />
+              Try the full marketplace demo <ArrowRight size={18} aria-hidden="true" />
             </Link>
             <div className="hero-launch-note" data-intro>
               <span className="launch-note-symbol">
@@ -88,7 +89,8 @@ export default function HomePage() {
             </h2>
           </div>
           <p>
-            Explore the services planned for Mkhondo before live bookings open.
+            A category for the everyday jobs that keep a home moving. Explore what's planned, with
+            no pressure to book before we're ready.
           </p>
         </div>
         <div className="category-grid">
