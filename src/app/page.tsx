@@ -22,43 +22,20 @@ export default function HomePage() {
         <div className="hero-ambient" aria-hidden="true" />
         <div className="shell editorial-hero-layout">
           <HeroIntro>
-            <div className="hero-eyebrow" data-intro>
-              <span className="eyebrow-dot" /> THE NEIGHBOURHOOD SERVICE DESK
-            </div>
             <h1 data-intro>
               A little help.
               <br />
               <em>A lot</em> <span className="word-underline">closer.</span>
             </h1>
-            <p className="hero-description" data-intro>
-              From the tap that drips to the garden that needs love. Discover the right kind of help
-              for real life, right where you live.
-            </p>
             <div className="hero-search-wrap" data-intro>
               <ServiceSearch demo />
             </div>
-            <div className="hero-quick-links" data-intro>
-              <span>Popular searches</span>
-              <Link href="/demo?q=plumbing">
-                Plumbing <ArrowUpRight size={13} aria-hidden="true" />
-              </Link>
-              <Link href="/demo?q=cleaning">
-                Cleaning <ArrowUpRight size={13} aria-hidden="true" />
-              </Link>
-              <Link href="/demo?q=gardening">
-                Gardening <ArrowUpRight size={13} aria-hidden="true" />
-              </Link>
-            </div>
-            <Link href="/demo" className="home-demo-cta" data-intro>
-              Try the full marketplace demo <ArrowRight size={18} aria-hidden="true" />
-            </Link>
             <div className="hero-launch-note" data-intro>
               <span className="launch-note-symbol">
                 <ShieldCheck size={18} aria-hidden="true" />
               </span>
               <span>
-                <strong>Previewing in Mkhondo.</strong> Service bookings and real provider
-                verification are not live yet.
+                <strong>Mkhondo demo.</strong> Bookings and provider verification are not yet live.
               </span>
             </div>
           </HeroIntro>
