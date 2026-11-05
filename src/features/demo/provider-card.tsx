@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowUpRight, Heart, MapPin, Star } from "@phosphor-icons/react";
 import { categoryName, demoMoney, type DemoProvider } from "./catalogue";
 import { useDemo } from "./store.client";
+import { playDemoHaptic } from "./haptics";
 
 export function ProviderCard({
   provider: p,
@@ -38,7 +39,10 @@ export function ProviderCard({
           aria-label={`${saved ? "Unsave" : "Save"} ${p.name}`}
           aria-pressed={saved}
           disabled={!state}
-          onClick={() => dispatch({ type: "save", slug: p.slug })}
+          onClick={() => {
+            dispatch({ type: "save", slug: p.slug });
+            playDemoHaptic("save");
+          }}
         >
           <Heart size={20} weight={saved ? "fill" : "regular"} aria-hidden="true" />
         </button>
