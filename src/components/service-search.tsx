@@ -24,7 +24,7 @@ export function ServiceSearch({
         type="search"
         defaultValue={defaultValue}
         autoComplete="off"
-        placeholder="Try plumbing, painting, cleaning…"
+        placeholder="Search local services"
       />
       <button type="submit">
         {demo ? "Find a service · demo" : "Find a service"}{" "}
