@@ -121,6 +121,15 @@ describe("isolated sample workspace", () => {
       "demo-green-corner",
     ]);
     expect(filterDemoProviders("tap repair", "all", "recommended")).toHaveLength(1);
+    expect(filterDemoProviders("plumber", "all", "recommended").map((p) => p.category)).toEqual([
+      "plumbing",
+    ]);
+    expect(filterDemoProviders("electrician", "all", "recommended").map((p) => p.category)).toEqual([
+      "electrical",
+    ]);
+    expect(filterDemoProviders("washer", "all", "recommended").map((p) => p.category)).toEqual([
+      "plumbing",
+    ]);
     expect(filterDemoProviders("impossible-service", "all", "recommended")).toHaveLength(0);
     expect(filterDemoProviders("", "all", "recommended", state.saved)).toHaveLength(2);
   });
