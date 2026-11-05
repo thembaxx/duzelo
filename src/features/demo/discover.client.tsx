@@ -66,7 +66,12 @@ export function DemoDiscover({ savedOnly = false }: { savedOnly?: boolean }) {
     [query, category, sort, savedOnly, state?.saved],
   );
   const selection = providers.some((p) => p.slug === selected) ? selected : null;
+  function changeView(view: boolean) {
+    setMapView(view);
+    playDemoHaptic();
+  }
   function update(key: string, value: string) {
+    if (key === "category") playDemoHaptic();
     const next = new URLSearchParams(params.toString());
     if (value && value !== "all" && value !== "recommended") next.set(key, value);
     else next.delete(key);
@@ -90,7 +95,7 @@ export function DemoDiscover({ savedOnly = false }: { savedOnly?: boolean }) {
               <em>See how it works.</em>
             </h1>
             <p>
-              Explore sample providers and try a fictional booking. No payment or real request.
+              Try sample providers and bookings. Nothing here is live.
             </p>
             <Link href="/demo/bookings" className="demo-welcome-link">
               Your week, at a glance <ArrowRight size={18} aria-hidden="true" />
@@ -171,10 +176,7 @@ export function DemoDiscover({ savedOnly = false }: { savedOnly?: boolean }) {
               type="button"
               key={c.id}
               aria-pressed={category === c.id}
-              onClick={() => {
-                update("category", c.id);
-                playDemoHaptic();
-              }}
+              onClick={() => update("category", c.id)}
             >
               <Icon size={22} weight={category === c.id ? "fill" : "regular"} aria-hidden="true" />
               {c.name}
@@ -208,16 +210,10 @@ export function DemoDiscover({ savedOnly = false }: { savedOnly?: boolean }) {
             </select>
           </label>
           <div className="demo-view-toggle" role="group" aria-label="Result view">
-            <button aria-pressed={!mapView} onClick={() => {
-                setMapView(false);
-                playDemoHaptic();
-              }}>
+            <button aria-pressed={!mapView} onClick={() => changeView(false)}>
               <List size={18} aria-hidden="true" /> List
             </button>
-            <button aria-pressed={mapView} onClick={() => {
-                setMapView(true);
-                playDemoHaptic();
-              }}>
+            <button aria-pressed={mapView} onClick={() => changeView(true)}>
               <MapTrifold size={18} aria-hidden="true" /> Map
             </button>
           </div>
