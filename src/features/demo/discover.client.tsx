@@ -24,7 +24,6 @@ import {
 import { demoCategories, filterDemoProviders, type DemoCategory } from "./catalogue";
 import { useDemo } from "./store.client";
 import { ProviderCard } from "./provider-card";
-import { playDemoHaptic } from "./haptics";
 const DemoMap = dynamic(() => import("./map.client"), {
   ssr: false,
   loading: () => (
@@ -66,12 +65,7 @@ export function DemoDiscover({ savedOnly = false }: { savedOnly?: boolean }) {
     [query, category, sort, savedOnly, state?.saved],
   );
   const selection = providers.some((p) => p.slug === selected) ? selected : null;
-  function changeView(view: boolean) {
-    setMapView(view);
-    playDemoHaptic();
-  }
   function update(key: string, value: string) {
-    if (key === "category") playDemoHaptic();
     const next = new URLSearchParams(params.toString());
     if (value && value !== "all" && value !== "recommended") next.set(key, value);
     else next.delete(key);
@@ -88,14 +82,15 @@ export function DemoDiscover({ savedOnly = false }: { savedOnly?: boolean }) {
       {!savedOnly && (
         <section className="demo-welcome demo-enter" aria-labelledby="demo-welcome-title">
           <div className="demo-welcome-copy">
-            <p className="demo-kicker">EXPLORE THE MKHONDO DEMO</p>
+            <p className="demo-kicker">A LITTLE TIME BACK, A LITTLE CLOSER TO HOME.</p>
             <h1 id="demo-welcome-title">
-              Find local help.
+              Good help.
               <br />
-              <em>See how it works.</em>
+              <em>More living.</em>
             </h1>
             <p>
-              Try sample providers and bookings. Nothing here is live.
+              Find someone for the to-do list.
+              <br /> Keep the rest of the day for you.
             </p>
             <Link href="/demo/bookings" className="demo-welcome-link">
               Your week, at a glance <ArrowRight size={18} aria-hidden="true" />
@@ -116,9 +111,9 @@ export function DemoDiscover({ savedOnly = false }: { savedOnly?: boolean }) {
           <span className="demo-welcome-stamp" aria-hidden="true">
             <Sparkle size={21} />
             <span>
-              DEMO
+              Good help,
               <br />
-              ONLY
+              close to home.
             </span>
           </span>
         </section>
@@ -210,10 +205,10 @@ export function DemoDiscover({ savedOnly = false }: { savedOnly?: boolean }) {
             </select>
           </label>
           <div className="demo-view-toggle" role="group" aria-label="Result view">
-            <button aria-pressed={!mapView} onClick={() => changeView(false)}>
+            <button aria-pressed={!mapView} onClick={() => setMapView(false)}>
               <List size={18} aria-hidden="true" /> List
             </button>
-            <button aria-pressed={mapView} onClick={() => changeView(true)}>
+            <button aria-pressed={mapView} onClick={() => setMapView(true)}>
               <MapTrifold size={18} aria-hidden="true" /> Map
             </button>
           </div>
