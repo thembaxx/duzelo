@@ -10,7 +10,7 @@ test("mobile home makes local service search the first clear action", async () =
     const page = await browser.newPage({ viewport: { width: 320, height: 700 } });
     await page.goto(baseURL + "/", { waitUntil: "networkidle" });
 
-    assert.match(await page.getByRole("heading", { level: 1 }).innerText(), /Find good help/);
+    assert.match(await page.getByRole("heading", { level: 1 }).innerText(), /A little help/);
     assert.equal(await page.getByRole("searchbox", { name: "Search for a service" }).count(), 1);
     assert.match(await page.locator(".hero-launch-note").innerText(), /not yet live/i);
     assert.equal(await page.locator(".hero-quick-links").count(), 0);
