@@ -24,6 +24,7 @@ import {
 import { demoCategories, filterDemoProviders, type DemoCategory } from "./catalogue";
 import { useDemo } from "./store.client";
 import { ProviderCard } from "./provider-card";
+import { playDemoHaptic } from "./haptics";
 const DemoMap = dynamic(() => import("./map.client"), {
   ssr: false,
   loading: () => (
@@ -82,15 +83,14 @@ export function DemoDiscover({ savedOnly = false }: { savedOnly?: boolean }) {
       {!savedOnly && (
         <section className="demo-welcome demo-enter" aria-labelledby="demo-welcome-title">
           <div className="demo-welcome-copy">
-            <p className="demo-kicker">A LITTLE TIME BACK, A LITTLE CLOSER TO HOME.</p>
+            <p className="demo-kicker">EXPLORE THE MKHONDO DEMO</p>
             <h1 id="demo-welcome-title">
-              Good help.
+              Find local help.
               <br />
-              <em>More living.</em>
+              <em>See how it works.</em>
             </h1>
             <p>
-              Find someone for the to-do list.
-              <br /> Keep the rest of the day for you.
+              Explore sample providers and try a fictional booking. No payment or real request.
             </p>
             <Link href="/demo/bookings" className="demo-welcome-link">
               Your week, at a glance <ArrowRight size={18} aria-hidden="true" />
@@ -111,9 +111,9 @@ export function DemoDiscover({ savedOnly = false }: { savedOnly?: boolean }) {
           <span className="demo-welcome-stamp" aria-hidden="true">
             <Sparkle size={21} />
             <span>
-              Good help,
+              DEMO
               <br />
-              close to home.
+              ONLY
             </span>
           </span>
         </section>
@@ -171,7 +171,10 @@ export function DemoDiscover({ savedOnly = false }: { savedOnly?: boolean }) {
               type="button"
               key={c.id}
               aria-pressed={category === c.id}
-              onClick={() => update("category", c.id)}
+              onClick={() => {
+                update("category", c.id);
+                playDemoHaptic();
+              }}
             >
               <Icon size={22} weight={category === c.id ? "fill" : "regular"} aria-hidden="true" />
               {c.name}
@@ -205,10 +208,16 @@ export function DemoDiscover({ savedOnly = false }: { savedOnly?: boolean }) {
             </select>
           </label>
           <div className="demo-view-toggle" role="group" aria-label="Result view">
-            <button aria-pressed={!mapView} onClick={() => setMapView(false)}>
+            <button aria-pressed={!mapView} onClick={() => {
+                setMapView(false);
+                playDemoHaptic();
+              }}>
               <List size={18} aria-hidden="true" /> List
             </button>
-            <button aria-pressed={mapView} onClick={() => setMapView(true)}>
+            <button aria-pressed={mapView} onClick={() => {
+                setMapView(true);
+                playDemoHaptic();
+              }}>
               <MapTrifold size={18} aria-hidden="true" /> Map
             </button>
           </div>
