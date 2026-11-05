@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { List, X, ArrowUpRight } from "@phosphor-icons/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppearanceControl } from "./appearance-control";
 import { BrandMark } from "./brand-mark";
 
@@ -20,7 +20,18 @@ export function SiteHeader() {
     pathname.startsWith(prefix),
   );
   const [open, setOpen] = useState(false);
+  const menuButton = useRef<HTMLButtonElement>(null);
   useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    if (!open) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setOpen(false);
+      menuButton.current?.focus();
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [open]);
 
   if (pathname.startsWith("/demo"))
     return (
@@ -83,6 +94,7 @@ export function SiteHeader() {
             <ArrowUpRight size={16} aria-hidden="true" />
           </Link>
           <button
+            ref={menuButton}
             type="button"
             className="menu-toggle"
             aria-label={open ? "Close menu" : "Open menu"}
