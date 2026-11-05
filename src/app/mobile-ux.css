@@ -117,22 +117,79 @@ html {
   }
 }
 
-
 /* Phase 1: discover a service quickly without tiny mobile tabs. */
-.service-browser-controls { display: grid; gap: 8px; max-width: 480px; margin-bottom: 16px; }
-.service-browser-controls label { font-size: 14px; font-weight: 700; }
-.service-browser-controls input { width: 100%; min-width: 0; min-height: 48px; padding: 12px 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); color: var(--foreground); font-size: 16px; }
-.service-browser-controls input:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
-.service-browser-empty { margin-top: 24px; padding: 24px; border: 1px dashed var(--border); border-radius: 18px; background: var(--surface); }
-.service-browser-empty p { margin: 0 0 12px; }
-.service-browser-empty button { min-height: 44px; padding: 0 16px; border: 1px solid var(--border); border-radius: 12px; font-weight: 700; color: var(--foreground); }
-.service-pill-tabs { scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
-.service-pill { scroll-snap-align: start; }
+.service-browser-controls {
+  display: grid;
+  gap: 8px;
+  max-width: 480px;
+  margin-bottom: 16px;
+}
+.service-browser-controls label {
+  font-size: 14px;
+  font-weight: 700;
+}
+.service-browser-controls input {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--foreground);
+  font-size: 16px;
+}
+.service-browser-controls input:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+.service-browser-empty {
+  margin-top: 24px;
+  padding: 24px;
+  border: 1px dashed var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+}
+.service-browser-empty p {
+  margin: 0 0 12px;
+}
+.service-browser-empty button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-weight: 700;
+  color: var(--foreground);
+}
+.service-pill-tabs {
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+.service-pill {
+  scroll-snap-align: start;
+}
 @media (max-width: 600px) {
-  .service-browser { margin-top: 24px; }
-  .service-pill-tabs { display: flex; width: 100%; border-radius: 16px; }
-  .service-pill { flex: 0 0 auto; font-size: 14px; padding-inline: 14px; }
-  .service-result-count { margin: 18px 0 16px; }
-  .page-categories { gap: 12px; }
-  .page-categories .category-card { min-height: 0; padding: 22px; }
+  .service-browser {
+    margin-top: 24px;
+  }
+  .service-pill-tabs {
+    display: flex;
+    width: 100%;
+    border-radius: 16px;
+  }
+  .service-pill {
+    flex: 0 0 auto;
+    font-size: 14px;
+    padding-inline: 14px;
+  }
+  .service-result-count {
+    margin: 18px 0 16px;
+  }
+  .page-categories {
+    gap: 12px;
+  }
+  .page-categories .category-card {
+    min-height: 0;
+    padding: 22px;
+  }
 }
