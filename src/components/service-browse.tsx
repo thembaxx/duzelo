@@ -10,8 +10,16 @@ import { filterServiceCategories, serviceGroups, type ServiceGroup } from "@/lib
  */
 export function ServiceBrowse() {
   const [selected, setSelected] = useState<ServiceGroup>("all");
+  const [search, setSearch] = useState("");
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const categories = filterServiceCategories(selected);
+  const query = search.trim().toLocaleLowerCase("en-ZA");
+  const categories = filterServiceCategories(selected).filter(
+    (category) =>
+      !query ||
+      [category.name, category.summary, ...category.examples].some((value) =>
+        value.toLocaleLowerCase("en-ZA").includes(query),
+      ),
+  );
 
   function onArrow(event: KeyboardEvent<HTMLButtonElement>, index: number) {
     const offset = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
@@ -24,6 +32,19 @@ export function ServiceBrowse() {
 
   return (
     <div className="service-browser">
+      <div className="service-browser-controls">
+        <label htmlFor="service-category-search">Find a service</label>
+        <input
+          id="service-category-search"
+          type="search"
+          inputMode="search"
+          autoComplete="off"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Try plumbing or garden"
+          aria-describedby="service-category-count"
+        />
+      </div>
       <div className="service-pill-tabs" role="tablist" aria-label="Filter service categories">
         {serviceGroups.map((group, index) => (
           <button
@@ -50,9 +71,17 @@ export function ServiceBrowse() {
         id="service-categories-panel"
         aria-labelledby={"service-tab-" + selected}
       >
-        <p className="service-result-count" role="status">
+        <p className="service-result-count" id="service-category-count" role="status">
           Showing {categories.length} {categories.length === 1 ? "category" : "categories"}
         </p>
+        {categories.length === 0 && (
+          <div className="service-browser-empty">
+            <p>No services match your search.</p>
+            <button type="button" onClick={() => { setSearch(""); setSelected("all"); }}>
+              Clear filters
+            </button>
+          </div>
+        )}
         <div className="category-grid page-categories">
           {categories.map((category) => (
             <CategoryCard category={category} key={category.slug} />
