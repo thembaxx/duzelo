@@ -55,3 +55,38 @@ test("reduced-motion users never have pending-hidden cards", async () => {
     await browser.close();
   }
 });
+
+test("mobile navigation closes on Escape and restores focus to its trigger", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await page.goto(baseURL + "/services", { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: "Open menu" }).click();
+    assert.equal(
+      await page.getByRole("button", { name: "Close menu" }).getAttribute("aria-expanded"),
+      "true",
+    );
+    await page.keyboard.press("Escape");
+    const toggle = page.getByRole("button", { name: "Open menu" });
+    assert.equal(await toggle.getAttribute("aria-expanded"), "false");
+    assert.equal(await toggle.evaluate((element) => element === document.activeElement), true);
+  } finally {
+    await browser.close();
+  }
+});
+
+test("category tabs accept Home and End keys", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await page.goto(baseURL + "/services", { waitUntil: "networkidle" });
+    const tabs = page.getByRole("tab");
+    await tabs.first().focus();
+    await page.keyboard.press("End");
+    assert.equal(await tabs.last().getAttribute("aria-selected"), "true");
+    await page.keyboard.press("Home");
+    assert.equal(await tabs.first().getAttribute("aria-selected"), "true");
+  } finally {
+    await browser.close();
+  }
+});

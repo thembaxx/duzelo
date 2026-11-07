@@ -23,9 +23,14 @@ export function ServiceBrowse() {
 
   function onArrow(event: KeyboardEvent<HTMLButtonElement>, index: number) {
     const offset = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
-    if (!offset) return;
+    if (!offset && event.key !== "Home" && event.key !== "End") return;
     event.preventDefault();
-    const next = (index + offset + serviceGroups.length) % serviceGroups.length;
+    const next =
+      event.key === "Home"
+        ? 0
+        : event.key === "End"
+          ? serviceGroups.length - 1
+          : (index + offset + serviceGroups.length) % serviceGroups.length;
     setSelected(serviceGroups[next].id);
     tabRefs.current[next]?.focus();
   }
